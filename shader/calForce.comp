@@ -1,0 +1,36 @@
+#version 310 es
+
+uniform float g0;
+uniform float t_amb;
+uniform float beta;
+
+layout(std430, binding = 0) buffer layout_out_y_force_texture
+{
+    float out_y_force_texture[];
+};
+layout(std430, binding = 1) buffer layout_density_tgt_texture
+{
+    float density_tgt_texture[];
+};
+layout(std430, binding = 2) buffer layout_density_amb_texture
+{
+    float density_amb_texture[];
+};
+layout(std430, binding = 3) buffer layout_tmp_texture
+{
+    float temp_texture[];
+};
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    float density_tgt = density_tgt_texture[index];
+    float density_amb = density_amb_texture[index];
+    float templature = temp_texture[index];
+    float gravity = g0*(density_tgt + density_amb);
+    float buoyancy = -beta*(templature - t_amb);
+    out_y_force_texture[index] = gravity + buoyancy;
+    // out_y_force_texture[index] = gravity;
+    // out_y_force_texture[index] = buoyancy;
+    // out_y_force_texture[index] = 1.0;
+}

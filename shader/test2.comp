@@ -1,0 +1,18 @@
+#version 310 es
+
+uniform uint element_size;
+uniform uint texwidth;
+layout(std430, binding = 3) buffer layout_dst
+{
+    float dst[];
+};
+layout(std430, binding = 4) buffer layout_dst2
+{
+    float dst4[];
+};
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= element_size) { return; }
+    dst4[index] = 1 - dst[index];
+}

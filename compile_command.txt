@@ -1,0 +1,6 @@
+cd ../home/toshi/dev/CXX/Subspace
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+
+cd ../home/toshi/dev/CXX/Subspace/build
+./main

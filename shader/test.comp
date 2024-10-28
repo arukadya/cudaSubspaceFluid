@@ -1,0 +1,23 @@
+#version 310 es
+
+uniform uint element_size;
+uniform uint texwidth;
+layout(std430, binding = 3) buffer layout_dst
+{
+    float dst[];
+};
+vec2 bufferID_to_texcood(uint id)
+{
+    uint x = id / texwidth;
+    id -= x * texwidth;
+    uint y = id;
+    return vec2(x,y);
+}
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= element_size) { return; }
+    vec2 texpos = bufferID_to_texcood(index);
+    if((uint(texpos.x) / 10) % 2 == 0)dst[index] = 1;
+    if((uint(texpos.y) / 10) % 2 == 1)dst[index] = 0;
+}
