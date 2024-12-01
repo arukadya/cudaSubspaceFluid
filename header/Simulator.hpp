@@ -94,6 +94,16 @@ struct CalForceEncoder : Encoder{
         Slab &templature
     );
 };
+struct AddForceEncoder : Encoder{
+    AddForceEncoder(){}
+    AddForceEncoder(char *shader_path) : Encoder(shader_path){}
+    virtual void encode(
+        Slab &out_y_force,
+        Slab &density_tgt,
+        Slab &density_amb,
+        Slab &templature
+    );
+};
 struct Simulator{
     //FluidVariables
     const float _dx;

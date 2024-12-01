@@ -92,8 +92,6 @@ void CalForceEncoder::encode
     glUniform1f(uniform_beta, BETA);
     glDispatchCompute(std::pow(2,10),1,1);
     out_y_force.sl_getSrcBufferSubData();
-    // out_y_force.print_src();
-    // out_y_force.swap_src_dst();
 }
 void Simulator::inputTXT(std::string &InputFileName)
 {
