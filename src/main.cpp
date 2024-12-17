@@ -2,6 +2,17 @@
 #define GLEW_STATIC
 #define STBI_MSC_SECURE_CRT
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+
+#define TIMESTEP 0.01f
+#define DX 0.1f
+#define BETA 1000
+
+
+#define TEXWIDTH 64
+#define TEXHEIGHT 64
+#define TEXDEPTH 64
+#define SLICENUM 64
+
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -16,6 +27,7 @@
 #include "SolidShapeIndex.h"
 #include "SolidShape.h"
 #include "Simulator.hpp"
+// #include "Simulator.cuh"
 #include "FixedObjectRenderer.hpp"
 #include "SliceRenderer.hpp"
 #include "Eigen/Dense"
@@ -23,12 +35,19 @@
 /*
 FixedObjectRenderer,SliceRendererのconst工事
 */
+//swich branch
+
 int main(int argc, char * argv[])
 {
-    Simulator simulator(DX);
-    std::cout << "Sucssess initialize Simulator" << std::endl;
+    float dx;float dt;float beta;
+    unsigned int texwidth;unsigned int texheight;unsigned int texdepth;unsigned int slice_num;
+    unsigned int flame_num;
+    std::string paramatorsFileName = "../src/paramators.txt";
+    inputParamator(paramatorsFileName,dx,dt,beta,texwidth,texheight,texdepth,slice_num,flame_num);
+    Simulator simulator(dx,dt,texwidth,texheight,texdepth,beta);
     FixedObjectRenderer fixedObjectRenderer;
-    SliceRenderer sliceRenderer;
+    SliceRenderer sliceRenderer(texwidth,texheight,texdepth,slice_num);
+    std::cout << "Sucssess initialize Simulator" << std::endl;
     //GLFWを初期化する
     if(glfwInit() == GL_FALSE){
         std::cerr << "Can't initialize GLFW" << std::endl;
@@ -57,32 +76,33 @@ int main(int argc, char * argv[])
     //テキストデータのID
     
     int id = 0;
-//    int id = 0;
     int sumcnt = 0;
     float startTime;
     float sum = 0;
-    while(window)
+    while(window && id < flame_num)
     {
         std::string str_density = "densityTexture";
         std::string str_templature = "templatureTexture";
         std::string str_force = "forceTexture";
         std::string str_test = "testTexture";
-        if(id % 500 == 10)
+        if(id % flame_num == 5)
         {
-            // buffer_write_png(TEXWIDTH,TEXHEIGHT,TEXDEPTH,4,simulator.densityTexture,str_density);
-            // buffer_write_png(TEXWIDTH,TEXHEIGHT,1,1,simulator.testTexture,str_test);
-            // buffer_write_png(TEXWIDTH,TEXHEIGHT,TEXDEPTH,4,simulator.density_tgt.src_texture,str_density);
-            buffer_write_png(TEXWIDTH,TEXHEIGHT,TEXDEPTH,4,simulator.y_force.src_texture,str_force);
-            buffer_write_png(TEXWIDTH,TEXHEIGHT,TEXDEPTH,4,simulator.templature.src_texture,str_templature);
-            // buffer_write_png(TEXWIDTH,TEXHEIGHT,1,1,simulator.test.src_texture,str_test);
+            // buffer_write_png(texwidth,TEXHEIGHT,TEXDEPTH,4,simulator.densityTexture,str_density);
+            // buffer_write_png(texwidth,TEXHEIGHT,1,1,simulator.testTexture,str_test);
+            // buffer_write_png(texwidth,TEXHEIGHT,TEXDEPTH,4,simulator.density_tgt.src_texture,str_density);
+            // buffer_write_png(texwidth,TEXHEIGHT,TEXDEPTH,4,simulator.y_force.src_texture,str_force);
+            // buffer_write_png(texwidth,TEXHEIGHT,TEXDEPTH,4,simulator.templature.src_texture,str_templature);
+            // buffer_write_png(texwidth,TEXHEIGHT,1,1,simulator.test.src_texture,str_test);
         }
-        std::string inputFileName = "../resources/density_txt/output";
-        inputFileName += std::to_string(id % 500)+".txt";
+        std::string inputFileName = "density_txt/output";
+        
         ++id;
-        simulator.inputTXT(inputFileName);
+        inputFileName += std::to_string(id % flame_num)+".txt";
+        // std::cout << inputFileName << std::endl;
+        // simulator.inputTXT(inputFileName);
         simulator.oneloop();
-
-        Eigen::Vector3f viewPoint(4.0f, 4.0f, 4.0f);
+        // simulator.output_txt(id);
+        Eigen::Vector3f viewPoint(4.0f, 0.0f, 4.0f);
 //        viewPoint /= 1.732;
         // 拡大縮小の変換行列を求める
         const GLfloat *const size(window.getSize());
@@ -91,7 +111,7 @@ int main(int argc, char * argv[])
         Matrix4x4 projection(Matrix4x4::perspective(fovy, aspect, 1.0f, 10.0f));
         // 平行移動の変換行列を求める
         const GLfloat *const position(window.getLocation());
-        // モデル変換行列を求める
+        // モデル変換行列を求めるccc
         const GLfloat *const location(window.getLocation());
 //        const Matrix4x4 r(Matrix4x4::rotate(static_cast<GLfloat>(glfwGetTime()), 0.0f, 1.0f, 0.0f));
         Matrix4x4 r(Matrix4x4::rotate(0.0f, 0.0f, 1.0f, 0.0f));
@@ -120,10 +140,7 @@ int main(int argc, char * argv[])
                            );
         sliceRenderer.setSliceDirection(tgt);
         fixedObjectRenderer.rendering(projection, modelview);
-        // sliceRenderer.rendering(projection, modelview, sliceRot, simulator.densityTexture);
         sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture);
-
-        //simulator.testCompute();
         window.swapBuffers();
     }
     

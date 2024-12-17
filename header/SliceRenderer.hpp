@@ -1,11 +1,6 @@
 #ifndef SliceRenderer_hpp
 #define SliceRenderer_hpp
 
-#define TEXWIDTH 64
-#define TEXHEIGHT 64
-#define TEXDEPTH 64
-#define SLICENUM 64
-
 #include "Eigen/Core"
 #include <iostream>
 #include <vector>
@@ -14,9 +9,10 @@
 #include "ComputeCommand.hpp"
 #include "ShaderCommand.hpp"
 #include "Matrix4x4.h"
-
 struct SliceRenderer{
-    static constexpr float sliceThickness = 2.0 / SLICENUM;
+    const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
+    const unsigned int _slice_num;
+    float sliceThickness = 2.0 / _slice_num;
     float raySliceAngleCos;//射法投影だと画素ごとに違うはず
     int sliceDirectionID;
     
@@ -25,7 +21,9 @@ struct SliceRenderer{
     Eigen::Vector3f sliceDirection;
     GLuint cosHandle;
     
-    SliceRenderer();
+    // SliceRenderer();
+    SliceRenderer(unsigned int texwidth, unsigned int texheight, unsigned int texdepth, unsigned int slice_num)
+     : _texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),_slice_num(slice_num){}
     void setViewPoint(GLfloat ex,GLfloat ey,GLfloat ez);
     void setSliceDirection(Eigen::Vector3f &tgt);
     void setSmokecolor(GLfloat color);

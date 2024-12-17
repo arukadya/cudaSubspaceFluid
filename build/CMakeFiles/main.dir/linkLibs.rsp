@@ -1,0 +1,1 @@
+  -L/dev/lib/OpenGL/lib  -Wl,-rpath,/dev/lib/OpenGL/lib -lglfw -lGLEW -lGL -lcublas -lcusolver -lcusparse -lcudart -lcudadevrt -lcudart_static -lrt -lpthread -ldl 

@@ -7,8 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/main.dir/src/ShaderCommand.cpp.o.d"
   "CMakeFiles/main.dir/src/ShaderDebugger.cpp.o"
   "CMakeFiles/main.dir/src/ShaderDebugger.cpp.o.d"
-  "CMakeFiles/main.dir/src/Simulator.cpp.o"
-  "CMakeFiles/main.dir/src/Simulator.cpp.o.d"
+  "CMakeFiles/main.dir/src/Simulator.cu.o"
+  "CMakeFiles/main.dir/src/Simulator.cu.o.d"
   "CMakeFiles/main.dir/src/SliceRenderer.cpp.o"
   "CMakeFiles/main.dir/src/SliceRenderer.cpp.o.d"
   "CMakeFiles/main.dir/src/main.cpp.o"
@@ -18,6 +18,6 @@ file(REMOVE_RECURSE
 )
 
 # Per-language clean rules from dependency scanning.
-foreach(lang CXX)
+foreach(lang CUDA CXX)
   include(CMakeFiles/main.dir/cmake_clean_${lang}.cmake OPTIONAL)
 endforeach()
