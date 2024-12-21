@@ -41,10 +41,10 @@ int main(int argc, char * argv[])
 {
     float dx;float dt;float beta;
     unsigned int texwidth;unsigned int texheight;unsigned int texdepth;unsigned int slice_num;
-    unsigned int flame_num;
+    unsigned int flame_num;unsigned int snap_num;
     std::string paramatorsFileName = "../src/paramators.txt";
-    inputParamator(paramatorsFileName,dx,dt,beta,texwidth,texheight,texdepth,slice_num,flame_num);
-    Simulator simulator(dx,dt,texwidth,texheight,texdepth,beta);
+    inputParamator(paramatorsFileName,dx,dt,beta,texwidth,texheight,texdepth,slice_num,flame_num,snap_num);
+    Simulator simulator(dx,dt,texwidth,texheight,texdepth,beta,snap_num);
     FixedObjectRenderer fixedObjectRenderer;
     SliceRenderer sliceRenderer(texwidth,texheight,texdepth,slice_num);
     std::cout << "Sucssess initialize Simulator" << std::endl;

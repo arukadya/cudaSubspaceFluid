@@ -194,6 +194,7 @@ struct Simulator{
     //FluidVariables
     const float _dx; const float _dt;const float _beta;
     const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
+    const unsigned int _snap_num;
     Slab x_velocity;
     Slab y_velocity;
     Slab z_velocity;
@@ -210,12 +211,12 @@ struct Simulator{
 
     SparseMatrix Vel2DivMatrix;
     SparseMatrix PoissonMatrix;
-    SparseMatrix Pre2DivMatrix;
+    SparseMatrix Pressure2VelocityMatrix;
 
     CalForceEncoder calForceEncoder;
     std::string density_floder_name;
-    Simulator(float dx,float dt,unsigned int texwidth, unsigned int texheight, unsigned int texdepth, float beta) 
-    : _dx(dx/texwidth),_dt(dt),_texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),_beta(beta)
+    Simulator(float dx,float dt,unsigned int texwidth, unsigned int texheight, unsigned int texdepth, float beta, unsigned int snap_num) 
+    : _dx(dx/texwidth),_dt(dt),_texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),_beta(beta),_snap_num(snap_num)
     {
         std::cout << "dx,dt,beta = " << _dx << "," << _dt << "," << _beta << std::endl;
         std::cout << "width,height,depth,slice = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
@@ -237,10 +238,16 @@ struct Simulator{
         density_floder_name = "density_txt";
         std::filesystem::create_directories(density_floder_name);
         PoissonMatrix = SparseMatrix(texwidth*_texheight*_texdepth,texwidth*_texheight*_texdepth);
-        Vel2DivMatrix = SparseMatrix(3*texwidth*_texheight*_texdepth,texwidth*_texheight*_texdepth);
+        Vel2DivMatrix = SparseMatrix(texwidth*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
+        Pressure2VelocityMatrix = SparseMatrix(3*(texwidth + 1)*_texheight*_texdepth, texwidth*_texheight*_texdepth);
+        all_velocity = Eigen::VectorXf::Zero(3*(texwidth + 1)*_texheight*_texdepth);
 
-        all_velocity = Slab(3 * (texwidth+1) * _texheight * _texdepth, 0.0f);
-
+        calPoissonMatrix();
+        std::cout << "Poison" << std::endl;
+        calVel2DivMatrix();
+        std::cout << "V2D" << std::endl;
+        calPressure2VelocityMatrix();
+        std::cout << "P2V" << std::endl;
     };
     void oneloop();
     void testCompute();
@@ -249,7 +256,6 @@ struct Simulator{
     void init_templature(float init_templature_value);
     void init_pressure(float init_pressure_value);
     void init_velocity(float init_pressure_value);
-    void init_all__velocity();
     void inputTXT(std::string &InputFileName);
     float TriLinearInterporation(float x,float y,float z,Slab &val);
     float* get_currentTexture();
@@ -263,6 +269,9 @@ struct Simulator{
 
     void calPoissonMatrix();
     void calVel2DivMatrix();
+    void calPressure2VelocityMatrix();
+    void init_all_velocity();
+    void all2xyz();
 private:
     void testSDF();
 };

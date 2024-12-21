@@ -6,3 +6,4 @@ texheight 64
 texdepth 64
 slice_num 64
 flame_num 100
+snap_num 20

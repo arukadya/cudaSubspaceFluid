@@ -63,7 +63,8 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
     return ret;
 }
 int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta,
-    unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,unsigned int &flame_num){
+    unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
+    unsigned int &flame_num,unsigned int &snap_num){
     std::ifstream Inputfile(InputFileName);
     if (!Inputfile.is_open()) {
         std::cerr << "Could not open the file - '"
@@ -125,10 +126,16 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta,
                 flame_num = std::stoi(word);
             };
         }
+        else if(word == "snap_num")
+        {
+            while(getline(ss_nums,word,' ')){
+                snap_num = std::stoi(word);
+            };
+        }
     };
     std::cout << "dx,dt,beta = " << dx << "," << dt << "," << beta << std::endl;
     std::cout << "width,height,depth,slice = " << texwidth << "," << texheight << "," << texdepth << "," << slice_num << std::endl;
-    std::cout << "flame = " << flame_num << std::endl;
+    std::cout << "flame_num, snap_num= " << flame_num << "," << snap_num << std::endl;
     Inputfile.close();
     return EXIT_SUCCESS;
 }

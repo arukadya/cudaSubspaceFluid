@@ -73,37 +73,94 @@ void Simulator::init_velocity(float init_templature_value)
     std::vector<unsigned int>init_index = get_init_index_list(_texwidth,_texheight,_texdepth); 
     for(unsigned int i=0;i<init_index.size();++i)y_velocity.src_texture[init_index[i]] = init_templature_value;
 }
-// void Simulator::init_all__velocity()
-// {
-//     unsigned int size = _texwidth * _texheight * _texdepth;
-//     for(int x=0;x<3;++x)
-//     {
-//         for(unsigned int i=0;i<_texwidth;++i)
-//         {
-//             for(unsigned int j=0;j<_texheight;++j)
-//             {
-//                 for(unsigned int k=0;k<_texdepth;++k)
-//                 {
-//                     all_velocity.src_texture[ x*size + resequence3to1(i,j,k) ] = 0;
-//                 }
-//             }
-//         }
-//     }
-// }
+void Simulator::init_all_velocity()
+{
+    unsigned int size = (_texwidth + 1) * _texheight * _texdepth;
+    for(unsigned int i=0;i<_texwidth+1;++i)
+    {
+        for(unsigned int j=0;j<_texheight;++j)
+        {
+            for(unsigned int k=0;k<_texdepth;++k)
+            {
+                all_velocity(resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)) = x_velocity.get_volume_value(i,j,k);
+            }
+        }
+    }
+    for(unsigned int i=0;i<_texwidth;++i)
+    {
+        for(unsigned int j=0;j<_texheight+1;++j)
+        {
+            for(unsigned int k=0;k<_texdepth;++k)
+            {
+                all_velocity(size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)) = y_velocity.get_volume_value(i,j,k);
+            }
+        }
+    }
+    for(unsigned int i=0;i<_texwidth;++i)
+    {
+        for(unsigned int j=0;j<_texheight;++j)
+        {
+            for(unsigned int k=0;k<_texdepth+1;++k)
+            {
+                all_velocity(2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)) = z_velocity.get_volume_value(i,j,k);
+            }
+        }
+    }
+}
+void Simulator::all2xyz()
+{
+    unsigned int size = (_texwidth + 1) * _texheight * _texdepth;
+    for(unsigned int i=0;i<_texwidth+1;++i)
+    {
+        for(unsigned int j=0;j<_texheight;++j)
+        {
+            for(unsigned int k=0;k<_texdepth;++k)
+            {
+                x_velocity.set_volume_value(i,j,k,all_velocity(resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)));
+                // all_velocity(resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)) = x_velocity.get_volume_value(i,j,k);
+            }
+        }
+    }
+    for(unsigned int i=0;i<_texwidth;++i)
+    {
+        for(unsigned int j=0;j<_texheight+1;++j)
+        {
+            for(unsigned int k=0;k<_texdepth;++k)
+            {
+                y_velocity.set_volume_value(i,j,k,all_velocity(size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)));
+                // all_velocity(size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)) = y_velocity.get_volume_value(i,j,k);
+            }
+        }
+    }
+    for(unsigned int i=0;i<_texwidth;++i)
+    {
+        for(unsigned int j=0;j<_texheight;++j)
+        {
+            for(unsigned int k=0;k<_texdepth+1;++k)
+            {
+                z_velocity.set_volume_value(i,j,k,all_velocity(2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)));
+                // all_velocity(2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)) = z_velocity.get_volume_value(i,j,k);
+            }
+        }
+    }
+    x_velocity.swap_src_dst();
+    y_velocity.swap_src_dst();
+    z_velocity.swap_src_dst();
+}
 void Simulator::oneloop()
 {
     // calForceEncoder.encode(y_force,density_tgt,density_tgt,templature);
     init_density(TGT_DENSITY);
     init_templature(TGT_TEMPLATURE);
-    // std::cout << "calForce" << std::endl;
+    std::cout << "calForce" << std::endl;
     addForce();
-    // std::cout << "addForce" << std::endl;
+    std::cout << "addForce" << std::endl;
     faceAdvect();
-    // std::cout << "faceAdvect" << std::endl;
+    std::cout << "faceAdvect" << std::endl;
     // TD.startTimer("cd_project");
     project();
     // times.push_back(TD.endTimer());
-    // std::cout << "project" << std::endl;
+    std::cout << "project" << std::endl;
     centerAdvect(templature);
     // std::cout << "centerAdvectTemp" << std::endl;
     centerAdvect(density_tgt);
@@ -262,55 +319,71 @@ void Simulator::calVel2DivMatrix()
                 // for(int n=0;n<6;n++){
                 //     b(i+j*texwidth+k*texwidth*_texheight) += D[n]*F[n]*U[n]/(_dx);
                 // }
-                if(F[0])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+1+j*_texwidth+k*_texwidth*_texheight, D[0]*F[0]/(_dx););
-                if(F[1])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, size + i+(j+1)*_texwidth+k*_texwidth*_texheight, D[1]*F[1]/(_dx););
-                if(F[2])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i-1+j*_texwidth+k*_texwidth*_texheight, D[2]*F[2]/(_dx););
-                if(F[3])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, size + i+(j-1)*_texwidth+k*_texwidth*_texheight, D[3]*F[3]/(_dx););
-                if(F[4])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k-1)*_texwidth*_texheight, D[4]*F[4]/(_dx););
-                if(F[5])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k+1)*_texwidth*_texheight, D[5]*F[5]/(_dx););
+                if(F[0])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+1+j*_texwidth+k*_texwidth*_texheight, (D[0]*F[0])/(_dx));
+                if(F[1])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, size + i+(j+1)*_texwidth+k*_texwidth*_texheight, (D[1]*F[1])/(_dx));
+                if(F[2])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, (D[2]*F[2])/(_dx));
+                if(F[3])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, size + i+(j)*_texwidth+k*_texwidth*_texheight, (D[3]*F[3])/(_dx));
+                if(F[4])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k)*_texwidth*_texheight, (D[4]*F[4])/(_dx));
+                if(F[5])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k+1)*_texwidth*_texheight, (D[5]*F[5])/(_dx));
             }
         }
     }
     Vel2DivMatrix.setFromTriplets(triplets.begin(), triplets.end());
 }
 
+void Simulator::calPressure2VelocityMatrix()
+{
+    std::vector<Triplet> triplets;
+    float size = (_texwidth + 1) * _texheight * _texdepth;
+    for(unsigned int i=1;i<_texwidth;i++){
+        for(unsigned int j=0;j<_texheight;j++){
+            for(unsigned int k=0;k<_texdepth;k++){
+                triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, _dt/(_dx));
+                triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i-1+j*_texwidth+k*_texwidth*_texheight, -1*_dt/(_dx));
+            }
+        }
+    }
+    for(unsigned int i=0;i<_texwidth;i++){
+        for(unsigned int j=1;j<_texheight;j++){
+            for(unsigned int k=0;k<_texdepth;k++){
+                triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, _dt/(_dx));
+                triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, i+(j-1)*_texwidth+k*_texwidth*_texheight, -1*_dt/(_dx));
+            }
+        }
+    }
+    for(unsigned int i=0;i<_texwidth;i++){
+        for(unsigned int j=0;j<_texheight;j++){
+            for(unsigned int k=1;k<_texdepth;k++){
+                triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, _dt/(_dx));
+                triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+(k-1)*_texwidth*_texheight, -1*_dt/(_dx));
+            }
+        }
+    }
+    Pressure2VelocityMatrix.setFromTriplets(triplets.begin(), triplets.end());
+}
 
 void Simulator::project(){
     Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
+    // Eigen::VectorXf test_b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
     Eigen::VectorXf px(_texwidth*_texheight*_texdepth);
     Eigen::ConjugateGradient<SparseMatrix> solver;
 
-    // for(int i=0;i<_texwidth;i++){
-    //     for(int j=0;j<_texheight;j++){
-    //         for(int k=0;k<_texdepth;k++){
-    //             px[i+j*_texwidth+k*_texwidth*_texheight] = pressure.get_volume_value(i,j,k);
-    //             float scale = _dt/((density_tgt.get_volume_value(i,j,k) + density_amb.get_volume_value(i,j,k))*_dx*_dx);
-    //             float D[6] = {1.0,1.0,-1.0,-1.0,-1.0,1.0};//周囲6方向に向かって働く、圧力の向き
-                
-    //             std::vector<int> F = {i<_texwidth-1,j<_texheight-1,i>0,j>0,k>0,k<_texdepth-1};
-    //             float U[6] = {
-    //                 x_velocity.get_volume_value(i+1,j,k),
-    //                 y_velocity.get_volume_value(i,j+1,k),
-    //                 x_velocity.get_volume_value(i,j,k),
-    //                 y_velocity.get_volume_value(i,j,k),
-    //                 z_velocity.get_volume_value(i,j,k),
-    //                 z_velocity.get_volume_value(i,j,k+1)};
-    //             float sumP = 0;
-    //             for(int n=0;n<6;n++){
-    //                 sumP += -F[n]*scale;
-    //                 b(i+j*_texwidth+k*_texwidth*_texheight) += D[n]*F[n]*U[n]/(_dx);
-    //             }
-    //         }
-    //     }
-    // }
-    
+    for(unsigned int i=0;i<_texwidth;i++){
+        for(unsigned int j=0;j<_texheight;j++){
+            for(unsigned int k=0;k<_texdepth;k++){
+                px[i+j*_texwidth+k*_texwidth*_texheight] = pressure.get_volume_value(i,j,k);
+            }
+        }
+    }
     solver.setTolerance(1e-6);
     solver.setMaxIterations(20);
     // solver.compute(A);
-    calPoissonMatrix();
-    calVel2DivMatrix();
+    init_all_velocity();
+    b = Vel2DivMatrix * all_velocity;
+    //initialize
     solver.compute(PoissonMatrix);
     px = solver.solveWithGuess(b, px);
+
     for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
@@ -319,53 +392,9 @@ void Simulator::project(){
         }
     }
     pressure.swap_src_dst();
-    // pressure.print_src();
 
-    for(unsigned int i=1; i<_texwidth;i++){
-        for(unsigned int j=0;j<_texheight;j++){
-            for(unsigned int k=0;k<_texdepth;k++){
-                float u = x_velocity.get_volume_value(i,j,k);
-                // float rho = density_tgt.get_volume_value(i,j,k);
-                // float rho_amb = density_amb.get_volume_value(i,j,k);
-                float p = pressure.get_volume_value(i,j,k);
-                float p_pre = pressure.get_volume_value(i-1,j,k);
-                // float value = u - _dt/(rho + rho_amb) * (p - p_pre) / _dx;
-                float value = u - _dt * (p - p_pre) / _dx;
-                x_velocity.set_volume_value(i,j,k,value);
-            }
-        }
-    }
-    for(unsigned int i=0;i<_texwidth;i++){
-        for(unsigned int j=1;j<_texheight;j++){
-            for(unsigned int k=0;k<_texdepth;k++){
-                float v = y_velocity.get_volume_value(i,j,k);
-                // float rho = density_tgt.get_volume_value(i,j,k);
-                // float rho_amb = density_amb.get_volume_value(i,j,k);
-                float p = pressure.get_volume_value(i,j,k);
-                float p_pre = pressure.get_volume_value(i,j-1,k);
-                // float value = v - _dt/(rho + rho_amb) * (p - p_pre) / _dx;
-                float value = v - _dt * (p - p_pre) / _dx;
-                y_velocity.set_volume_value(i,j,k,value);
-            }
-        }
-    }
-    for(unsigned int i=0;i<_texwidth;i++){
-        for(unsigned int j=0;j<_texheight;j++){
-            for(unsigned int k=1;k<_texdepth;k++){
-                float w = z_velocity.get_volume_value(i,j,k);
-                // float rho = density_tgt.get_volume_value(i,j,k);
-                // float rho_amb = density_amb.get_volume_value(i,j,k);
-                float p = pressure.get_volume_value(i,j,k);
-                float p_pre = pressure.get_volume_value(i,j,k-1);
-                // float value = w - _dt/(rho + rho_amb) * (p - p_pre) / _dx;
-                float value = w - _dt * (p - p_pre) / _dx;
-                z_velocity.set_volume_value(i,j,k,value);
-            }
-        }
-    }
-    x_velocity.swap_src_dst();
-    y_velocity.swap_src_dst();
-    z_velocity.swap_src_dst();
+    all_velocity = all_velocity - Pressure2VelocityMatrix * px;
+    all2xyz();
 }
 
 void Simulator::addForce(){
