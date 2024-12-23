@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -ccbin g++-10)
 
-include_directories(../../../dev/lib/eigen-3.4.0)
+include_directories(SYSTEM ../../../dev/lib/eigen-3.4.0)
 include_directories(header)
 include_directories(cuda_util)
 

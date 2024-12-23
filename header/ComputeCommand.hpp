@@ -25,6 +25,6 @@ struct Timer{
 };
 int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
-    unsigned int &flame_num,unsigned int &snap_num);
+    unsigned int &flame_num,unsigned int &snap_num,float &threshold);
 
 #endif /* ComputeCommand_hpp */

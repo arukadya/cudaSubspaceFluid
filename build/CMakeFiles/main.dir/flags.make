@@ -11,7 +11,7 @@ CUDA_FLAGS = -O3 -DNDEBUG -std=c++17 -O2 -Wall
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/toshi/dev/CXX/Subspace/../../../dev/lib/eigen-3.4.0 -I/home/toshi/dev/CXX/Subspace/header -I/home/toshi/dev/CXX/Subspace/cuda_util
+CXX_INCLUDES = -I/home/toshi/dev/CXX/Subspace/header -I/home/toshi/dev/CXX/Subspace/cuda_util -isystem /home/toshi/dev/CXX/Subspace/../../../dev/lib/eigen-3.4.0
 
 CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -O2 -Wall
 

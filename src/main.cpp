@@ -41,10 +41,16 @@ int main(int argc, char * argv[])
 {
     float dx;float dt;float beta;
     unsigned int texwidth;unsigned int texheight;unsigned int texdepth;unsigned int slice_num;
-    unsigned int flame_num;unsigned int snap_num;
+    unsigned int flame_num;unsigned int snap_num;float threshold;
     std::string paramatorsFileName = "../src/paramators.txt";
-    inputParamator(paramatorsFileName,dx,dt,beta,texwidth,texheight,texdepth,slice_num,flame_num,snap_num);
-    Simulator simulator(dx,dt,texwidth,texheight,texdepth,beta,snap_num);
+    inputParamator(paramatorsFileName,dx,dt,beta,
+    texwidth,texheight,texdepth,slice_num,
+    flame_num,snap_num,threshold);
+
+    Simulator simulator(dx,dt,beta,
+    texwidth,texheight,texdepth,
+    flame_num,snap_num,threshold);
+    
     FixedObjectRenderer fixedObjectRenderer;
     SliceRenderer sliceRenderer(texwidth,texheight,texdepth,slice_num);
     std::cout << "Sucssess initialize Simulator" << std::endl;
@@ -75,10 +81,10 @@ int main(int argc, char * argv[])
     glfwSetTime(0.0);
     //テキストデータのID
     
-    int id = 0;
-    int sumcnt = 0;
-    float startTime;
-    float sum = 0;
+    unsigned int id = 0;
+    // int sumcnt = 0;
+    // float startTime;
+    // float sum = 0;
     while(window && id < flame_num)
     {
         std::string str_density = "densityTexture";
@@ -111,7 +117,7 @@ int main(int argc, char * argv[])
         Matrix4x4 projection(Matrix4x4::perspective(fovy, aspect, 1.0f, 10.0f));
         // 平行移動の変換行列を求める
         const GLfloat *const position(window.getLocation());
-        // モデル変換行列を求めるccc
+        // モデル変換行列を求める
         const GLfloat *const location(window.getLocation());
 //        const Matrix4x4 r(Matrix4x4::rotate(static_cast<GLfloat>(glfwGetTime()), 0.0f, 1.0f, 0.0f));
         Matrix4x4 r(Matrix4x4::rotate(0.0f, 0.0f, 1.0f, 0.0f));
@@ -143,6 +149,10 @@ int main(int argc, char * argv[])
         sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture);
         window.swapBuffers();
     }
-    
+    std::cout << "fin_window" << std::endl;
+    simulator.getBasisQRSVD();
+    std::cout << "fin_calBasis" << std::endl;
+    simulator.getReducedLinearOperator();
+    std::cout << "fin_operator_projection" << std::endl;
     return 0;
 }

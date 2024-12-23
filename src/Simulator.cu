@@ -41,7 +41,6 @@ void CalForceEncoder::encode
 }
 void Simulator::inputTXT(std::string &InputFileName)
 {
-    float max = 0;
     FILE *ifp = fopen(InputFileName.c_str(),"r");
     for(unsigned int k=0;k<_texdepth;++k){
         for(unsigned int j=0;j<_texheight;++j){
@@ -147,26 +146,48 @@ void Simulator::all2xyz()
     y_velocity.swap_src_dst();
     z_velocity.swap_src_dst();
 }
+
 void Simulator::oneloop()
 {
     // calForceEncoder.encode(y_force,density_tgt,density_tgt,templature);
     init_density(TGT_DENSITY);
     init_templature(TGT_TEMPLATURE);
-    std::cout << "calForce" << std::endl;
+    //nonlinear
+    // std::cout << "calForce" << std::endl;
     addForce();
-    std::cout << "addForce" << std::endl;
+    // std::cout << "addForce" << std::endl;
+    init_all_velocity();
+    // std::cout << "init_all_velocity" << std::endl;
+    // std::cout << "U0 snap norm = " << all_velocity.norm() << std::endl;
+    //U0
+    write_snapshot(U0_SnapShot, all_velocity, _timestamp);
+    // std::cout << "U0 snap norm = " << U0_SnapShot.row(_timestamp).norm() << std::endl;
+    
     faceAdvect();
-    std::cout << "faceAdvect" << std::endl;
-    // TD.startTimer("cd_project");
+
+    //linear
+    init_all_velocity();
+    // std::cout << "U2 snap norm = " << all_velocity.norm() << std::endl;
+    write_snapshot(U2_SnapShot, all_velocity, _timestamp);
+    //U1
+    //Diffusion
+    //U2
     project();
+    write_snapshot(U3_SnapShot, all_velocity, _timestamp);
+    write_snapshot(P_SnapShot, px, _timestamp);
+
+    //nonlinear
+    //U3
     // times.push_back(TD.endTimer());
-    std::cout << "project" << std::endl;
+    // std::cout << "project" << std::endl;
     centerAdvect(templature);
     // std::cout << "centerAdvectTemp" << std::endl;
     centerAdvect(density_tgt);
     centerAdvect(density_amb);
     // std::cout << "centerAdvectRho" << std::endl;
+    ++_timestamp;
 }
+
 void Simulator::output_txt(unsigned int id)
 {
     std::string density_outputFileName = density_floder_name + "/output" + std::to_string(id) + ".txt";
@@ -198,6 +219,7 @@ float Simulator::TriLinearInterporation(float x,float y,float z,Slab &val)
     };
     return f.dot(c);
 }
+
 void Simulator::faceAdvect(){
     for(unsigned int i=1;i<x_velocity._width-1;++i){
         for(unsigned int j=0;j<x_velocity._height;++j){
@@ -281,13 +303,9 @@ void Simulator::calPoissonMatrix()
     for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
-                // px[i+j*texwidth+k*texwidth*_texheight] = p.value[i][j][k];
                 // float scale = _dt/((density_tgt.get_volume_value(i,j,k) + density_amb.get_volume_value(i,j,k))*_dx*_dx);
                 // float scale = _dt/((rho_tgt.value[i][j][k] + rho_amb.value[i][j][k])*_dx*_dx);
                 float scale = _dt/(_dx*_dx);
-                float D[6] = {1.0,1.0,-1.0,-1.0,-1.0,1.0};//周囲6方向に向かって働く、圧力の向き
-                //float F[4] = {(float )(i<texwidth-1),(float )(j<_texheight-1),(float )(i>0),(float )(j>0)};//境界条件。壁なら0,流体なら1
-
                 std::vector<int> F = {i<_texwidth-1,j<_texheight-1,i>0,j>0,k>0,k<_texdepth-1};
                 float sumP = 0;
                 for(int n=0;n<6;n++){
@@ -365,7 +383,7 @@ void Simulator::calPressure2VelocityMatrix()
 void Simulator::project(){
     Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
     // Eigen::VectorXf test_b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
-    Eigen::VectorXf px(_texwidth*_texheight*_texdepth);
+    // Eigen::VectorXf px(_texwidth*_texheight*_texdepth);
     Eigen::ConjugateGradient<SparseMatrix> solver;
 
     for(unsigned int i=0;i<_texwidth;i++){
@@ -382,6 +400,40 @@ void Simulator::project(){
     b = Vel2DivMatrix * all_velocity;
     //initialize
     solver.compute(PoissonMatrix);
+    px = solver.solveWithGuess(b, px);
+
+    for(unsigned int i=0;i<_texwidth;i++){
+        for(unsigned int j=0;j<_texheight;j++){
+            for(unsigned int k=0;k<_texdepth;k++){
+                pressure.set_volume_value(i,j,k,px(i+j*_texwidth+k*_texwidth*_texheight));
+            }
+        }
+    }
+    pressure.swap_src_dst();
+
+    all_velocity = all_velocity - Pressure2VelocityMatrix * px;
+    all2xyz();
+}
+
+void Simulator::subspace_project(){
+    Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
+    // Eigen::ConjugateGradient<SparseMatrix> solver;
+    Eigen::ConjugateGradient<Eigen::MatrixXf> solver;
+
+    // for(unsigned int i=0;i<_texwidth;i++){
+    //     for(unsigned int j=0;j<_texheight;j++){
+    //         for(unsigned int k=0;k<_texdepth;k++){
+    //             px[i+j*_texwidth+k*_texwidth*_texheight] = pressure.get_volume_value(i,j,k);
+    //         }
+    //     }
+    // }
+    solver.setTolerance(1e-6);
+    solver.setMaxIterations(20);
+    // solver.compute(A);
+    init_all_velocity();
+    b = Vel2DivMatrix * all_velocity;
+    //initialize
+    solver.compute(reduced_PoissonMatrix);
     px = solver.solveWithGuess(b, px);
 
     for(unsigned int i=0;i<_texwidth;i++){
@@ -450,6 +502,13 @@ void Simulator::addForce(){
     // y_velocity.print_src();
 }
 
+void Simulator::write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap, unsigned int timestamp)
+{
+    assert(mat.cols != snap.size || mat.rows > timestamp);
+    // if(_timestamp % _snap_num == 0)mat.row(timestamp) = snap;
+    if(_timestamp % delta_snap == 0)mat.row(timestamp) = snap;
+}
+
 Eigen::Vector3d Simulator::getBuoyanacy(int i,int j, int k){
     Eigen::Vector3d dir_gravity = {0.0,1.0,0.0};
     float rho = density_tgt.get_volume_value(i,j,k);
@@ -457,4 +516,101 @@ Eigen::Vector3d Simulator::getBuoyanacy(int i,int j, int k){
     float temp = templature.get_volume_value(i,j,k);
     // float value = -(-G0*(rho +rho_amb) + BETA*(temp - AMB_TEMPLATURE));
     return -(-G0*(rho +rho_amb) + _beta*(temp - AMB_TEMPLATURE))*dir_gravity;
+}
+
+void Simulator::getBasisQRSVD()
+{
+    U0 = cal_Basis(U0_SnapShot,_reduce_dimention,_threshold);
+    std::cout << "reduce_dimention = " << _reduce_dimention << std::endl;
+    U2 = cal_Basis(U2_SnapShot,_reduce_dimention,_threshold);
+    std::cout << "reduce_dimention = " << _reduce_dimention << std::endl;
+    U3 = cal_Basis(U3_SnapShot,_reduce_dimention,_threshold);
+    std::cout << "reduce_dimention = " << _reduce_dimention << std::endl;
+    P = cal_Basis(P_SnapShot,_reduce_dimention,_threshold);
+    std::cout << "reduce_dimention = " << _reduce_dimention << std::endl;
+}
+
+void Simulator::getReducedLinearOperator()
+{
+    reduced_Vel2DivMatrix = P.transpose() * Vel2DivMatrix * U2;
+    reduced_PoissonMatrix = P.transpose() * PoissonMatrix * P;
+    reduced_Pressure2VelocityMatrix = U3.transpose() * Pressure2VelocityMatrix * P;
+    std::cout << "reduced_W size" << std::endl << 
+    "rows,cols = " << reduced_Vel2DivMatrix.rows() << "," << reduced_Vel2DivMatrix.cols() << std::endl;
+    std::cout << "reduced_X size" << std::endl << 
+    "rows,cols = " << reduced_PoissonMatrix.rows() << "," << reduced_PoissonMatrix.cols() << std::endl;
+    // std::cout << "reduced_X" << std::endl << reduced_PoissonMatrix << std::endl;
+    std::cout << "reduced_Y size" << std::endl << 
+    "rows,cols = " << reduced_Pressure2VelocityMatrix.rows() << "," << reduced_Pressure2VelocityMatrix.cols() << std::endl;
+}
+
+Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_dimention,float threshold)
+{
+    Eigen::HouseholderQR<Eigen::MatrixXf> QRSolver(SnapShot);
+    int m = SnapShot.rows();
+    int n = SnapShot.cols();
+    // std::cout << "m,n = " << m << "," << n << std::endl; 
+    // std::cout << "initialize" << std::endl;
+    //ランダムノイズは圧縮できない．
+    // Eigen::MatrixXf A = Eigen::MatrixXf::Random(m, n);
+    // Eigen::VectorXf snap = A.col(0);
+    // Eigen::MatrixXf LinearOperator = Eigen::MatrixXf::Random(m, m);
+    
+    Eigen::HouseholderQR<Eigen::MatrixXf> HhQR(SnapShot);
+    // std::cout << "QRfactorization" << std::endl;
+    Eigen::MatrixXf R = HhQR.matrixQR();
+    // std::cout << "R" << std::endl;
+    Eigen::MatrixXf thin_R(n,n);
+    Eigen::MatrixXf _R(m,n);
+    for(int i=0;i<n;++i)
+    {
+        for(int j=0;j<n;++j)
+        {
+            if(j >= i)thin_R(i,j) = R(i,j);
+            else thin_R(i,j) = 0;
+        }
+    }
+    for(int i=0;i<m;++i)
+    {
+        if(i < n)_R.row(i) = thin_R.row(i);
+        else _R.row(i) = Eigen::VectorXf::Zero(n).transpose();
+    }
+    // std::cout << "fix_R" << std::endl;
+    Eigen::JacobiSVD<Eigen::MatrixXf> svd(_R,Eigen::ComputeThinU);
+    // std::cout << "svd" << std::endl;
+//    //特異値
+    Eigen::VectorXf singular_values = svd.singularValues();
+    Eigen::MatrixXf singular_value_matrix = singular_values.asDiagonal();
+    for(unsigned int i=0;i<singular_values.size();++i)
+    {
+        if(singular_values(i) < threshold)
+        {
+            if(reduce_dimention < i)reduce_dimention = i;
+            break;
+        }
+    }
+    std::cout << "singular value" << std::endl << singular_values.transpose() << std::endl;
+//    Eigen::MatrixXf Basis = HhQR.matrixQ()*svd.matrixU();
+    Eigen::MatrixXf Basis(m,n);
+
+    // Eigen::MatrixXf Basis(m,reduce_dimention);
+    Basis = HhQR.householderQ()*svd.matrixU(); //m * n
+    // std::cout << "(QU**QU - I).norm" << std::endl << (Basis.transpose()*Basis - Eigen::MatrixXf::Identity(n,n)).norm() << std::endl;
+    
+    // Eigen::VectorXf reduced_vector = Basis.transpose() * snap;
+//    std::cout << "redeced_vector" << std::endl;
+    
+    // Eigen::MatrixXf reduced_operator = Basis.transpose() * LinearOperator * Basis;
+//    std::cout << "redeced_operator" << std::endl;
+    // Eigen::VectorXf reduced_next_vector = reduced_operator * reduced_vector;
+//    std::cout << "redeced_next_vector" << std::endl;
+    // Eigen::VectorXf ans = LinearOperator * snap;
+//    std::cout << "ans" << std::endl;
+    // Eigen::VectorXf cmp = Basis * reduced_next_vector;
+//    std::cout << "cmp" << std::endl;
+//    std::cout << "snap" << std::endl << snap.transpose() << std::endl;
+//    std::cout << "ans" << std::endl << ans.transpose() << std::endl;
+//    std::cout << "cmp" << std::endl << cmp.transpose() << std::endl;
+    // std::cout << "(ans - cmp).norm" << std::endl << (ans - cmp).norm() << std::endl;
+    return Basis;
 }

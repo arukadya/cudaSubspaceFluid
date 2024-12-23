@@ -209,16 +209,16 @@ CMakeFiles/main.dir/src/ComputeCommand.cpp.o: /home/toshi/dev/CXX/Subspace/src/C
   /usr/lib/gcc/x86_64-linux-gnu/10/include/stdint.h
 
 CMakeFiles/main.dir/src/FixedObjectRenderer.cpp.o: /home/toshi/dev/CXX/Subspace/src/FixedObjectRenderer.cpp \
+  /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
+  /home/toshi/dev/CXX/Subspace/header/FixedObjectRenderer.hpp \
+  /home/toshi/dev/CXX/Subspace/header/Matrix4x4.h \
+  /home/toshi/dev/CXX/Subspace/header/Object.h \
+  /home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp \
+  /home/toshi/dev/CXX/Subspace/header/Shape.h \
+  /home/toshi/dev/CXX/Subspace/header/ShapeIndex.h \
+  /home/toshi/dev/CXX/Subspace/header/SolidShape.h \
+  /home/toshi/dev/CXX/Subspace/header/SolidShapeIndex.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/Core \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/IndexedViewMethods.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArithmeticSequence.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Array.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArrayBase.h \
@@ -335,15 +335,15 @@ CMakeFiles/main.dir/src/FixedObjectRenderer.cpp.o: /home/toshi/dev/CXX/Subspace/
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/StaticAssert.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/SymbolicIndex.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/XprHelper.h \
-  /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
-  /home/toshi/dev/CXX/Subspace/header/FixedObjectRenderer.hpp \
-  /home/toshi/dev/CXX/Subspace/header/Matrix4x4.h \
-  /home/toshi/dev/CXX/Subspace/header/Object.h \
-  /home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp \
-  /home/toshi/dev/CXX/Subspace/header/Shape.h \
-  /home/toshi/dev/CXX/Subspace/header/ShapeIndex.h \
-  /home/toshi/dev/CXX/Subspace/header/SolidShape.h \
-  /home/toshi/dev/CXX/Subspace/header/SolidShapeIndex.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/IndexedViewMethods.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h \
   /usr/include/GL/gl.h \
   /usr/include/GL/glew.h \
   /usr/include/GL/glu.h \
@@ -1141,6 +1141,10 @@ CMakeFiles/main.dir/src/ShaderDebugger.cpp.o: /home/toshi/dev/CXX/Subspace/src/S
   /usr/lib/gcc/x86_64-linux-gnu/10/include/stdint.h
 
 CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulator.cu \
+  /home/toshi/dev/CXX/Subspace/cuda_util/cuda_util.cuh \
+  /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
+  /home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp \
+  /home/toshi/dev/CXX/Subspace/header/Simulator.hpp \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/Cholesky \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/Core \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/Dense \
@@ -1156,15 +1160,6 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/SparseCore \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Cholesky/LDLT.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Cholesky/LLT.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/IndexedViewMethods.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArithmeticSequence.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Array.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArrayBase.h \
@@ -1281,11 +1276,6 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/StaticAssert.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/SymbolicIndex.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/XprHelper.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/ComplexSchur.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/HessenbergDecomposition.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/RealQZ.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/RealSchur.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/Tridiagonalization.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/ComplexEigenSolver.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/ComplexSchur.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/EigenSolver.h \
@@ -1338,11 +1328,6 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SVD/JacobiSVD.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SVD/SVDBase.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SVD/UpperBidiagonalization.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/AmbiVector.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/CompressedStorage.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/ConservativeSparseSparseProduct.h \
@@ -1375,10 +1360,15 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/misc/Image.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/misc/Kernel.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/misc/RealSvd2x2.h \
-  /home/toshi/dev/CXX/Subspace/cuda_util/cuda_util.cuh \
-  /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
-  /home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp \
-  /home/toshi/dev/CXX/Subspace/header/Simulator.hpp \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/IndexedViewMethods.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h \
   /usr/include/GL/gl.h \
   /usr/include/GL/glew.h \
   /usr/include/GL/glu.h \
@@ -1761,16 +1751,12 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /usr/local/cuda-12.6/targets/x86_64-linux/include/vector_types.h
 
 CMakeFiles/main.dir/src/SliceRenderer.cpp.o: /home/toshi/dev/CXX/Subspace/src/SliceRenderer.cpp \
+  /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
+  /home/toshi/dev/CXX/Subspace/header/Matrix4x4.h \
+  /home/toshi/dev/CXX/Subspace/header/Object.h \
+  /home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp \
+  /home/toshi/dev/CXX/Subspace/header/SliceRenderer.hpp \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/Core \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/IndexedViewMethods.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArithmeticSequence.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Array.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArrayBase.h \
@@ -1887,11 +1873,15 @@ CMakeFiles/main.dir/src/SliceRenderer.cpp.o: /home/toshi/dev/CXX/Subspace/src/Sl
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/StaticAssert.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/SymbolicIndex.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/XprHelper.h \
-  /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
-  /home/toshi/dev/CXX/Subspace/header/Matrix4x4.h \
-  /home/toshi/dev/CXX/Subspace/header/Object.h \
-  /home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp \
-  /home/toshi/dev/CXX/Subspace/header/SliceRenderer.hpp \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/IndexedViewMethods.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h \
   /usr/include/GL/gl.h \
   /usr/include/GL/glew.h \
   /usr/include/GL/glu.h \
@@ -2186,6 +2176,21 @@ CMakeFiles/main.dir/src/SliceRenderer.cpp.o: /home/toshi/dev/CXX/Subspace/src/Sl
   /usr/lib/gcc/x86_64-linux-gnu/10/include/xmmintrin.h
 
 CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
+  /home/toshi/dev/CXX/Subspace/cuda_util/cuda_util.cuh \
+  /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
+  /home/toshi/dev/CXX/Subspace/header/FixedObjectRenderer.hpp \
+  /home/toshi/dev/CXX/Subspace/header/Matrix4x4.h \
+  /home/toshi/dev/CXX/Subspace/header/Object.h \
+  /home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp \
+  /home/toshi/dev/CXX/Subspace/header/ShaderDebugger.hpp \
+  /home/toshi/dev/CXX/Subspace/header/Shape.h \
+  /home/toshi/dev/CXX/Subspace/header/ShapeIndex.h \
+  /home/toshi/dev/CXX/Subspace/header/Simulator.hpp \
+  /home/toshi/dev/CXX/Subspace/header/SliceRenderer.hpp \
+  /home/toshi/dev/CXX/Subspace/header/SolidShape.h \
+  /home/toshi/dev/CXX/Subspace/header/SolidShapeIndex.h \
+  /home/toshi/dev/CXX/Subspace/header/Window.h \
+  /home/toshi/dev/CXX/Subspace/header/stb_image_write.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/Cholesky \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/Core \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/Dense \
@@ -2201,15 +2206,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/SparseCore \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Cholesky/LDLT.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Cholesky/LLT.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/IndexedViewMethods.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArithmeticSequence.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Array.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArrayBase.h \
@@ -2326,11 +2322,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/StaticAssert.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/SymbolicIndex.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/XprHelper.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/ComplexSchur.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/HessenbergDecomposition.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/RealQZ.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/RealSchur.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/Tridiagonalization.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/ComplexEigenSolver.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/ComplexSchur.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/EigenSolver.h \
@@ -2385,11 +2376,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SVD/JacobiSVD.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SVD/SVDBase.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SVD/UpperBidiagonalization.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/AmbiVector.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/CompressedStorage.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/ConservativeSparseSparseProduct.h \
@@ -2422,21 +2408,15 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/misc/Image.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/misc/Kernel.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/misc/RealSvd2x2.h \
-  /home/toshi/dev/CXX/Subspace/cuda_util/cuda_util.cuh \
-  /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
-  /home/toshi/dev/CXX/Subspace/header/FixedObjectRenderer.hpp \
-  /home/toshi/dev/CXX/Subspace/header/Matrix4x4.h \
-  /home/toshi/dev/CXX/Subspace/header/Object.h \
-  /home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp \
-  /home/toshi/dev/CXX/Subspace/header/ShaderDebugger.hpp \
-  /home/toshi/dev/CXX/Subspace/header/Shape.h \
-  /home/toshi/dev/CXX/Subspace/header/ShapeIndex.h \
-  /home/toshi/dev/CXX/Subspace/header/Simulator.hpp \
-  /home/toshi/dev/CXX/Subspace/header/SliceRenderer.hpp \
-  /home/toshi/dev/CXX/Subspace/header/SolidShape.h \
-  /home/toshi/dev/CXX/Subspace/header/SolidShapeIndex.h \
-  /home/toshi/dev/CXX/Subspace/header/Window.h \
-  /home/toshi/dev/CXX/Subspace/header/stb_image_write.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/IndexedViewMethods.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h \
   /usr/include/GL/gl.h \
   /usr/include/GL/glew.h \
   /usr/include/GL/glu.h \
@@ -3153,8 +3133,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/11/algorithm:
 
-/home/toshi/dev/CXX/Subspace/cuda_util/cuda_util.cuh:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/misc/RealSvd2x2.h:
 
 /usr/local/cuda-12.6/targets/x86_64-linux/include/driver_functions.h:
@@ -3187,6 +3165,10 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseFuzzy.h:
 
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseDiagonalProduct.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseDenseProduct.h:
+
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/NestByValue.h:
 
 /usr/include/c++/10/exception:
@@ -3201,8 +3183,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/c++/10/bits/gthr-default.h:
 
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CoreIterators.h:
-
 /usr/include/c++/10/string:
 
 /usr/include/c++/11/bits/range_access.h:
@@ -3212,8 +3192,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/BandMatrix.h:
 
 /usr/include/time.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/AssignEvaluator.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CwiseUnaryOp.h:
 
@@ -3231,17 +3209,21 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArrayBase.h:
 
-/usr/include/x86_64-linux-gnu/c++/11/bits/ctype_base.h:
-
-/usr/include/c++/10/ext/string_conversions.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h:
-
-/usr/include/c++/10/bits/unique_ptr.h:
-
 /usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/Core:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CoreIterators.h:
+
+/usr/include/c++/11/bits/stringfwd.h:
+
+/home/toshi/dev/CXX/Subspace/header/Shape.h:
+
+/usr/include/c++/10/bits/list.tcc:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/TriangularSolverVector.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/AssignEvaluator.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Diagonal.h:
 
@@ -3270,8 +3252,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/lib/gcc/x86_64-linux-gnu/10/include/stdarg.h:
 
 /usr/include/c++/10/tr1/hypergeometric.tcc:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h:
 
 /usr/include/c++/10/vector:
 
@@ -3324,6 +3304,14 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
+
+/usr/include/c++/11/iosfwd:
+
+/home/toshi/dev/CXX/Subspace/header/Object.h:
+
+/usr/include/c++/11/climits:
+
+/usr/include/c++/10/tuple:
 
 /usr/include/x86_64-linux-gnu/c++/10/bits/c++config.h:
 
@@ -3403,10 +3391,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
 
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/GeneralMatrixMatrixTriangular.h:
-
 /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseRef.h:
@@ -3434,12 +3418,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/c++/11/bits/alloc_traits.h:
 
 /usr/include/errno.h:
-
-/usr/include/c++/11/pstl/glue_algorithm_defs.h:
-
-/home/toshi/dev/CXX/Subspace/header/Simulator.hpp:
-
-/usr/include/c++/10/bits/ptr_traits.h:
 
 /usr/include/c++/10/cctype:
 
@@ -3470,6 +3448,20 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/c++/10/bits/stl_construct.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/GeneralMatrixVector.h:
+
+/usr/include/cublas_v2.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/NoAlias.h:
+
+/home/toshi/dev/CXX/Subspace/header/SolidShape.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ProductEvaluators.h:
+
+/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_30_intrinsics.hpp:
+
+/usr/include/c++/11/cstdlib:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/MappedSparseMatrix.h:
 
 /usr/include/c++/11/tr1/exp_integral.tcc:
 
@@ -3514,6 +3506,16 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/x86_64-linux-gnu/bits/wchar2.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/Memory.h:
+
+/home/toshi/dev/CXX/Subspace/header/SolidShapeIndex.h:
+
+/usr/include/c++/11/istream:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/DiagonalProduct.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SVD/BDCSVD.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/SelfadjointProduct.h:
 
 /usr/include/c++/10/bits/exception_defines.h:
 
@@ -3560,6 +3562,14 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/c++/10/bits/localefwd.h:
 
 /usr/include/c++/10/bits/locale_classes.tcc:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/ctype_base.h:
+
+/usr/include/c++/10/ext/string_conversions.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/GeneralMatrixMatrixTriangular.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h:
 
 /usr/include/c++/11/tr1/gamma.tcc:
 
@@ -3657,10 +3667,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/ostream:
 
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Householder/Householder.h:
-
 /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_32_intrinsics.hpp:
 
 /usr/include/asm-generic/errno-base.h:
@@ -3690,10 +3696,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/c++/10/bits/allocator.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/SelfadjointMatrixMatrix.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h:
-
-/usr/include/c++/10/bits/codecvt.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Transpositions.h:
 
@@ -3743,6 +3745,8 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
 
+/home/toshi/dev/CXX/Subspace/cuda_util/cuda_util.cuh:
+
 /usr/include/c++/10/cwchar:
 
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
@@ -3781,12 +3785,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/cstdio:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_60_atomic_functions.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h:
-
-/usr/include/x86_64-linux-gnu/sys/types.h:
-
 /usr/include/x86_64-linux-gnu/bits/select2.h:
 
 /usr/include/c++/10/sstream:
@@ -3808,12 +3806,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
 
 /usr/include/c++/10/bits/shared_ptr.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CwiseNullaryOp.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/RotationBase.h:
 
 /usr/include/c++/10/fstream:
 
@@ -3901,6 +3893,12 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/bits/algorithmfwd.h:
 
+/home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/GeneralProduct.h:
+
+/usr/include/x86_64-linux-gnu/bits/endianness.h:
+
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/AssignmentFunctors.h:
 
 /usr/include/c++/10/bits/memoryfwd.h:
@@ -3933,9 +3931,9 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
 
-/usr/include/cublas_v2.h:
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/ConjHelper.h:
 
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/NoAlias.h:
+/usr/include/c++/10/codecvt:
 
 /usr/include/vector_functions.h:
 
@@ -3946,20 +3944,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/IterativeLinearSolvers:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/PlainObjectBase.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ProductEvaluators.h:
-
-/usr/include/c++/10/codecvt:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/ConjHelper.h:
-
-/home/toshi/dev/CXX/Subspace/header/SolidShape.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_30_intrinsics.hpp:
-
-/usr/include/c++/11/cstdlib:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/MappedSparseMatrix.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Redux.h:
 
@@ -4023,6 +4007,12 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Swap.h:
 
+/usr/include/c++/11/pstl/glue_algorithm_defs.h:
+
+/usr/include/c++/10/bits/ptr_traits.h:
+
+/home/toshi/dev/CXX/Subspace/header/Simulator.hpp:
+
 /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_60_atomic_functions.hpp:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/VectorwiseOp.h:
@@ -4065,16 +4055,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/Parallelizer.h:
 
-/usr/include/c++/11/istream:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/DiagonalProduct.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SVD/BDCSVD.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/SelfadjointProduct.h:
-
-/home/toshi/dev/CXX/Subspace/header/SolidShapeIndex.h:
-
 /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_61_intrinsics.hpp:
 
 /usr/include/x86_64-linux-gnu/sys/single_threaded.h:
@@ -4090,14 +4070,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/TriangularSolverMatrix.h:
 
 /usr/include/x86_64-linux-gnu/bits/xopen_lim.h:
-
-/usr/include/c++/10/bits/list.tcc:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/TriangularSolverVector.h:
-
-/usr/include/c++/11/bits/stringfwd.h:
-
-/home/toshi/dev/CXX/Subspace/header/Shape.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/BlasUtil.h:
 
@@ -4125,19 +4097,31 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/QR/ColPivHouseholderQR.h:
 
-/usr/include/c++/11/iosfwd:
+/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_60_atomic_functions.h:
 
-/home/toshi/dev/CXX/Subspace/header/Object.h:
+/usr/include/x86_64-linux-gnu/sys/types.h:
 
-/usr/include/c++/11/climits:
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h:
 
-/usr/include/c++/10/tuple:
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h:
 
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/GeneralProduct.h:
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h:
 
-/usr/include/x86_64-linux-gnu/bits/endianness.h:
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CwiseNullaryOp.h:
 
-/home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp:
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/RotationBase.h:
+
+/usr/include/c++/10/bits/codecvt.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h:
+
+/usr/include/c++/10/bits/unique_ptr.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Householder/Householder.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h:
 
 /usr/include/GL/glew.h:
 
@@ -4270,8 +4254,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/c++/10/utility:
 
 /usr/include/limits.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseDiagonalProduct.h:
 
 /usr/include/string.h:
 
@@ -4429,17 +4411,17 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/GPU/TypeCasting.h:
 
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/HessenbergDecomposition.h:
-
-/usr/include/c++/11/bits/stl_iterator_base_types.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/RealSchur.h:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/ComplexEigenSolver.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/HessenbergDecomposition.h:
 
 /home/toshi/dev/CXX/Subspace/header/FixedObjectRenderer.hpp:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h:
+
+/usr/include/c++/11/bits/stl_iterator_base_types.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/RealSchur.h:
 
 /usr/include/c++/10/unordered_map:
 
@@ -4514,5 +4496,3 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseCompressedBase.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseCwiseUnaryOp.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseDenseProduct.h:

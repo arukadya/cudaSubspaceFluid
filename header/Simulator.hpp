@@ -190,11 +190,19 @@ struct CudaSimulator{
     float* get_currentTexture();
 };
 
+Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_dimention,float threshold);
+
 struct Simulator{
     //FluidVariables
     const float _dx; const float _dt;const float _beta;
     const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
-    const unsigned int _snap_num;
+    const unsigned int _flame_num;const unsigned int _snap_num; const float _threshold;
+    // constexpr float _dx; constexpr float _dt;constexpr float _beta;
+    // constexpr unsigned int _texwidth; constexpr unsigned int _texheight; constexpr unsigned int _texdepth;
+    // constexpr unsigned int _flame_num;constexpr unsigned int _snap_num;
+    unsigned int _timestamp;
+    unsigned int delta_snap;
+    unsigned int _reduce_dimention;
     Slab x_velocity;
     Slab y_velocity;
     Slab z_velocity;
@@ -208,18 +216,46 @@ struct Simulator{
     Slab test;
 
     Eigen::VectorXf all_velocity;
+    Eigen::VectorXf px;
+    Eigen::MatrixXf U0_SnapShot;
+    Eigen::MatrixXf U1_SnapShot;
+    Eigen::MatrixXf U2_SnapShot;
+    Eigen::MatrixXf U3_SnapShot;
+    Eigen::MatrixXf P_SnapShot;
+    SparseMatrix Vel2DivMatrix;//W
+    SparseMatrix PoissonMatrix;//X
+    SparseMatrix Pressure2VelocityMatrix;//Y
 
-    SparseMatrix Vel2DivMatrix;
-    SparseMatrix PoissonMatrix;
-    SparseMatrix Pressure2VelocityMatrix;
+    Eigen::MatrixXf reduced_Vel2DivMatrix;//W
+    Eigen::MatrixXf reduced_PoissonMatrix;//X　???こいつが正定値対称行列になるのすごい　要確認
+    Eigen::MatrixXf reduced_Pressure2VelocityMatrix;//Y
+
+    Eigen::MatrixXf U0;
+    Eigen::MatrixXf U1;
+    Eigen::MatrixXf U2;
+    Eigen::MatrixXf U3;
+    Eigen::MatrixXf P;
+    
+    Eigen::MatrixXf reduced_U2_SnapShot;
+    Eigen::MatrixXf reduced_U3_SnapShot;
+    Eigen::VectorXf reduced_all_velocity;
+    Eigen::VectorXf reduced_px;
 
     CalForceEncoder calForceEncoder;
     std::string density_floder_name;
-    Simulator(float dx,float dt,unsigned int texwidth, unsigned int texheight, unsigned int texdepth, float beta, unsigned int snap_num) 
-    : _dx(dx/texwidth),_dt(dt),_texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),_beta(beta),_snap_num(snap_num)
+    Simulator(float dx,float dt,float beta,
+    unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
+    unsigned int flame_num, unsigned int snap_num, float threshold) 
+    : _dx(dx/texwidth),_dt(dt),_beta(beta),
+    _texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),
+    _flame_num(flame_num),_snap_num(snap_num),_threshold(threshold)
     {
+        _timestamp = 0;
+        delta_snap = _flame_num / _snap_num;
+        if(_flame_num % _snap_num != 0)std::cout << " Warning : _flame_num % _snap_num != 0" << std::endl;
         std::cout << "dx,dt,beta = " << _dx << "," << _dt << "," << _beta << std::endl;
-        std::cout << "width,height,depth,slice = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
+        std::cout << "width,height,depth = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
+        std::cout << "flame_num,snap_num,threshold = " << _flame_num << "," << _snap_num << "," << threshold << std::endl;
         x_velocity = Slab(texwidth+1,_texheight,_texdepth,0.0f);
         y_velocity = Slab(texwidth,_texheight+1,_texdepth,0.0f);
         z_velocity = Slab(texwidth,_texheight,_texdepth+1,0.0f);
@@ -237,17 +273,24 @@ struct Simulator{
         // init_velocity(-_dx);
         density_floder_name = "density_txt";
         std::filesystem::create_directories(density_floder_name);
-        PoissonMatrix = SparseMatrix(texwidth*_texheight*_texdepth,texwidth*_texheight*_texdepth);
-        Vel2DivMatrix = SparseMatrix(texwidth*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
-        Pressure2VelocityMatrix = SparseMatrix(3*(texwidth + 1)*_texheight*_texdepth, texwidth*_texheight*_texdepth);
-        all_velocity = Eigen::VectorXf::Zero(3*(texwidth + 1)*_texheight*_texdepth);
+        PoissonMatrix = SparseMatrix(_texwidth*_texheight*_texdepth,texwidth*_texheight*_texdepth);
+        Vel2DivMatrix = SparseMatrix(_texwidth*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
+        Pressure2VelocityMatrix = SparseMatrix(3*(_texwidth + 1)*_texheight*_texdepth, texwidth*_texheight*_texdepth);
+        all_velocity = Eigen::VectorXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth);
+        px = Eigen::VectorXf::Zero(_texwidth *_texheight*_texdepth);
 
+        U0_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
+        U1_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
+        U2_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
+        U3_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
+        P_SnapShot = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _snap_num);
         calPoissonMatrix();
         std::cout << "Poison" << std::endl;
         calVel2DivMatrix();
         std::cout << "V2D" << std::endl;
         calPressure2VelocityMatrix();
         std::cout << "P2V" << std::endl;
+        _reduce_dimention = 0;
     };
     void oneloop();
     void testCompute();
@@ -263,6 +306,7 @@ struct Simulator{
     void faceAdvect();
     void centerAdvect(Slab &val);
     void project();
+    void subspace_project();
     void addForce();
 
     Eigen::Vector3d getBuoyanacy(int i,int j, int k);
@@ -272,6 +316,9 @@ struct Simulator{
     void calPressure2VelocityMatrix();
     void init_all_velocity();
     void all2xyz();
+    void write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap, unsigned int timestamp);
+    void getBasisQRSVD();
+    void getReducedLinearOperator();
 private:
     void testSDF();
 };
