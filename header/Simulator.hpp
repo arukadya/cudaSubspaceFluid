@@ -201,7 +201,7 @@ struct Simulator{
     // constexpr unsigned int _texwidth; constexpr unsigned int _texheight; constexpr unsigned int _texdepth;
     // constexpr unsigned int _flame_num;constexpr unsigned int _snap_num;
     unsigned int _timestamp;
-    unsigned int delta_snap;
+    unsigned int _delta_snap;
     unsigned int _reduce_dimention;
     Slab x_velocity;
     Slab y_velocity;
@@ -222,6 +222,11 @@ struct Simulator{
     Eigen::MatrixXf U2_SnapShot;
     Eigen::MatrixXf U3_SnapShot;
     Eigen::MatrixXf P_SnapShot;
+    Eigen::MatrixXf U0_all_frame;
+    Eigen::MatrixXf U1_all_frame;
+    Eigen::MatrixXf U2_all_frame;
+    Eigen::MatrixXf U3_all_frame;
+    Eigen::MatrixXf P_all_frame;
     SparseMatrix Vel2DivMatrix;//W
     SparseMatrix PoissonMatrix;//X
     SparseMatrix Pressure2VelocityMatrix;//Y
@@ -236,8 +241,8 @@ struct Simulator{
     Eigen::MatrixXf U3;
     Eigen::MatrixXf P;
     
-    Eigen::MatrixXf reduced_U2_SnapShot;
-    Eigen::MatrixXf reduced_U3_SnapShot;
+    // Eigen::MatrixXf reduced_U2_SnapShot;
+    // Eigen::MatrixXf reduced_U3_SnapShot;
     Eigen::VectorXf reduced_all_velocity;
     Eigen::VectorXf reduced_px;
 
@@ -251,26 +256,23 @@ struct Simulator{
     _flame_num(flame_num),_snap_num(snap_num),_threshold(threshold)
     {
         _timestamp = 0;
-        delta_snap = _flame_num / _snap_num;
+        _delta_snap = _flame_num / _snap_num;
         if(_flame_num % _snap_num != 0)std::cout << " Warning : _flame_num % _snap_num != 0" << std::endl;
         std::cout << "dx,dt,beta = " << _dx << "," << _dt << "," << _beta << std::endl;
         std::cout << "width,height,depth = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
         std::cout << "flame_num,snap_num,threshold = " << _flame_num << "," << _snap_num << "," << threshold << std::endl;
-        x_velocity = Slab(texwidth+1,_texheight,_texdepth,0.0f);
-        y_velocity = Slab(texwidth,_texheight+1,_texdepth,0.0f);
-        z_velocity = Slab(texwidth,_texheight,_texdepth+1,0.0f);
-        x_force = Slab(texwidth,_texheight,_texdepth,0.0f);
-        y_force = Slab(texwidth,_texheight,_texdepth,0.0f);
-        z_force = Slab(texwidth,_texheight,_texdepth,0.0f);
-        pressure = Slab(texwidth,_texheight,_texdepth,0.0f);
-        density_tgt = Slab(texwidth,_texheight,_texdepth,0.0f);
-        density_amb = Slab(texwidth,_texheight,_texdepth,AMB_DENSITY);
-        templature = Slab(texwidth,_texheight,_texdepth,AMB_TEMPLATURE);
-        test = Slab(texwidth,_texheight,1,0.0f);
+        x_velocity = Slab(_texwidth+1,_texheight,_texdepth,0.0f);
+        y_velocity = Slab(_texwidth,_texheight+1,_texdepth,0.0f);
+        z_velocity = Slab(_texwidth,_texheight,_texdepth+1,0.0f);
+        x_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        y_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        z_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        pressure = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        density_tgt = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        density_amb = Slab(_texwidth,_texheight,_texdepth,AMB_DENSITY);
+        templature = Slab(_texwidth,_texheight,_texdepth,AMB_TEMPLATURE);
+        test = Slab(_texwidth,_texheight,1,0.0f);
         calForceEncoder = CalForceEncoder("../shader/calForce.comp");
-        init_density(TGT_DENSITY);
-        init_templature(TGT_TEMPLATURE);
-        // init_velocity(-_dx);
         density_floder_name = "density_txt";
         std::filesystem::create_directories(density_floder_name);
         PoissonMatrix = SparseMatrix(_texwidth*_texheight*_texdepth,texwidth*_texheight*_texdepth);
@@ -284,41 +286,55 @@ struct Simulator{
         U2_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
         U3_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
         P_SnapShot = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _snap_num);
+        U0_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
+        U1_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
+        U2_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
+        U3_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
+        P_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         calPoissonMatrix();
         std::cout << "Poison" << std::endl;
         calVel2DivMatrix();
         std::cout << "V2D" << std::endl;
         calPressure2VelocityMatrix();
         std::cout << "P2V" << std::endl;
-        _reduce_dimention = 0;
     };
+    //full simulator
     void oneloop();
-    void testCompute();
     void init_velocity();
     void init_density(float init_density_value);
     void init_templature(float init_templature_value);
     void init_pressure(float init_pressure_value);
     void init_velocity(float init_pressure_value);
-    void inputTXT(std::string &InputFileName);
     float TriLinearInterporation(float x,float y,float z,Slab &val);
     float* get_currentTexture();
-    void output_txt(unsigned int id);
     void faceAdvect();
     void centerAdvect(Slab &val);
     void project();
-    void subspace_project();
     void addForce();
-
     Eigen::Vector3d getBuoyanacy(int i,int j, int k);
 
+    //construct basis
     void calPoissonMatrix();
     void calVel2DivMatrix();
     void calPressure2VelocityMatrix();
     void init_all_velocity();
-    void all2xyz();
-    void write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap, unsigned int timestamp);
+    void write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap);
+    void write_exact_solution(Eigen::MatrixXf &mat, Eigen::VectorXf &snap);
     void getBasisQRSVD();
     void getReducedLinearOperator();
+
+    //subspace
+    void subspace_execute();
+    void subspace_oneloop();
+    void subspace_project();
+    
+    //test
+    void inputTXT(std::string &InputFileName);
+    void output_txt(unsigned int id);
+    void output_Basis();
+    void input_Basis();
+    void all2xyz();
+    void testCompute();
 private:
     void testSDF();
 };

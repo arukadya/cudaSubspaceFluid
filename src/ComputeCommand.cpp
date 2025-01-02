@@ -145,3 +145,29 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta,
     Inputfile.close();
     return EXIT_SUCCESS;
 }
+
+void outputMatrix(std::string OutputFileName, Eigen::MatrixXf &mat)
+{
+    std::cout << OutputFileName << std::endl;
+    FILE *ofp = fopen(OutputFileName.c_str(),"w");
+    for(int col=0;col<mat.cols();col++){
+        for(int row=0;row<mat.rows();row++){
+            if(fprintf(ofp, "%f\n", mat(row,col)));
+        }
+    }
+    fclose(ofp);
+}
+
+void inputMatrix(std::string InputFileName, Eigen::MatrixXf &mat)
+{
+    FILE *ifp = fopen(InputFileName.c_str(),"r");
+    std::cout << InputFileName << std::endl;
+    for(int col=0;col<mat.cols();col++){
+        for(int row=0;row<mat.rows();row++){
+            float value;
+            if(fscanf(ifp, "%f", &value));
+            mat(row,col) = value;
+        }
+    }
+    fclose(ifp);
+}

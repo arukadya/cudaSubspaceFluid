@@ -3,16 +3,6 @@
 #define STBI_MSC_SECURE_CRT
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
-#define TIMESTEP 0.01f
-#define DX 0.1f
-#define BETA 1000
-
-
-#define TEXWIDTH 64
-#define TEXHEIGHT 64
-#define TEXDEPTH 64
-#define SLICENUM 64
-
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -39,6 +29,9 @@ FixedObjectRenderer,SliceRendererのconst工事
 
 int main(int argc, char * argv[])
 {
+    std::string command(argv[1]);
+    bool is_simulate = (argc == 2 && command == "pre_compute");
+
     float dx;float dt;float beta;
     unsigned int texwidth;unsigned int texheight;unsigned int texdepth;unsigned int slice_num;
     unsigned int flame_num;unsigned int snap_num;float threshold;
@@ -50,7 +43,13 @@ int main(int argc, char * argv[])
     Simulator simulator(dx,dt,beta,
     texwidth,texheight,texdepth,
     flame_num,snap_num,threshold);
-    
+
+    if(argc == 2 && !is_simulate)
+    {
+        unsigned int r = atoi(argv[1]);
+        simulator._reduce_dimention = r;
+    }
+
     FixedObjectRenderer fixedObjectRenderer;
     SliceRenderer sliceRenderer(texwidth,texheight,texdepth,slice_num);
     std::cout << "Sucssess initialize Simulator" << std::endl;
@@ -85,7 +84,7 @@ int main(int argc, char * argv[])
     // int sumcnt = 0;
     // float startTime;
     // float sum = 0;
-    while(window && id < flame_num)
+    while(window && id < flame_num && is_simulate)
     {
         std::string str_density = "densityTexture";
         std::string str_templature = "templatureTexture";
@@ -149,10 +148,18 @@ int main(int argc, char * argv[])
         sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture);
         window.swapBuffers();
     }
+
     std::cout << "fin_window" << std::endl;
-    simulator.getBasisQRSVD();
-    std::cout << "fin_calBasis" << std::endl;
+    if(is_simulate)
+    {
+        simulator.getBasisQRSVD();
+        std::cout << "fin_calBasis" << std::endl;
+        simulator.output_Basis();
+    }
+    else simulator.input_Basis();
     simulator.getReducedLinearOperator();
     std::cout << "fin_operator_projection" << std::endl;
+    simulator.subspace_execute();
+    std::cout << "fin_subspace" << std::endl;
     return 0;
 }

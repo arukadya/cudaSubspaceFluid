@@ -1,9 +1,3 @@
-//
-//  Simulator.cpp
-//  OpenGLTest
-//
-//  Created by 須之内俊樹 on 2024/05/26.
-
 #include "Simulator.hpp"
 // #include "Simulator.cuh"
 float* Simulator::get_currentTexture()
@@ -39,6 +33,7 @@ void CalForceEncoder::encode
     // out_y_force.print_src();
     out_y_force.swap_src_dst();
 }
+
 void Simulator::inputTXT(std::string &InputFileName)
 {
     FILE *ifp = fopen(InputFileName.c_str(),"r");
@@ -160,21 +155,29 @@ void Simulator::oneloop()
     // std::cout << "init_all_velocity" << std::endl;
     // std::cout << "U0 snap norm = " << all_velocity.norm() << std::endl;
     //U0
-    write_snapshot(U0_SnapShot, all_velocity, _timestamp);
-    // std::cout << "U0 snap norm = " << U0_SnapShot.row(_timestamp).norm() << std::endl;
+    write_snapshot(U0_SnapShot, all_velocity);
+    write_exact_solution(U0_all_frame, all_velocity);
     
     faceAdvect();
 
     //linear
     init_all_velocity();
-    // std::cout << "U2 snap norm = " << all_velocity.norm() << std::endl;
-    write_snapshot(U2_SnapShot, all_velocity, _timestamp);
     //U1
     //Diffusion
     //U2
+    // std::cout << "U2 snap norm = " << all_velocity.norm() << std::endl;
+    write_snapshot(U2_SnapShot, all_velocity);
+    write_exact_solution(U2_all_frame, all_velocity);
+    // std::cout << "U2 norm = " << U2_all_frame.row(_timestamp).norm() << std::endl;
+    
     project();
-    write_snapshot(U3_SnapShot, all_velocity, _timestamp);
-    write_snapshot(P_SnapShot, px, _timestamp);
+    // std::cout << "px norm = " << px.norm() << std::endl;
+    write_snapshot(U3_SnapShot, all_velocity);
+    write_snapshot(P_SnapShot, px);
+    write_exact_solution(U3_all_frame, all_velocity);
+    // std::cout << "U3 norm = " << U3_all_frame.row(_timestamp).norm() << std::endl;
+    write_exact_solution(P_all_frame, px);
+    // std::cout << "P norm = " << P_all_frame.row(_timestamp).norm() << std::endl;
 
     //nonlinear
     //U3
@@ -186,6 +189,68 @@ void Simulator::oneloop()
     centerAdvect(density_amb);
     // std::cout << "centerAdvectRho" << std::endl;
     ++_timestamp;
+}
+void Simulator::subspace_execute()
+{
+    
+    x_velocity = Slab(_texwidth+1,_texheight,_texdepth,0.0f);
+    y_velocity = Slab(_texwidth,_texheight+1,_texdepth,0.0f);
+    z_velocity = Slab(_texwidth,_texheight,_texdepth+1,0.0f);
+    x_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
+    y_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
+    z_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
+    pressure = Slab(_texwidth,_texheight,_texdepth,0.0f);
+    density_tgt = Slab(_texwidth,_texheight,_texdepth,0.0f);
+    density_amb = Slab(_texwidth,_texheight,_texdepth,AMB_DENSITY);
+    templature = Slab(_texwidth,_texheight,_texdepth,AMB_TEMPLATURE);
+    init_all_velocity();
+    for(_timestamp = 0; _timestamp<_flame_num; ++_timestamp)
+    {
+        subspace_oneloop();
+    }
+    
+}
+
+void Simulator::subspace_oneloop()
+{
+    init_density(TGT_DENSITY);
+    init_templature(TGT_TEMPLATURE);
+    //nonlinear
+    std::cout << "sub_calForce" << std::endl;
+    addForce();
+    std::cout << "sub_addForce" << std::endl;
+    init_all_velocity();
+    std::cout << "sub_init_all_velocity" << std::endl;
+    // std::cout << "U0 snap norm = " << all_velocity.norm() << std::endl;
+    //U0
+    // std::cout << "U0 snap norm = " << U0_SnapShot.row(_timestamp).norm() << std::endl;
+    faceAdvect();
+
+    //linear
+    init_all_velocity();
+    // std::cout << "U2 snap norm = " << all_velocity.norm() << std::endl;
+    //U1
+    //Diffusion
+    //U2
+    reduced_all_velocity = U2.transpose() * all_velocity;
+
+    // std::cout << "U2 : " << (U2_all_frame.row(_timestamp) - U2 * reduced_all_velocity).norm() << std::endl;
+    // std::cout << "exact, reduce : " << U2_all_frame.row(_timestamp).norm() << "," <<  (U2 * reduced_all_velocity).norm() << std::endl;
+    subspace_project();
+    // std::cout << "U3 : " << (U3_all_frame.row(_timestamp) - U3 * reduced_all_velocity).norm() << std::endl;
+    // std::cout << "exact, reduce : " << U3_all_frame.row(_timestamp).norm() << "," <<  (U3 * reduced_all_velocity).norm() << std::endl;
+    // std::cout << "P  : " << ( P_all_frame.row(_timestamp) - P * reduced_px).norm() << std::endl;
+    // std::cout << "exact, reduce : " << P_all_frame.row(_timestamp).norm() << "," <<  (P * reduced_px).norm() << std::endl;
+    //nonlinear
+    //U3
+    // times.push_back(TD.endTimer());
+    std::cout << "sub_project" << std::endl;
+    centerAdvect(templature);
+    // std::cout << "centerAdvectTemp" << std::endl;
+    centerAdvect(density_tgt);
+    centerAdvect(density_amb);
+    // std::cout << "centerAdvectRho" << std::endl;
+    std::cout << "accuracy check flame : " << _timestamp << std::endl;
 }
 
 void Simulator::output_txt(unsigned int id)
@@ -416,7 +481,8 @@ void Simulator::project(){
 }
 
 void Simulator::subspace_project(){
-    Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
+    // Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
+    Eigen::VectorXf b;
     // Eigen::ConjugateGradient<SparseMatrix> solver;
     Eigen::ConjugateGradient<Eigen::MatrixXf> solver;
 
@@ -430,22 +496,31 @@ void Simulator::subspace_project(){
     solver.setTolerance(1e-6);
     solver.setMaxIterations(20);
     // solver.compute(A);
-    init_all_velocity();
-    b = Vel2DivMatrix * all_velocity;
+    // init_all_velocity();
+    // b = Vel2DivMatrix * all_velocity;
+    b = reduced_Vel2DivMatrix * reduced_all_velocity;
     //initialize
     solver.compute(reduced_PoissonMatrix);
-    px = solver.solveWithGuess(b, px);
+    // px = solver.solveWithGuess(b, px);
 
-    for(unsigned int i=0;i<_texwidth;i++){
-        for(unsigned int j=0;j<_texheight;j++){
-            for(unsigned int k=0;k<_texdepth;k++){
-                pressure.set_volume_value(i,j,k,px(i+j*_texwidth+k*_texwidth*_texheight));
-            }
-        }
-    }
-    pressure.swap_src_dst();
+    std::cout << "before reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
+    reduced_px = solver.solveWithGuess(b, reduced_px);
+    std::cout << "after reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
+    // for(unsigned int i=0;i<_texwidth;i++){
+    //     for(unsigned int j=0;j<_texheight;j++){
+    //         for(unsigned int k=0;k<_texdepth;k++){
+    //             pressure.set_volume_value(i,j,k,px(i+j*_texwidth+k*_texwidth*_texheight));
+    //         }
+    //     }
+    // }
+    // pressure.swap_src_dst();
 
-    all_velocity = all_velocity - Pressure2VelocityMatrix * px;
+    // all_velocity = all_velocity - Pressure2VelocityMatrix * px;
+    std::cout << "before reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
+    reduced_all_velocity = reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
+    std::cout << "after reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
+
+    all_velocity = U3 * reduced_all_velocity;
     all2xyz();
 }
 
@@ -502,11 +577,18 @@ void Simulator::addForce(){
     // y_velocity.print_src();
 }
 
-void Simulator::write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap, unsigned int timestamp)
+void Simulator::write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap)
 {
-    assert(mat.cols != snap.size || mat.rows > timestamp);
+    assert(mat.cols != snap.size || mat.rows > _timestamp);
     // if(_timestamp % _snap_num == 0)mat.row(timestamp) = snap;
-    if(_timestamp % delta_snap == 0)mat.row(timestamp) = snap;
+    if(_timestamp % _delta_snap == 0)mat.row(_timestamp / _delta_snap) = snap;
+}
+
+void Simulator::write_exact_solution(Eigen::MatrixXf &mat, Eigen::VectorXf &snap)
+{
+    assert(mat.cols != snap.size || mat.rows > _timestamp);
+    // if(_timestamp % _snap_num == 0)mat.row(timestamp) = snap;
+    mat.row(_timestamp) = snap;
 }
 
 Eigen::Vector3d Simulator::getBuoyanacy(int i,int j, int k){
@@ -535,13 +617,54 @@ void Simulator::getReducedLinearOperator()
     reduced_Vel2DivMatrix = P.transpose() * Vel2DivMatrix * U2;
     reduced_PoissonMatrix = P.transpose() * PoissonMatrix * P;
     reduced_Pressure2VelocityMatrix = U3.transpose() * Pressure2VelocityMatrix * P;
-    std::cout << "reduced_W size" << std::endl << 
-    "rows,cols = " << reduced_Vel2DivMatrix.rows() << "," << reduced_Vel2DivMatrix.cols() << std::endl;
-    std::cout << "reduced_X size" << std::endl << 
-    "rows,cols = " << reduced_PoissonMatrix.rows() << "," << reduced_PoissonMatrix.cols() << std::endl;
+    // std::cout << "reduced_W size" << std::endl << 
+    // "rows,cols = " << reduced_Vel2DivMatrix.rows() << "," << reduced_Vel2DivMatrix.cols() << std::endl;
+    // std::cout << "reduced_X size" << std::endl << 
+    // "rows,cols = " << reduced_PoissonMatrix.rows() << "," << reduced_PoissonMatrix.cols() << std::endl;
     // std::cout << "reduced_X" << std::endl << reduced_PoissonMatrix << std::endl;
-    std::cout << "reduced_Y size" << std::endl << 
-    "rows,cols = " << reduced_Pressure2VelocityMatrix.rows() << "," << reduced_Pressure2VelocityMatrix.cols() << std::endl;
+    // std::cout << "reduced_Y size" << std::endl << 
+    // "rows,cols = " << reduced_Pressure2VelocityMatrix.rows() << "," << reduced_Pressure2VelocityMatrix.cols() << std::endl;
+    std::cout << "reduced_W" << std::endl << reduced_Vel2DivMatrix << std::endl;
+    std::cout << "reduced_X" << std::endl << reduced_PoissonMatrix << std::endl;
+    std::cout << "reduced_Y" << std::endl << reduced_Pressure2VelocityMatrix << std::endl;
+}
+
+void Simulator::output_Basis()
+{
+    std::filesystem::create_directories("basis");
+    int n = _texdepth * _texheight * _texdepth;
+    int r = _reduce_dimention;
+    std::string basis_foldername = "basis/n" + std::to_string(n) + "r" + std::to_string(r); 
+    std::filesystem::create_directories(basis_foldername);
+    std::string U0FileName = basis_foldername + "/U0.txt";
+    std::string U2FileName = basis_foldername + "/U2.txt";
+    std::string U3FileName = basis_foldername + "/U3.txt";
+    std::string PFileName  = basis_foldername +  "/P.txt";
+    outputMatrix(U0FileName,U0);
+    outputMatrix(U2FileName,U2);
+    outputMatrix(U3FileName,U3);
+    outputMatrix(PFileName,P);
+}
+
+void Simulator::input_Basis()
+{
+    std::filesystem::create_directories("basis");
+    int n = _texdepth * _texheight * _texdepth;
+    int r = _reduce_dimention;
+    std::string basis_foldername = "basis/n" + std::to_string(n) + "r" + std::to_string(r); 
+    std::string U0FileName = basis_foldername + "/U0.txt";
+    std::string U2FileName = basis_foldername + "/U2.txt";
+    std::string U3FileName = basis_foldername + "/U3.txt";
+    std::string PFileName  = basis_foldername +  "/P.txt";
+    n = (_texdepth + 1)* _texheight * _texdepth;
+    U0 = Eigen::MatrixXf(3*n,r);
+    U2 = Eigen::MatrixXf(3*n,r);
+    U3 = Eigen::MatrixXf(3*n,r);
+    P  = Eigen::MatrixXf(_texdepth * _texheight * _texdepth,r);
+    inputMatrix(U0FileName,U0);
+    inputMatrix(U2FileName,U2);
+    inputMatrix(U3FileName,U3);
+    inputMatrix(PFileName,P);
 }
 
 Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_dimention,float threshold)

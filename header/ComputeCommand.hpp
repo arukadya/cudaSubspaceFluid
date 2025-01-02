@@ -14,6 +14,8 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <filesystem>
+#include "Eigen/Core"
 unsigned int resequence3to1(unsigned int i,unsigned int j,unsigned int k,unsigned int Ni,unsigned int Nj,unsigned int Nk);
 std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,unsigned int Nk);
 struct Timer{
@@ -27,4 +29,6 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
     unsigned int &flame_num,unsigned int &snap_num,float &threshold);
 
+void outputMatrix(std::string OutputFileName, Eigen::MatrixXf &mat);
+void inputMatrix(std::string InputFileName, Eigen::MatrixXf &mat);
 #endif /* ComputeCommand_hpp */
