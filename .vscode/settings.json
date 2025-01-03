@@ -78,6 +78,7 @@
         "filesystem": "cpp",
         "core": "cpp",
         "locale": "cpp",
-        "fft": "cpp"
+        "fft": "cpp",
+        "alignedvector3": "cpp"
     }
 }

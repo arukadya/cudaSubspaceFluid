@@ -197,9 +197,6 @@ struct Simulator{
     const float _dx; const float _dt;const float _beta;
     const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
     const unsigned int _flame_num;const unsigned int _snap_num; const float _threshold;
-    // constexpr float _dx; constexpr float _dt;constexpr float _beta;
-    // constexpr unsigned int _texwidth; constexpr unsigned int _texheight; constexpr unsigned int _texdepth;
-    // constexpr unsigned int _flame_num;constexpr unsigned int _snap_num;
     unsigned int _timestamp;
     unsigned int _delta_snap;
     unsigned int _reduce_dimention;
@@ -292,11 +289,11 @@ struct Simulator{
         U3_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         P_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         calPoissonMatrix();
-        std::cout << "Poison" << std::endl;
+        // std::cout << "Poison" << std::endl;
         calVel2DivMatrix();
-        std::cout << "V2D" << std::endl;
+        // std::cout << "V2D" << std::endl;
         calPressure2VelocityMatrix();
-        std::cout << "P2V" << std::endl;
+        // std::cout << "P2V" << std::endl;
     };
     //full simulator
     void oneloop();
