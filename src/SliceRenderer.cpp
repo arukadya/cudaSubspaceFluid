@@ -117,12 +117,10 @@ GLuint SliceRenderer::makeVolume(float* densityTexture, GLfloat *smokeColor,Eige
         for(unsigned int j=0;j<_texheight;++j){
             for(unsigned int i=0;i<_texwidth;++i){
                 float transparency = exp( -1.0 * densityTexture[resequence3to1(i, j, k, _texwidth, _texheight, _texdepth)] * marchingLength);
-                float transparency10 = exp( -1.0 * 10 * marchingLength);
-                float transparency255 = exp( -1.0 * 255 * marchingLength);
+                // float transparency10 = exp( -1.0 * 10 * marchingLength);
+                // float transparency255 = exp( -1.0 * 255 * marchingLength);
 //                std::cout << densityTexture[resequence3to1(i, j, k, texwidth, _texheight, _texdepth)] << std::endl;
                 float opacity = 1 - transparency;
-                float opacity10 = 1 - transparency10;
-                float opacity255 = 1 - transparency255;
 //                else volume.push_back(opacity);
                 volume.push_back(opacity);
 //                std::cout << (float)volume[volume.size()-1] << "," << opacity10 << "," << opacity255 << std::endl;
@@ -253,7 +251,7 @@ void SliceRenderer::makeCosTexture()
 {
     const GLuint program(loadComputeProgram("Shader/cos.comp"));
     const GLint eye_posLoc(glGetUniformLocation(program, "eye_pos"));
-    const GLint volumeLoc(glGetUniformLocation(program, "volume"));
+    // const GLint volumeLoc(glGetUniformLocation(program, "volume"));
 
     glUseProgram(program);
     glUniform4f(eye_posLoc, 3.0f, 4.0f, 5.0f, 0.0f);

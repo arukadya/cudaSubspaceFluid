@@ -8,7 +8,6 @@
 #include <string>
 #include "ComputeCommand.hpp"
 #include "ShaderCommand.hpp"
-#include "cuda_util.cuh"
 #include <fstream>
 #include <sstream>
 #include <filesystem>
@@ -153,42 +152,6 @@ struct CalForceEncoder : Encoder{
         Slab &templature
     );
 };
-struct CudaSimulator{
-    const float _dx;const float _dt;const float _beta;
-    const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
-    myCUDA_Array<float> x_velocity;
-    myCUDA_Array<float> y_velocity;
-    myCUDA_Array<float> z_velocity;
-    myCUDA_Array<float> x_force;
-    myCUDA_Array<float> y_force;
-    myCUDA_Array<float> z_force;
-    myCUDA_Array<float> pressure;
-    myCUDA_Array<float> density_tgt;
-    myCUDA_Array<float> density_amb;
-    myCUDA_Array<float> templature;
-    CudaSimulator(float dx,float dt,unsigned int texwidth, unsigned int texheight, unsigned int texdepth, float beta) 
-    : _dx(dx),_dt(dt),_texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),_beta(beta)
-    {
-        x_velocity  = myCUDA_Array<float>(_texwidth+1,_texheight,_texdepth);
-        x_velocity  = myCUDA_Array<float>(_texwidth,_texheight+1,_texdepth);
-        x_velocity  = myCUDA_Array<float>(_texwidth,_texheight,_texdepth+1);
-        x_force     = myCUDA_Array<float>(_texwidth,_texheight,_texdepth);
-        y_force     = myCUDA_Array<float>(_texwidth,_texheight,_texdepth);
-        z_force     = myCUDA_Array<float>(_texwidth,_texheight,_texdepth);
-        pressure    = myCUDA_Array<float>(_texwidth,_texheight,_texdepth);
-        density_tgt = myCUDA_Array<float>(_texwidth,_texheight,_texdepth);
-        density_amb = myCUDA_Array<float>(_texwidth,_texheight,_texdepth);
-        templature  = myCUDA_Array<float>(_texwidth,_texheight,_texdepth);
-        init_density(100);
-        init_templature(100);
-    }
-    void oneloop();
-    void testCompute();
-    void init_density(float init_density_value);
-    void init_templature(float init_templature_value);
-    void inputTXT(std::string &InputFileName);
-    float* get_currentTexture();
-};
 
 Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_dimention,float threshold);
 
@@ -245,7 +208,7 @@ struct Simulator{
     Eigen::VectorXf reduced_all_velocity;
     Eigen::VectorXf reduced_px;
 
-    CalForceEncoder calForceEncoder;
+    // CalForceEncoder calForceEncoder;
     std::string density_floder_name;
     Simulator(float dx,float dt,float beta,
     unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
@@ -271,7 +234,7 @@ struct Simulator{
         density_amb = Slab(_texwidth,_texheight,_texdepth,AMB_DENSITY);
         templature = Slab(_texwidth,_texheight,_texdepth,AMB_TEMPLATURE);
         test = Slab(_texwidth,_texheight,1,0.0f);
-        calForceEncoder = CalForceEncoder("../shader/calForce.comp");
+        // calForceEncoder = CalForceEncoder("../shader/calForce.comp");
         density_floder_name = "density_txt";
         std::filesystem::create_directories(density_floder_name);
         PoissonMatrix = SparseMatrix(_texwidth*_texheight*_texdepth,texwidth*_texheight*_texdepth);

@@ -125,10 +125,24 @@ CMakeFiles/main.dir/src/ShaderDebugger.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/ShaderDebugger.cpp.s"
 	/usr/bin/g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/toshi/dev/CXX/Subspace/src/ShaderDebugger.cpp -o CMakeFiles/main.dir/src/ShaderDebugger.cpp.s
 
+CMakeFiles/main.dir/src/Simulator.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/src/Simulator.cpp.o: /home/toshi/dev/CXX/Subspace/src/Simulator.cpp
+CMakeFiles/main.dir/src/Simulator.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/toshi/dev/CXX/Subspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/main.dir/src/Simulator.cpp.o"
+	/usr/bin/g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/Simulator.cpp.o -MF CMakeFiles/main.dir/src/Simulator.cpp.o.d -o CMakeFiles/main.dir/src/Simulator.cpp.o -c /home/toshi/dev/CXX/Subspace/src/Simulator.cpp
+
+CMakeFiles/main.dir/src/Simulator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/Simulator.cpp.i"
+	/usr/bin/g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/toshi/dev/CXX/Subspace/src/Simulator.cpp > CMakeFiles/main.dir/src/Simulator.cpp.i
+
+CMakeFiles/main.dir/src/Simulator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/Simulator.cpp.s"
+	/usr/bin/g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/toshi/dev/CXX/Subspace/src/Simulator.cpp -o CMakeFiles/main.dir/src/Simulator.cpp.s
+
 CMakeFiles/main.dir/src/SliceRenderer.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/src/SliceRenderer.cpp.o: /home/toshi/dev/CXX/Subspace/src/SliceRenderer.cpp
 CMakeFiles/main.dir/src/SliceRenderer.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/toshi/dev/CXX/Subspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/main.dir/src/SliceRenderer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/toshi/dev/CXX/Subspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/main.dir/src/SliceRenderer.cpp.o"
 	/usr/bin/g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/SliceRenderer.cpp.o -MF CMakeFiles/main.dir/src/SliceRenderer.cpp.o.d -o CMakeFiles/main.dir/src/SliceRenderer.cpp.o -c /home/toshi/dev/CXX/Subspace/src/SliceRenderer.cpp
 
 CMakeFiles/main.dir/src/SliceRenderer.cpp.i: cmake_force
@@ -142,7 +156,7 @@ CMakeFiles/main.dir/src/SliceRenderer.cpp.s: cmake_force
 CMakeFiles/main.dir/src/main.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp
 CMakeFiles/main.dir/src/main.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/toshi/dev/CXX/Subspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/main.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/toshi/dev/CXX/Subspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/main.dir/src/main.cpp.o"
 	/usr/bin/g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/main.cpp.o -MF CMakeFiles/main.dir/src/main.cpp.o.d -o CMakeFiles/main.dir/src/main.cpp.o -c /home/toshi/dev/CXX/Subspace/src/main.cpp
 
 CMakeFiles/main.dir/src/main.cpp.i: cmake_force
@@ -153,30 +167,15 @@ CMakeFiles/main.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/main.cpp.s"
 	/usr/bin/g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/toshi/dev/CXX/Subspace/src/main.cpp -o CMakeFiles/main.dir/src/main.cpp.s
 
-CMakeFiles/main.dir/src/Simulator.cu.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/src/Simulator.cu.o: CMakeFiles/main.dir/includes_CUDA.rsp
-CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulator.cu
-CMakeFiles/main.dir/src/Simulator.cu.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/toshi/dev/CXX/Subspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CUDA object CMakeFiles/main.dir/src/Simulator.cu.o"
-	/usr/local/cuda-12.6/bin/nvcc -forward-unknown-to-host-compiler $(CUDA_DEFINES) $(CUDA_INCLUDES) $(CUDA_FLAGS) -MD -MT CMakeFiles/main.dir/src/Simulator.cu.o -MF CMakeFiles/main.dir/src/Simulator.cu.o.d -x cu -c /home/toshi/dev/CXX/Subspace/src/Simulator.cu -o CMakeFiles/main.dir/src/Simulator.cu.o
-
-CMakeFiles/main.dir/src/Simulator.cu.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CUDA source to CMakeFiles/main.dir/src/Simulator.cu.i"
-	$(CMAKE_COMMAND) -E cmake_unimplemented_variable CMAKE_CUDA_CREATE_PREPROCESSED_SOURCE
-
-CMakeFiles/main.dir/src/Simulator.cu.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CUDA source to assembly CMakeFiles/main.dir/src/Simulator.cu.s"
-	$(CMAKE_COMMAND) -E cmake_unimplemented_variable CMAKE_CUDA_CREATE_ASSEMBLY_SOURCE
-
 # Object files for target main
 main_OBJECTS = \
 "CMakeFiles/main.dir/src/ComputeCommand.cpp.o" \
 "CMakeFiles/main.dir/src/FixedObjectRenderer.cpp.o" \
 "CMakeFiles/main.dir/src/ShaderCommand.cpp.o" \
 "CMakeFiles/main.dir/src/ShaderDebugger.cpp.o" \
+"CMakeFiles/main.dir/src/Simulator.cpp.o" \
 "CMakeFiles/main.dir/src/SliceRenderer.cpp.o" \
-"CMakeFiles/main.dir/src/main.cpp.o" \
-"CMakeFiles/main.dir/src/Simulator.cu.o"
+"CMakeFiles/main.dir/src/main.cpp.o"
 
 # External object files for target main
 main_EXTERNAL_OBJECTS =
@@ -185,9 +184,9 @@ main: CMakeFiles/main.dir/src/ComputeCommand.cpp.o
 main: CMakeFiles/main.dir/src/FixedObjectRenderer.cpp.o
 main: CMakeFiles/main.dir/src/ShaderCommand.cpp.o
 main: CMakeFiles/main.dir/src/ShaderDebugger.cpp.o
+main: CMakeFiles/main.dir/src/Simulator.cpp.o
 main: CMakeFiles/main.dir/src/SliceRenderer.cpp.o
 main: CMakeFiles/main.dir/src/main.cpp.o
-main: CMakeFiles/main.dir/src/Simulator.cu.o
 main: CMakeFiles/main.dir/build.make
 main: CMakeFiles/main.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/toshi/dev/CXX/Subspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable main"

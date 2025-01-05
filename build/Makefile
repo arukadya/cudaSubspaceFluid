@@ -226,29 +226,29 @@ src/ShaderDebugger.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/ShaderDebugger.cpp.s
 .PHONY : src/ShaderDebugger.cpp.s
 
-src/Simulator.o: src/Simulator.cu.o
+src/Simulator.o: src/Simulator.cpp.o
 .PHONY : src/Simulator.o
 
 # target to build an object file
-src/Simulator.cu.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Simulator.cu.o
-.PHONY : src/Simulator.cu.o
+src/Simulator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Simulator.cpp.o
+.PHONY : src/Simulator.cpp.o
 
-src/Simulator.i: src/Simulator.cu.i
+src/Simulator.i: src/Simulator.cpp.i
 .PHONY : src/Simulator.i
 
 # target to preprocess a source file
-src/Simulator.cu.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Simulator.cu.i
-.PHONY : src/Simulator.cu.i
+src/Simulator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Simulator.cpp.i
+.PHONY : src/Simulator.cpp.i
 
-src/Simulator.s: src/Simulator.cu.s
+src/Simulator.s: src/Simulator.cpp.s
 .PHONY : src/Simulator.s
 
 # target to generate assembly for a file
-src/Simulator.cu.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Simulator.cu.s
-.PHONY : src/Simulator.cu.s
+src/Simulator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Simulator.cpp.s
+.PHONY : src/Simulator.cpp.s
 
 src/SliceRenderer.o: src/SliceRenderer.cpp.o
 .PHONY : src/SliceRenderer.o

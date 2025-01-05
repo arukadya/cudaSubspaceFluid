@@ -1567,8 +1567,7 @@ CMakeFiles/main.dir/src/ShaderDebugger.cpp.o: /home/toshi/dev/CXX/Subspace/src/S
   /usr/lib/gcc/x86_64-linux-gnu/10/include/syslimits.h \
   /usr/lib/gcc/x86_64-linux-gnu/10/include/xmmintrin.h
 
-CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulator.cu \
-  /home/toshi/dev/CXX/Subspace/cuda_util/cuda_util.cuh \
+CMakeFiles/main.dir/src/Simulator.cpp.o: /home/toshi/dev/CXX/Subspace/src/Simulator.cpp \
   /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
   /home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp \
   /home/toshi/dev/CXX/Subspace/header/Simulator.hpp \
@@ -1657,7 +1656,6 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/VectorBlock.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/VectorwiseOp.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Visitor.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/CUDA/Complex.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/BFloat16.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/ConjHelper.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/GenericPacketMathFunctions.h \
@@ -1665,9 +1663,10 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/Half.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/Settings.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/TypeCasting.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/GPU/MathFunctions.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/GPU/PacketMath.h \
-  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/GPU/TypeCasting.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/SSE/Complex.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/SSE/MathFunctions.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/SSE/PacketMath.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/SSE/TypeCasting.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/AssignmentFunctors.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/BinaryFunctors.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/NullaryFunctors.h \
@@ -1728,6 +1727,7 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/Transform.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/Translation.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/Umeyama.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/arch/Geometry_SIMD.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Householder/BlockHouseholder.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Householder/Householder.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Householder/HouseholderSequence.h \
@@ -1744,6 +1744,7 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/LU/FullPivLU.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/LU/InverseImpl.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/LU/PartialPivLU.h \
+  /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/LU/arch/InverseSize4.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/OrderingMethods/Amd.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/OrderingMethods/Eigen_Colamd.h \
   /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/OrderingMethods/Ordering.h \
@@ -1804,181 +1805,182 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
   /usr/include/assert.h \
-  /usr/include/c++/11/algorithm \
-  /usr/include/c++/11/array \
-  /usr/include/c++/11/atomic \
-  /usr/include/c++/11/backward/binders.h \
-  /usr/include/c++/11/bit \
-  /usr/include/c++/11/bits/algorithmfwd.h \
-  /usr/include/c++/11/bits/alloc_traits.h \
-  /usr/include/c++/11/bits/allocated_ptr.h \
-  /usr/include/c++/11/bits/allocator.h \
-  /usr/include/c++/11/bits/atomic_base.h \
-  /usr/include/c++/11/bits/atomic_lockfree_defines.h \
-  /usr/include/c++/11/bits/basic_ios.h \
-  /usr/include/c++/11/bits/basic_ios.tcc \
-  /usr/include/c++/11/bits/basic_string.h \
-  /usr/include/c++/11/bits/basic_string.tcc \
-  /usr/include/c++/11/bits/char_traits.h \
-  /usr/include/c++/11/bits/charconv.h \
-  /usr/include/c++/11/bits/codecvt.h \
-  /usr/include/c++/11/bits/concept_check.h \
-  /usr/include/c++/11/bits/cpp_type_traits.h \
-  /usr/include/c++/11/bits/cxxabi_forced.h \
-  /usr/include/c++/11/bits/cxxabi_init_exception.h \
-  /usr/include/c++/11/bits/enable_special_members.h \
-  /usr/include/c++/11/bits/erase_if.h \
-  /usr/include/c++/11/bits/exception.h \
-  /usr/include/c++/11/bits/exception_defines.h \
-  /usr/include/c++/11/bits/exception_ptr.h \
-  /usr/include/c++/11/bits/fs_dir.h \
-  /usr/include/c++/11/bits/fs_fwd.h \
-  /usr/include/c++/11/bits/fs_ops.h \
-  /usr/include/c++/11/bits/fs_path.h \
-  /usr/include/c++/11/bits/fstream.tcc \
-  /usr/include/c++/11/bits/functexcept.h \
-  /usr/include/c++/11/bits/functional_hash.h \
-  /usr/include/c++/11/bits/hash_bytes.h \
-  /usr/include/c++/11/bits/hashtable.h \
-  /usr/include/c++/11/bits/hashtable_policy.h \
-  /usr/include/c++/11/bits/invoke.h \
-  /usr/include/c++/11/bits/ios_base.h \
-  /usr/include/c++/11/bits/istream.tcc \
-  /usr/include/c++/11/bits/list.tcc \
-  /usr/include/c++/11/bits/locale_classes.h \
-  /usr/include/c++/11/bits/locale_classes.tcc \
-  /usr/include/c++/11/bits/locale_conv.h \
-  /usr/include/c++/11/bits/locale_facets.h \
-  /usr/include/c++/11/bits/locale_facets.tcc \
-  /usr/include/c++/11/bits/locale_facets_nonio.h \
-  /usr/include/c++/11/bits/locale_facets_nonio.tcc \
-  /usr/include/c++/11/bits/localefwd.h \
-  /usr/include/c++/11/bits/memoryfwd.h \
-  /usr/include/c++/11/bits/move.h \
-  /usr/include/c++/11/bits/nested_exception.h \
-  /usr/include/c++/11/bits/node_handle.h \
-  /usr/include/c++/11/bits/ostream.tcc \
-  /usr/include/c++/11/bits/ostream_insert.h \
-  /usr/include/c++/11/bits/parse_numbers.h \
-  /usr/include/c++/11/bits/postypes.h \
-  /usr/include/c++/11/bits/predefined_ops.h \
-  /usr/include/c++/11/bits/ptr_traits.h \
-  /usr/include/c++/11/bits/quoted_string.h \
-  /usr/include/c++/11/bits/random.h \
-  /usr/include/c++/11/bits/random.tcc \
-  /usr/include/c++/11/bits/range_access.h \
-  /usr/include/c++/11/bits/refwrap.h \
-  /usr/include/c++/11/bits/shared_ptr.h \
-  /usr/include/c++/11/bits/shared_ptr_base.h \
-  /usr/include/c++/11/bits/specfun.h \
-  /usr/include/c++/11/bits/sstream.tcc \
-  /usr/include/c++/11/bits/std_abs.h \
-  /usr/include/c++/11/bits/std_function.h \
-  /usr/include/c++/11/bits/stl_algo.h \
-  /usr/include/c++/11/bits/stl_algobase.h \
-  /usr/include/c++/11/bits/stl_bvector.h \
-  /usr/include/c++/11/bits/stl_construct.h \
-  /usr/include/c++/11/bits/stl_function.h \
-  /usr/include/c++/11/bits/stl_heap.h \
-  /usr/include/c++/11/bits/stl_iterator.h \
-  /usr/include/c++/11/bits/stl_iterator_base_funcs.h \
-  /usr/include/c++/11/bits/stl_iterator_base_types.h \
-  /usr/include/c++/11/bits/stl_list.h \
-  /usr/include/c++/11/bits/stl_map.h \
-  /usr/include/c++/11/bits/stl_multimap.h \
-  /usr/include/c++/11/bits/stl_numeric.h \
-  /usr/include/c++/11/bits/stl_pair.h \
-  /usr/include/c++/11/bits/stl_relops.h \
-  /usr/include/c++/11/bits/stl_tempbuf.h \
-  /usr/include/c++/11/bits/stl_tree.h \
-  /usr/include/c++/11/bits/stl_uninitialized.h \
-  /usr/include/c++/11/bits/stl_vector.h \
-  /usr/include/c++/11/bits/streambuf.tcc \
-  /usr/include/c++/11/bits/streambuf_iterator.h \
-  /usr/include/c++/11/bits/string_view.tcc \
-  /usr/include/c++/11/bits/stringfwd.h \
-  /usr/include/c++/11/bits/uniform_int_dist.h \
-  /usr/include/c++/11/bits/unique_ptr.h \
-  /usr/include/c++/11/bits/unordered_map.h \
-  /usr/include/c++/11/bits/uses_allocator.h \
-  /usr/include/c++/11/bits/vector.tcc \
-  /usr/include/c++/11/cassert \
-  /usr/include/c++/11/cctype \
-  /usr/include/c++/11/cerrno \
-  /usr/include/c++/11/cfloat \
-  /usr/include/c++/11/chrono \
-  /usr/include/c++/11/climits \
-  /usr/include/c++/11/clocale \
-  /usr/include/c++/11/cmath \
-  /usr/include/c++/11/codecvt \
-  /usr/include/c++/11/complex \
-  /usr/include/c++/11/cstddef \
-  /usr/include/c++/11/cstdint \
-  /usr/include/c++/11/cstdio \
-  /usr/include/c++/11/cstdlib \
-  /usr/include/c++/11/cstring \
-  /usr/include/c++/11/ctime \
-  /usr/include/c++/11/cwchar \
-  /usr/include/c++/11/cwctype \
-  /usr/include/c++/11/debug/assertions.h \
-  /usr/include/c++/11/debug/debug.h \
-  /usr/include/c++/11/exception \
-  /usr/include/c++/11/ext/aligned_buffer.h \
-  /usr/include/c++/11/ext/alloc_traits.h \
-  /usr/include/c++/11/ext/atomicity.h \
-  /usr/include/c++/11/ext/concurrence.h \
-  /usr/include/c++/11/ext/new_allocator.h \
-  /usr/include/c++/11/ext/numeric_traits.h \
-  /usr/include/c++/11/ext/string_conversions.h \
-  /usr/include/c++/11/ext/type_traits.h \
-  /usr/include/c++/11/filesystem \
-  /usr/include/c++/11/fstream \
-  /usr/include/c++/11/functional \
-  /usr/include/c++/11/initializer_list \
-  /usr/include/c++/11/iomanip \
-  /usr/include/c++/11/ios \
-  /usr/include/c++/11/iosfwd \
-  /usr/include/c++/11/iostream \
-  /usr/include/c++/11/istream \
-  /usr/include/c++/11/limits \
-  /usr/include/c++/11/list \
-  /usr/include/c++/11/locale \
-  /usr/include/c++/11/map \
-  /usr/include/c++/11/math.h \
-  /usr/include/c++/11/new \
-  /usr/include/c++/11/numeric \
-  /usr/include/c++/11/ostream \
-  /usr/include/c++/11/pstl/execution_defs.h \
-  /usr/include/c++/11/pstl/glue_algorithm_defs.h \
-  /usr/include/c++/11/pstl/glue_numeric_defs.h \
-  /usr/include/c++/11/pstl/pstl_config.h \
-  /usr/include/c++/11/random \
-  /usr/include/c++/11/ratio \
-  /usr/include/c++/11/sstream \
-  /usr/include/c++/11/stdexcept \
-  /usr/include/c++/11/stdlib.h \
-  /usr/include/c++/11/streambuf \
-  /usr/include/c++/11/string \
-  /usr/include/c++/11/string_view \
-  /usr/include/c++/11/system_error \
-  /usr/include/c++/11/tr1/bessel_function.tcc \
-  /usr/include/c++/11/tr1/beta_function.tcc \
-  /usr/include/c++/11/tr1/ell_integral.tcc \
-  /usr/include/c++/11/tr1/exp_integral.tcc \
-  /usr/include/c++/11/tr1/gamma.tcc \
-  /usr/include/c++/11/tr1/hypergeometric.tcc \
-  /usr/include/c++/11/tr1/legendre_function.tcc \
-  /usr/include/c++/11/tr1/modified_bessel_func.tcc \
-  /usr/include/c++/11/tr1/poly_hermite.tcc \
-  /usr/include/c++/11/tr1/poly_laguerre.tcc \
-  /usr/include/c++/11/tr1/riemann_zeta.tcc \
-  /usr/include/c++/11/tr1/special_function_util.h \
-  /usr/include/c++/11/tuple \
-  /usr/include/c++/11/type_traits \
-  /usr/include/c++/11/typeinfo \
-  /usr/include/c++/11/unordered_map \
-  /usr/include/c++/11/utility \
-  /usr/include/c++/11/vector \
+  /usr/include/c++/10/algorithm \
+  /usr/include/c++/10/array \
+  /usr/include/c++/10/atomic \
+  /usr/include/c++/10/backward/binders.h \
+  /usr/include/c++/10/bits/algorithmfwd.h \
+  /usr/include/c++/10/bits/alloc_traits.h \
+  /usr/include/c++/10/bits/allocated_ptr.h \
+  /usr/include/c++/10/bits/allocator.h \
+  /usr/include/c++/10/bits/atomic_base.h \
+  /usr/include/c++/10/bits/atomic_lockfree_defines.h \
+  /usr/include/c++/10/bits/basic_ios.h \
+  /usr/include/c++/10/bits/basic_ios.tcc \
+  /usr/include/c++/10/bits/basic_string.h \
+  /usr/include/c++/10/bits/basic_string.tcc \
+  /usr/include/c++/10/bits/char_traits.h \
+  /usr/include/c++/10/bits/charconv.h \
+  /usr/include/c++/10/bits/codecvt.h \
+  /usr/include/c++/10/bits/concept_check.h \
+  /usr/include/c++/10/bits/cpp_type_traits.h \
+  /usr/include/c++/10/bits/cxxabi_forced.h \
+  /usr/include/c++/10/bits/cxxabi_init_exception.h \
+  /usr/include/c++/10/bits/enable_special_members.h \
+  /usr/include/c++/10/bits/erase_if.h \
+  /usr/include/c++/10/bits/exception.h \
+  /usr/include/c++/10/bits/exception_defines.h \
+  /usr/include/c++/10/bits/exception_ptr.h \
+  /usr/include/c++/10/bits/fs_dir.h \
+  /usr/include/c++/10/bits/fs_fwd.h \
+  /usr/include/c++/10/bits/fs_ops.h \
+  /usr/include/c++/10/bits/fs_path.h \
+  /usr/include/c++/10/bits/fstream.tcc \
+  /usr/include/c++/10/bits/functexcept.h \
+  /usr/include/c++/10/bits/functional_hash.h \
+  /usr/include/c++/10/bits/hash_bytes.h \
+  /usr/include/c++/10/bits/hashtable.h \
+  /usr/include/c++/10/bits/hashtable_policy.h \
+  /usr/include/c++/10/bits/invoke.h \
+  /usr/include/c++/10/bits/ios_base.h \
+  /usr/include/c++/10/bits/istream.tcc \
+  /usr/include/c++/10/bits/iterator_concepts.h \
+  /usr/include/c++/10/bits/list.tcc \
+  /usr/include/c++/10/bits/locale_classes.h \
+  /usr/include/c++/10/bits/locale_classes.tcc \
+  /usr/include/c++/10/bits/locale_conv.h \
+  /usr/include/c++/10/bits/locale_facets.h \
+  /usr/include/c++/10/bits/locale_facets.tcc \
+  /usr/include/c++/10/bits/locale_facets_nonio.h \
+  /usr/include/c++/10/bits/locale_facets_nonio.tcc \
+  /usr/include/c++/10/bits/localefwd.h \
+  /usr/include/c++/10/bits/memoryfwd.h \
+  /usr/include/c++/10/bits/move.h \
+  /usr/include/c++/10/bits/nested_exception.h \
+  /usr/include/c++/10/bits/node_handle.h \
+  /usr/include/c++/10/bits/ostream.tcc \
+  /usr/include/c++/10/bits/ostream_insert.h \
+  /usr/include/c++/10/bits/parse_numbers.h \
+  /usr/include/c++/10/bits/postypes.h \
+  /usr/include/c++/10/bits/predefined_ops.h \
+  /usr/include/c++/10/bits/ptr_traits.h \
+  /usr/include/c++/10/bits/quoted_string.h \
+  /usr/include/c++/10/bits/random.h \
+  /usr/include/c++/10/bits/random.tcc \
+  /usr/include/c++/10/bits/range_access.h \
+  /usr/include/c++/10/bits/range_cmp.h \
+  /usr/include/c++/10/bits/refwrap.h \
+  /usr/include/c++/10/bits/shared_ptr.h \
+  /usr/include/c++/10/bits/shared_ptr_base.h \
+  /usr/include/c++/10/bits/specfun.h \
+  /usr/include/c++/10/bits/sstream.tcc \
+  /usr/include/c++/10/bits/std_abs.h \
+  /usr/include/c++/10/bits/std_function.h \
+  /usr/include/c++/10/bits/stl_algo.h \
+  /usr/include/c++/10/bits/stl_algobase.h \
+  /usr/include/c++/10/bits/stl_bvector.h \
+  /usr/include/c++/10/bits/stl_construct.h \
+  /usr/include/c++/10/bits/stl_function.h \
+  /usr/include/c++/10/bits/stl_heap.h \
+  /usr/include/c++/10/bits/stl_iterator.h \
+  /usr/include/c++/10/bits/stl_iterator_base_funcs.h \
+  /usr/include/c++/10/bits/stl_iterator_base_types.h \
+  /usr/include/c++/10/bits/stl_list.h \
+  /usr/include/c++/10/bits/stl_map.h \
+  /usr/include/c++/10/bits/stl_multimap.h \
+  /usr/include/c++/10/bits/stl_numeric.h \
+  /usr/include/c++/10/bits/stl_pair.h \
+  /usr/include/c++/10/bits/stl_relops.h \
+  /usr/include/c++/10/bits/stl_tempbuf.h \
+  /usr/include/c++/10/bits/stl_tree.h \
+  /usr/include/c++/10/bits/stl_uninitialized.h \
+  /usr/include/c++/10/bits/stl_vector.h \
+  /usr/include/c++/10/bits/streambuf.tcc \
+  /usr/include/c++/10/bits/streambuf_iterator.h \
+  /usr/include/c++/10/bits/string_view.tcc \
+  /usr/include/c++/10/bits/stringfwd.h \
+  /usr/include/c++/10/bits/uniform_int_dist.h \
+  /usr/include/c++/10/bits/unique_ptr.h \
+  /usr/include/c++/10/bits/unordered_map.h \
+  /usr/include/c++/10/bits/uses_allocator.h \
+  /usr/include/c++/10/bits/vector.tcc \
+  /usr/include/c++/10/cassert \
+  /usr/include/c++/10/cctype \
+  /usr/include/c++/10/cerrno \
+  /usr/include/c++/10/chrono \
+  /usr/include/c++/10/climits \
+  /usr/include/c++/10/clocale \
+  /usr/include/c++/10/cmath \
+  /usr/include/c++/10/codecvt \
+  /usr/include/c++/10/complex \
+  /usr/include/c++/10/concepts \
+  /usr/include/c++/10/cstddef \
+  /usr/include/c++/10/cstdint \
+  /usr/include/c++/10/cstdio \
+  /usr/include/c++/10/cstdlib \
+  /usr/include/c++/10/cstring \
+  /usr/include/c++/10/ctime \
+  /usr/include/c++/10/cwchar \
+  /usr/include/c++/10/cwctype \
+  /usr/include/c++/10/debug/assertions.h \
+  /usr/include/c++/10/debug/debug.h \
+  /usr/include/c++/10/exception \
+  /usr/include/c++/10/ext/aligned_buffer.h \
+  /usr/include/c++/10/ext/alloc_traits.h \
+  /usr/include/c++/10/ext/atomicity.h \
+  /usr/include/c++/10/ext/concurrence.h \
+  /usr/include/c++/10/ext/new_allocator.h \
+  /usr/include/c++/10/ext/numeric_traits.h \
+  /usr/include/c++/10/ext/string_conversions.h \
+  /usr/include/c++/10/ext/type_traits.h \
+  /usr/include/c++/10/filesystem \
+  /usr/include/c++/10/fstream \
+  /usr/include/c++/10/functional \
+  /usr/include/c++/10/initializer_list \
+  /usr/include/c++/10/iomanip \
+  /usr/include/c++/10/ios \
+  /usr/include/c++/10/iosfwd \
+  /usr/include/c++/10/iostream \
+  /usr/include/c++/10/istream \
+  /usr/include/c++/10/limits \
+  /usr/include/c++/10/list \
+  /usr/include/c++/10/locale \
+  /usr/include/c++/10/map \
+  /usr/include/c++/10/new \
+  /usr/include/c++/10/numeric \
+  /usr/include/c++/10/optional \
+  /usr/include/c++/10/ostream \
+  /usr/include/c++/10/pstl/execution_defs.h \
+  /usr/include/c++/10/pstl/glue_algorithm_defs.h \
+  /usr/include/c++/10/pstl/glue_numeric_defs.h \
+  /usr/include/c++/10/pstl/pstl_config.h \
+  /usr/include/c++/10/random \
+  /usr/include/c++/10/ratio \
+  /usr/include/c++/10/sstream \
+  /usr/include/c++/10/stdexcept \
+  /usr/include/c++/10/stdlib.h \
+  /usr/include/c++/10/streambuf \
+  /usr/include/c++/10/string \
+  /usr/include/c++/10/string_view \
+  /usr/include/c++/10/system_error \
+  /usr/include/c++/10/tr1/bessel_function.tcc \
+  /usr/include/c++/10/tr1/beta_function.tcc \
+  /usr/include/c++/10/tr1/ell_integral.tcc \
+  /usr/include/c++/10/tr1/exp_integral.tcc \
+  /usr/include/c++/10/tr1/gamma.tcc \
+  /usr/include/c++/10/tr1/hypergeometric.tcc \
+  /usr/include/c++/10/tr1/legendre_function.tcc \
+  /usr/include/c++/10/tr1/modified_bessel_func.tcc \
+  /usr/include/c++/10/tr1/poly_hermite.tcc \
+  /usr/include/c++/10/tr1/poly_laguerre.tcc \
+  /usr/include/c++/10/tr1/riemann_zeta.tcc \
+  /usr/include/c++/10/tr1/special_function_util.h \
+  /usr/include/c++/10/tuple \
+  /usr/include/c++/10/type_traits \
+  /usr/include/c++/10/typeinfo \
+  /usr/include/c++/10/unordered_map \
+  /usr/include/c++/10/utility \
+  /usr/include/c++/10/vector \
   /usr/include/ctype.h \
   /usr/include/endian.h \
   /usr/include/errno.h \
@@ -2084,98 +2086,36 @@ CMakeFiles/main.dir/src/Simulator.cu.o: /home/toshi/dev/CXX/Subspace/src/Simulat
   /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/atomic_word.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/c++allocator.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/c++locale.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/cpu_defines.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/ctype_base.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/ctype_inline.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/error_constants.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/gthr-default.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/gthr.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/atomic_word.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/basic_file.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/c++allocator.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/c++config.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/c++io.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/c++locale.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/cpu_defines.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/ctype_base.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/ctype_inline.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/error_constants.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/gthr-default.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/gthr.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/messages_members.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/opt_random.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/os_defines.h \
+  /usr/include/x86_64-linux-gnu/c++/10/bits/time_members.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
   /usr/include/x86_64-linux-gnu/sys/cdefs.h \
   /usr/include/x86_64-linux-gnu/sys/select.h \
-  /usr/include/x86_64-linux-gnu/sys/single_threaded.h \
   /usr/include/x86_64-linux-gnu/sys/types.h \
-  /usr/lib/gcc/x86_64-linux-gnu/11/include/float.h \
-  /usr/lib/gcc/x86_64-linux-gnu/11/include/limits.h \
-  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
-  /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h \
-  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h \
-  /usr/lib/gcc/x86_64-linux-gnu/11/include/syslimits.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/builtin_types.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/channel_descriptor.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/common_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/cudacc_ext.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/device_double_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/device_double_functions.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/device_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/device_functions.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/host_config.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/host_defines.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/math_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/math_functions.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_70_rt.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_70_rt.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_80_rt.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_80_rt.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_90_rt.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_90_rt.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cuComplex.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cublas_api.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cublas_v2.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cuda.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_bf16.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_bf16.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_device_runtime_api.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_fp16.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_fp16.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_runtime.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_runtime_api.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/cusparse.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/device_atomic_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/device_atomic_functions.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/device_launch_parameters.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/device_types.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/driver_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/driver_types.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/library_types.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/math_constants.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/nv/detail/__preprocessor \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/nv/detail/__target_macros \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/nv/target \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_20_atomic_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_20_atomic_functions.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_20_intrinsics.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_20_intrinsics.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_30_intrinsics.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_30_intrinsics.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_32_atomic_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_32_atomic_functions.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_32_intrinsics.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_32_intrinsics.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_35_atomic_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_35_intrinsics.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_60_atomic_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_60_atomic_functions.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_61_intrinsics.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/sm_61_intrinsics.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/surface_indirect_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/surface_types.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/texture_indirect_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/texture_types.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/vector_functions.h \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/vector_functions.hpp \
-  /usr/local/cuda-12.6/targets/x86_64-linux/include/vector_types.h
+  /usr/lib/gcc/x86_64-linux-gnu/10/include/emmintrin.h \
+  /usr/lib/gcc/x86_64-linux-gnu/10/include/limits.h \
+  /usr/lib/gcc/x86_64-linux-gnu/10/include/mm_malloc.h \
+  /usr/lib/gcc/x86_64-linux-gnu/10/include/mmintrin.h \
+  /usr/lib/gcc/x86_64-linux-gnu/10/include/stdarg.h \
+  /usr/lib/gcc/x86_64-linux-gnu/10/include/stddef.h \
+  /usr/lib/gcc/x86_64-linux-gnu/10/include/stdint.h \
+  /usr/lib/gcc/x86_64-linux-gnu/10/include/syslimits.h \
+  /usr/lib/gcc/x86_64-linux-gnu/10/include/xmmintrin.h
 
 CMakeFiles/main.dir/src/SliceRenderer.cpp.o: /home/toshi/dev/CXX/Subspace/src/SliceRenderer.cpp \
   /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
@@ -2623,7 +2563,6 @@ CMakeFiles/main.dir/src/SliceRenderer.cpp.o: /home/toshi/dev/CXX/Subspace/src/Sl
   /usr/lib/gcc/x86_64-linux-gnu/10/include/xmmintrin.h
 
 CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
-  /home/toshi/dev/CXX/Subspace/cuda_util/cuda_util.cuh \
   /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp \
   /home/toshi/dev/CXX/Subspace/header/FixedObjectRenderer.hpp \
   /home/toshi/dev/CXX/Subspace/header/Matrix4x4.h \
@@ -2872,7 +2811,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
   /usr/include/assert.h \
-  /usr/include/builtin_types.h \
   /usr/include/c++/10/algorithm \
   /usr/include/c++/10/array \
   /usr/include/c++/10/atomic \
@@ -3056,30 +2994,12 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
   /usr/include/c++/10/unordered_map \
   /usr/include/c++/10/utility \
   /usr/include/c++/10/vector \
-  /usr/include/channel_descriptor.h \
-  /usr/include/crt/host_config.h \
-  /usr/include/crt/host_defines.h \
   /usr/include/ctype.h \
-  /usr/include/cuComplex.h \
-  /usr/include/cublas_api.h \
-  /usr/include/cublas_v2.h \
-  /usr/include/cuda_bf16.h \
-  /usr/include/cuda_bf16.hpp \
-  /usr/include/cuda_device_runtime_api.h \
-  /usr/include/cuda_fp16.h \
-  /usr/include/cuda_fp16.hpp \
-  /usr/include/cuda_runtime.h \
-  /usr/include/cuda_runtime_api.h \
-  /usr/include/cusparse.h \
-  /usr/include/device_types.h \
-  /usr/include/driver_functions.h \
-  /usr/include/driver_types.h \
   /usr/include/endian.h \
   /usr/include/errno.h \
   /usr/include/features-time64.h \
   /usr/include/features.h \
   /usr/include/libintl.h \
-  /usr/include/library_types.h \
   /usr/include/limits.h \
   /usr/include/linux/errno.h \
   /usr/include/linux/limits.h \
@@ -3093,12 +3013,7 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
   /usr/include/stdlib.h \
   /usr/include/string.h \
   /usr/include/strings.h \
-  /usr/include/surface_types.h \
-  /usr/include/texture_types.h \
   /usr/include/time.h \
-  /usr/include/vector_functions.h \
-  /usr/include/vector_functions.hpp \
-  /usr/include/vector_types.h \
   /usr/include/wchar.h \
   /usr/include/wctype.h \
   /usr/include/x86_64-linux-gnu/asm/errno.h \
@@ -3216,23 +3131,9 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
   /usr/lib/gcc/x86_64-linux-gnu/10/include/xmmintrin.h
 
 
-/usr/include/vector_types.h:
-
-/usr/include/driver_types.h:
-
-/usr/include/cusparse.h:
-
-/usr/include/cuda_runtime_api.h:
-
-/usr/include/cuda_bf16.hpp:
-
-/usr/include/cublas_api.h:
-
-/usr/include/cuComplex.h:
-
-/usr/include/channel_descriptor.h:
-
 /usr/include/c++/10/math.h:
+
+/home/toshi/dev/CXX/Subspace/header/SliceRenderer.hpp:
 
 /usr/include/c++/10/bits/stl_tree.h:
 
@@ -3242,349 +3143,7 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/bits/stl_list.h:
 
-/usr/include/builtin_types.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/arch/Geometry_SIMD.h:
-
-/home/toshi/dev/CXX/Subspace/header/SliceRenderer.hpp:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/vector_functions.hpp:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/vector_functions.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/texture_indirect_functions.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/surface_types.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_35_intrinsics.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_35_atomic_functions.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_32_intrinsics.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_30_intrinsics.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_20_intrinsics.hpp:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_20_intrinsics.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_20_atomic_functions.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/nv/target:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/nv/detail/__preprocessor:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/math_constants.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/library_types.h:
-
-/usr/include/device_types.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/driver_types.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/device_launch_parameters.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/device_atomic_functions.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_runtime_api.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_fp16.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_device_runtime_api.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_bf16.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cuda.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cublas_v2.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cublas_api.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cuComplex.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_90_rt.hpp:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_90_rt.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_80_rt.hpp:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_70_rt.h:
-
-/usr/include/texture_types.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/math_functions.hpp:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/math_functions.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/host_defines.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/device_double_functions.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/cudacc_ext.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/common_functions.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/builtin_types.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/float.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/gthr-default.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/ctype_inline.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/cpu_defines.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h:
-
-/usr/include/c++/11/vector:
-
-/usr/include/c++/11/typeinfo:
-
-/usr/include/c++/11/type_traits:
-
-/usr/include/c++/11/tr1/poly_laguerre.tcc:
-
-/usr/include/c++/11/tr1/poly_hermite.tcc:
-
-/usr/include/c++/11/tr1/modified_bessel_func.tcc:
-
-/usr/include/c++/11/tr1/legendre_function.tcc:
-
-/usr/include/c++/11/tr1/hypergeometric.tcc:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/error_constants.h:
-
-/usr/include/c++/11/tr1/ell_integral.tcc:
-
-/usr/include/c++/11/string_view:
-
-/usr/include/c++/11/string:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cusparse.h:
-
-/usr/include/c++/11/streambuf:
-
-/usr/include/c++/11/stdlib.h:
-
-/usr/include/c++/11/stdexcept:
-
-/usr/include/c++/11/sstream:
-
-/usr/include/c++/11/ratio:
-
-/usr/include/c++/11/random:
-
-/usr/include/c++/11/pstl/pstl_config.h:
-
-/usr/include/c++/11/pstl/glue_numeric_defs.h:
-
-/usr/include/c++/11/pstl/execution_defs.h:
-
-/usr/include/c++/11/ostream:
-
-/usr/include/c++/11/numeric:
-
-/usr/include/c++/11/math.h:
-
-/usr/include/c++/11/map:
-
-/usr/include/c++/11/locale:
-
-/usr/include/c++/11/list:
-
-/usr/include/c++/11/ios:
-
-/usr/include/c++/11/iomanip:
-
-/usr/include/c++/11/functional:
-
-/usr/include/c++/11/fstream:
-
-/usr/include/c++/11/ext/type_traits.h:
-
-/usr/include/c++/11/ext/numeric_traits.h:
-
-/usr/include/c++/11/ext/atomicity.h:
-
-/usr/include/c++/11/ext/alloc_traits.h:
-
-/usr/include/c++/11/exception:
-
-/usr/include/c++/11/debug/debug.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/device_double_functions.hpp:
-
-/usr/include/c++/11/debug/assertions.h:
-
-/usr/include/c++/11/cwctype:
-
-/usr/include/c++/11/cstring:
-
-/usr/include/c++/11/cstdio:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/device_functions.hpp:
-
-/usr/include/c++/11/cstdint:
-
-/usr/include/c++/11/cstddef:
-
-/usr/include/c++/11/cmath:
-
-/usr/include/library_types.h:
-
-/usr/include/c++/11/clocale:
-
-/usr/include/c++/11/chrono:
-
-/usr/include/c++/11/cfloat:
-
-/usr/include/c++/11/cerrno:
-
-/usr/include/c++/11/cctype:
-
-/usr/include/c++/11/cassert:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/LU/arch/InverseSize4.h:
-
-/usr/include/c++/11/bits/uses_allocator.h:
-
-/usr/include/c++/11/bits/unordered_map.h:
-
-/usr/include/c++/11/bits/unique_ptr.h:
-
-/usr/include/c++/11/bits/uniform_int_dist.h:
-
-/usr/include/c++/11/bits/string_view.tcc:
-
-/usr/include/c++/11/bits/stl_uninitialized.h:
-
-/usr/include/c++/11/bits/stl_tree.h:
-
-/usr/include/c++/11/bits/stl_relops.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_20_atomic_functions.hpp:
-
-/usr/include/c++/11/bits/stl_pair.h:
-
-/usr/include/c++/11/bits/stl_numeric.h:
-
-/usr/include/c++/11/bits/stl_map.h:
-
-/usr/include/crt/host_config.h:
-
-/usr/include/c++/11/bits/streambuf.tcc:
-
-/usr/include/c++/11/bits/stl_iterator_base_funcs.h:
-
-/usr/include/vector_functions.hpp:
-
-/usr/include/c++/11/bits/stl_heap.h:
-
-/usr/include/c++/11/bits/stl_function.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h:
-
-/usr/include/c++/11/bits/stl_construct.h:
-
-/usr/include/c++/11/bits/stl_bvector.h:
-
-/usr/include/c++/11/bits/sstream.tcc:
-
-/usr/include/c++/11/bits/specfun.h:
-
-/usr/include/c++/11/bits/shared_ptr_base.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_32_atomic_functions.h:
-
-/usr/include/c++/11/bits/shared_ptr.h:
-
-/usr/include/c++/11/bits/refwrap.h:
-
-/usr/include/c++/11/bits/random.h:
-
-/usr/include/c++/11/bits/quoted_string.h:
-
-/usr/include/c++/11/bits/ptr_traits.h:
-
-/usr/include/c++/11/bits/predefined_ops.h:
-
-/usr/include/c++/11/bits/ostream_insert.h:
-
-/usr/include/c++/11/bits/ostream.tcc:
-
-/usr/include/c++/11/bits/node_handle.h:
-
-/usr/include/c++/11/bits/nested_exception.h:
-
-/usr/include/c++/11/bits/memoryfwd.h:
-
-/usr/include/c++/11/bits/locale_facets.h:
-
-/usr/include/c++/11/ext/aligned_buffer.h:
-
-/usr/include/c++/11/bits/locale_classes.tcc:
-
-/usr/include/c++/11/bits/locale_classes.h:
-
-/usr/include/c++/11/bits/istream.tcc:
-
-/usr/include/c++/11/bits/ios_base.h:
-
-/usr/include/c++/11/bits/invoke.h:
-
-/usr/include/c++/11/bits/hashtable.h:
-
-/usr/include/c++/11/bits/hash_bytes.h:
-
-/usr/include/c++/11/bits/fstream.tcc:
-
-/usr/include/c++/11/bits/fs_path.h:
-
-/usr/include/c++/11/bits/fs_ops.h:
-
-/usr/include/c++/11/bits/fs_fwd.h:
-
-/usr/include/c++/11/bits/fs_dir.h:
-
-/usr/include/c++/11/bits/exception.h:
-
-/usr/include/c++/11/bits/erase_if.h:
-
-/usr/include/c++/11/bits/concept_check.h:
-
-/usr/include/c++/11/bits/codecvt.h:
-
-/usr/include/c++/11/bits/basic_string.tcc:
-
-/usr/include/c++/11/bits/basic_string.h:
-
-/usr/include/c++/11/bits/basic_ios.tcc:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h:
-
-/usr/include/c++/11/bits/basic_ios.h:
-
-/usr/include/c++/11/bits/atomic_lockfree_defines.h:
-
-/usr/include/c++/11/bits/allocator.h:
-
-/usr/include/c++/11/bits/cxxabi_forced.h:
-
-/usr/include/c++/11/bits/algorithmfwd.h:
-
-/usr/include/c++/11/backward/binders.h:
-
-/usr/include/c++/11/algorithm:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/misc/RealSvd2x2.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/driver_functions.h:
-
-/usr/include/c++/11/bits/move.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/misc/Kernel.h:
 
@@ -3598,11 +3157,7 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseProduct.h:
 
-/usr/include/c++/11/atomic:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparsePermutation.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/device_types.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseSparseProductWithPruning.h:
 
@@ -3611,10 +3166,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseMap.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseFuzzy.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseDiagonalProduct.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseDenseProduct.h:
 
 /usr/include/c++/10/initializer_list:
 
@@ -3629,8 +3180,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/c++/10/ext/numeric_traits.h:
 
 /usr/include/c++/10/bits/shared_ptr.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_61_intrinsics.h:
 
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
 
@@ -3656,23 +3205,15 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/cstdio:
 
-/usr/include/c++/11/tr1/special_function_util.h:
-
 /usr/include/c++/10/cstdint:
 
 /usr/include/c++/10/fstream:
 
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/GPU/MathFunctions.h:
-
 /usr/include/c++/10/cstddef:
-
-/usr/include/c++/11/limits:
 
 /usr/include/c++/10/iomanip:
 
 /usr/include/c++/10/bits/random.tcc:
-
-/usr/include/c++/11/bits/streambuf_iterator.h:
 
 /usr/include/c++/10/cmath:
 
@@ -3680,15 +3221,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Fuzzy.h:
 
-/usr/include/c++/11/array:
-
 /usr/include/c++/10/bits/vector.tcc:
 
 /usr/include/c++/10/bits/unique_ptr.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/IterativeLinearSolvers/IncompleteLUT.h:
-
-/usr/include/c++/11/tr1/exp_integral.tcc:
 
 /usr/include/c++/10/bits/streambuf_iterator.h:
 
@@ -3696,15 +3233,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/bits/stl_uninitialized.h:
 
-/usr/include/c++/11/bits/locale_conv.h:
-
 /usr/include/c++/10/bits/stl_heap.h:
 
 /usr/include/c++/10/debug/debug.h:
 
 /usr/include/c++/10/bits/stl_relops.h:
-
-/usr/include/c++/11/bits/cxxabi_init_exception.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/Rotation2D.h:
 
@@ -3712,11 +3245,7 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/TypeCasting.h:
 
-/usr/include/c++/11/bits/stl_algobase.h:
-
 /usr/include/c++/10/bits/stl_bvector.h:
-
-/usr/include/c++/11/bits/alloc_traits.h:
 
 /usr/include/errno.h:
 
@@ -3736,10 +3265,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h:
 
-/usr/include/c++/11/bits/random.tcc:
-
-/usr/include/c++/11/bits/atomic_base.h:
-
 /usr/include/c++/10/bits/sstream.tcc:
 
 /usr/include/c++/10/bits/range_cmp.h:
@@ -3748,15 +3273,13 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/bits/node_handle.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/nv/detail/__target_macros:
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/LU/arch/InverseSize4.h:
 
 /usr/include/c++/10/bits/locale_facets_nonio.tcc:
 
 /usr/include/c++/10/pstl/glue_numeric_defs.h:
 
 /usr/include/c++/10/bits/locale_facets.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/atomic_word.h:
 
 /usr/include/c++/10/filesystem:
 
@@ -3782,17 +3305,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/asm/errno.h:
 
-/usr/include/c++/11/bits/stl_algo.h:
-
 /usr/include/c++/10/iostream:
 
 /usr/include/c++/10/bits/exception_defines.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_80_rt.h:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArithmeticSequence.h:
-
-/usr/include/c++/11/ext/new_allocator.h:
 
 /usr/include/c++/10/bits/std_abs.h:
 
@@ -3812,8 +3329,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/IterativeLinearSolvers/BiCGSTAB.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/host_config.h:
-
 /usr/include/c++/10/bits/basic_ios.tcc:
 
 /usr/include/c++/10/bits/atomic_lockfree_defines.h:
@@ -3830,15 +3345,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/bits/algorithmfwd.h:
 
-/usr/include/c++/11/bits/enable_special_members.h:
-
 /usr/include/c++/10/atomic:
 
 /usr/lib/gcc/x86_64-linux-gnu/10/include/stddef.h:
 
 /usr/include/c++/10/array:
-
-/usr/include/cuda_runtime.h:
 
 /usr/include/sched.h:
 
@@ -3848,13 +3359,7 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/c++/10/bits/c++config.h:
 
-/usr/include/c++/11/codecvt:
-
-/usr/include/c++/11/bits/allocated_ptr.h:
-
 /usr/include/assert.h:
-
-/usr/include/c++/11/tr1/riemann_zeta.tcc:
 
 /usr/include/c++/10/bits/fs_dir.h:
 
@@ -3864,21 +3369,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/complex:
 
-/usr/include/c++/11/bits/locale_facets_nonio.tcc:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/OrderingMethods:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/ctype_base.h:
 
 /usr/include/c++/10/ext/string_conversions.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/SelfAdjointView.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseDot.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/TriangularMatrix.h:
 
 /usr/include/c++/10/bits/concept_check.h:
 
@@ -3887,8 +3382,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CoreIterators.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Diagonal.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/device_atomic_functions.hpp:
 
 /usr/include/c++/10/bits/charconv.h:
 
@@ -3918,8 +3411,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Reverse.h:
 
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/CUDA/Complex.h:
-
 /usr/include/c++/10/bits/locale_classes.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Inverse.h:
@@ -3936,13 +3427,7 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/CXX/Subspace/header/SolidShape.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_30_intrinsics.hpp:
-
-/usr/include/c++/11/cstdlib:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/MappedSparseMatrix.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/surface_indirect_functions.h:
 
 /usr/include/c++/10/bits/localefwd.h:
 
@@ -3953,8 +3438,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/SolveTriangular.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/IndexedView.h:
-
-/usr/include/c++/11/filesystem:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/DisableStupidWarnings.h:
 
@@ -3974,17 +3457,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/bits/cpp_type_traits.h:
 
-/usr/include/c++/11/bits/locale_facets_nonio.h:
-
 /usr/include/c++/10/cerrno:
-
-/usr/include/c++/11/tr1/bessel_function.tcc:
 
 /usr/include/c++/10/tr1/ell_integral.tcc:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/DenseBase.h:
-
-/usr/include/c++/11/bits/stl_multimap.h:
 
 /usr/include/c++/10/bits/hashtable_policy.h:
 
@@ -3995,8 +3472,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/SymbolicIndex.h:
 
 /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
-
-/usr/include/cuda_fp16.h:
 
 /usr/include/c++/10/backward/binders.h:
 
@@ -4012,15 +3487,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/SolverBase.h:
 
-/usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h:
-
 /usr/include/c++/10/ctime:
 
 /usr/include/c++/10/bits/ios_base.h:
 
 /usr/include/x86_64-linux-gnu/bits/errno.h:
-
-/usr/include/vector_functions.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/PartialReduxEvaluator.h:
 
@@ -4052,8 +3523,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
 
-/usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Replicate.h:
 
 /home/toshi/dev/CXX/Subspace/header/ComputeCommand.hpp:
@@ -4068,8 +3537,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
 
-/usr/include/crt/host_defines.h:
-
 /usr/include/c++/10/bits/nested_exception.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CwiseUnaryView.h:
@@ -4081,8 +3548,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/c++/10/tr1/riemann_zeta.tcc:
 
 /usr/include/c++/10/string:
-
-/usr/include/c++/11/bits/range_access.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
 
@@ -4098,25 +3563,23 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/vector:
 
-/usr/include/c++/11/bits/functional_hash.h:
-
 /usr/include/c++/10/tr1/poly_hermite.tcc:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/GenericPacketMath.h:
 
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/TriangularMatrix.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseDot.h:
+
 /usr/include/c++/10/ext/new_allocator.h:
 
 /usr/include/c++/10/iosfwd:
-
-/usr/include/c++/11/tr1/beta_function.tcc:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/NullaryFunctors.h:
 
 /usr/include/c++/10/map:
 
 /usr/include/c++/10/ios:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/Core:
 
@@ -4126,23 +3589,17 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/optional:
 
-/usr/include/c++/11/utility:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/DenseCoeffsBase.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/SelfCwiseBinaryOp.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/AssignEvaluator.h:
 
-/usr/include/c++/11/bits/stl_vector.h:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Solve.h:
 
 /usr/include/c++/10/debug/assertions.h:
 
 /usr/include/c++/10/bits/basic_string.tcc:
-
-/usr/include/c++/11/bits/stl_tempbuf.h:
 
 /home/toshi/dev/CXX/Subspace/header/Matrix4x4.h:
 
@@ -4158,19 +3615,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/IndexedViewHelper.h:
 
-/usr/include/c++/11/bits/std_function.h:
-
 /usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
-
-/usr/include/cublas_v2.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/NoAlias.h:
 
-/usr/include/c++/11/bits/std_abs.h:
-
 /usr/include/c++/10/bits/exception.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_32_intrinsics.hpp:
 
 /usr/include/asm-generic/errno-base.h:
 
@@ -4178,19 +3627,13 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Swap.h:
 
-/usr/include/c++/11/pstl/glue_algorithm_defs.h:
-
 /usr/include/c++/10/bits/ptr_traits.h:
 
 /home/toshi/dev/CXX/Subspace/header/Simulator.hpp:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_60_atomic_functions.hpp:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/VectorwiseOp.h:
 
 /usr/include/c++/10/bits/move.h:
-
-/usr/include/cuda_bf16.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Visitor.h:
 
@@ -4222,8 +3665,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/IterativeLinearSolvers/IncompleteCholesky.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/channel_descriptor.h:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/LU/Determinant.h:
 
 /usr/include/c++/10/bits/stringfwd.h:
@@ -4250,8 +3691,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
-/usr/include/c++/11/initializer_list:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/PlainObjectBase.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/IterativeLinearSolvers:
@@ -4259,8 +3698,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/x86_64-linux-gnu/c++/10/bits/c++allocator.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/Dense:
-
-/usr/include/c++/11/bits/exception_defines.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/BinaryFunctors.h:
 
@@ -4288,35 +3725,25 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/TriangularSolverVector.h:
 
-/usr/include/c++/11/bits/stringfwd.h:
-
 /home/toshi/dev/CXX/Subspace/header/Shape.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/Parallelizer.h:
-
-/usr/include/c++/11/unordered_map:
 
 /usr/include/c++/10/bits/allocator.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/SelfadjointMatrixMatrix.h:
 
-/home/toshi/dev/CXX/Subspace/header/SolidShapeIndex.h:
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/arch/Geometry_SIMD.h:
 
-/usr/include/c++/11/tr1/gamma.tcc:
+/home/toshi/dev/CXX/Subspace/header/SolidShapeIndex.h:
 
 /usr/include/c++/10/bits/stl_vector.h:
 
 /usr/include/linux/limits.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_61_intrinsics.hpp:
-
-/usr/include/x86_64-linux-gnu/sys/single_threaded.h:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/SelfadjointRank2Update.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/TriangularMatrixVector.h:
-
-/usr/include/c++/11/istream:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SVD/BDCSVD.h:
 
@@ -4335,6 +3762,8 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseCwiseBinaryOp.h:
 
 /usr/include/c++/10/bits/hash_bytes.h:
+
+/home/toshi/dev/CXX/Subspace/src/Simulator.cpp:
 
 /usr/include/alloca.h:
 
@@ -4360,8 +3789,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/limits:
 
-/usr/lib/gcc/x86_64-linux-gnu/11/include/syslimits.h:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/ReshapedHelper.h:
 
 /usr/include/c++/10/locale:
@@ -4378,11 +3805,7 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/IterativeLinearSolvers/IterativeSolverBase.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/11/include/limits.h:
-
 /usr/include/c++/10/ratio:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_60_atomic_functions.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h:
 
@@ -4400,8 +3823,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/string_view:
 
-/usr/include/c++/11/bits/hashtable_policy.h:
-
 /usr/include/c++/10/tr1/bessel_function.tcc:
 
 /usr/include/c++/10/tr1/gamma.tcc:
@@ -4418,15 +3839,9 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/tr1/modified_bessel_func.tcc:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/device_functions.h:
-
 /usr/include/x86_64-linux-gnu/c++/10/bits/gthr.h:
 
-/usr/include/c++/11/climits:
-
 /usr/include/c++/10/tuple:
-
-/usr/include/c++/11/iosfwd:
 
 /home/toshi/dev/CXX/Subspace/header/Object.h:
 
@@ -4444,8 +3859,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/QR/HouseholderQR.h:
 
-/usr/include/c++/11/bits/char_traits.h:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/GeneralMatrixMatrix.h:
 
 /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
@@ -4458,7 +3871,7 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/limits.h:
 
-/usr/include/x86_64-linux-gnu/c++/11/bits/c++locale.h:
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseDiagonalProduct.h:
 
 /usr/include/linux/errno.h:
 
@@ -4474,10 +3887,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/string.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_runtime.h:
-
-/usr/include/c++/11/new:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/AngleAxis.h:
 
 /usr/include/c++/10/bits/uniform_int_dist.h:
@@ -4486,15 +3895,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/byteswap.h:
 
-/usr/include/driver_functions.h:
-
 /home/toshi/dev/CXX/Subspace/header/Window.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/TernaryFunctors.h:
 
 /usr/include/x86_64-linux-gnu/bits/floatn-common.h:
-
-/usr/include/c++/11/bits/postypes.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/ReenableStupidWarnings.h:
 
@@ -4522,8 +3927,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/c++/10/bits/time_members.h:
 
-/usr/include/c++/11/ext/string_conversions.h:
-
 /usr/include/x86_64-linux-gnu/bits/iscanonical.h:
 
 /usr/include/c++/10/bits/cxxabi_forced.h:
@@ -4544,8 +3947,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/texture_types.h:
-
 /usr/include/x86_64-linux-gnu/c++/10/bits/os_defines.h:
 
 /usr/include/x86_64-linux-gnu/bits/posix2_lim.h:
@@ -4562,21 +3963,15 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/time.h:
 
-/usr/include/c++/11/bits/stl_iterator.h:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/PermutationMatrix.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
 
-/usr/include/c++/11/complex:
-
 /usr/include/x86_64-linux-gnu/bits/math-vector.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/GeneralizedSelfAdjointEigenSolver.h:
-
-/usr/include/c++/11/bits/locale_facets.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/stdio.h:
 
@@ -4596,10 +3991,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/c++/10/bits/c++io.h:
 
-/home/toshi/dev/CXX/Subspace/cuda_util/cuda_util.cuh:
-
-/usr/include/c++/11/bits/functexcept.h:
-
 /usr/include/x86_64-linux-gnu/bits/stdlib.h:
 
 /usr/include/c++/10/ext/type_traits.h:
@@ -4616,19 +4007,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/timesize.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/crt/sm_70_rt.hpp:
-
 /usr/include/x86_64-linux-gnu/bits/typesizes.h:
 
 /usr/include/c++/10/tr1/beta_function.tcc:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/LU/FullPivLU.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/c++allocator.h:
-
-/usr/include/c++/11/bits/exception_ptr.h:
-
-/usr/include/c++/11/bits/charconv.h:
 
 /usr/include/math.h:
 
@@ -4642,13 +4025,9 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h:
 
-/usr/include/c++/11/system_error:
-
 /usr/include/features-time64.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
 
@@ -4657,8 +4036,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArrayWrapper.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
-
-/usr/include/c++/11/bit:
 
 /usr/include/c++/10/tr1/legendre_function.tcc:
 
@@ -4678,27 +4055,19 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/time_t.h:
 
-/usr/include/c++/11/iostream:
-
 /usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
 
 /usr/include/x86_64-linux-gnu/bits/uio_lim.h:
 
 /usr/include/x86_64-linux-gnu/bits/waitflags.h:
 
-/home/toshi/dev/CXX/Subspace/src/Simulator.cu:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h:
 
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/sm_32_atomic_functions.hpp:
-
 /usr/include/c++/10/bits/std_function.h:
 
 /usr/include/x86_64-linux-gnu/c++/10/bits/basic_file.h:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/GPU/PacketMath.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/LU/PartialPivLU.h:
 
@@ -4710,14 +4079,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/c++/10/bits/error_constants.h:
 
-/usr/include/surface_types.h:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_bf16.hpp:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/gthr.h:
-
-/usr/include/c++/11/bits/list.tcc:
-
 /usr/include/x86_64-linux-gnu/c++/10/bits/messages_members.h:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs.h:
@@ -4726,27 +4087,17 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
 
-/usr/local/cuda-12.6/targets/x86_64-linux/include/vector_types.h:
-
 /usr/include/x86_64-linux-gnu/sys/select.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/10/include/emmintrin.h:
 
-/usr/include/c++/11/bits/stl_list.h:
-
 /usr/lib/gcc/x86_64-linux-gnu/10/include/limits.h:
-
-/usr/include/c++/11/bits/localefwd.h:
 
 /usr/include/c++/10/bits/stl_tempbuf.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/10/include/mmintrin.h:
 
-/usr/include/c++/11/bits/vector.tcc:
-
 /home/toshi/dev/CXX/Subspace/src/FixedObjectRenderer.cpp:
-
-/usr/include/c++/11/bits/parse_numbers.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/RealQZ.h:
 
@@ -4794,8 +4145,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /usr/include/c++/10/bits/stl_raw_storage_iter.h:
 
-/usr/include/c++/11/bits/cpp_type_traits.h:
-
 /usr/include/endian.h:
 
 /usr/include/c++/10/numeric:
@@ -4807,8 +4156,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /usr/include/c++/10/random:
 
 /usr/include/x86_64-linux-gnu/c++/10/bits/opt_random.h:
-
-/usr/include/c++/11/cwchar:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Ref.h:
 
@@ -4834,15 +4181,13 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Cholesky/LLT.h:
 
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/Householder:
+
 /usr/include/c++/10/bits/basic_ios.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/DenseStorage.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/QR:
-
-/usr/include/cuda_fp16.hpp:
-
-/usr/local/cuda-12.6/targets/x86_64-linux/include/cuda_fp16.hpp:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CommaInitializer.h:
 
@@ -4854,10 +4199,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Cholesky/LDLT.h:
 
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/Householder:
-
-/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/GPU/TypeCasting.h:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/ComplexEigenSolver.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/HessenbergDecomposition.h:
@@ -4865,8 +4206,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/CXX/Subspace/header/FixedObjectRenderer.hpp:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h:
-
-/usr/include/c++/11/bits/stl_iterator_base_types.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Eigenvalues/RealSchur.h:
 
@@ -4884,15 +4223,11 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/Quaternion.h:
 
-/usr/include/c++/11/tuple:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Geometry/Transform.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/QR/CompleteOrthogonalDecomposition.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Householder/BlockHouseholder.h:
-
-/usr/include/cuda_device_runtime_api.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Householder/HouseholderSequence.h:
 
@@ -4901,8 +4236,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/IterativeLinearSolvers/BasicPreconditioners.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/IterativeLinearSolvers/ConjugateGradient.h:
-
-/usr/include/c++/11/ext/concurrence.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/IterativeLinearSolvers/SolveWithGuess.h:
 
@@ -4930,8 +4263,6 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/CompressedStorage.h:
 
-/usr/include/c++/11/ctime:
-
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/ConservativeSparseSparseProduct.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseAssign.h:
@@ -4943,3 +4274,5 @@ CMakeFiles/main.dir/src/main.cpp.o: /home/toshi/dev/CXX/Subspace/src/main.cpp \
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseCompressedBase.h:
 
 /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseCwiseUnaryOp.h:
+
+/home/toshi/dev/lib/eigen-3.4.0/Eigen/src/SparseCore/SparseDenseProduct.h:

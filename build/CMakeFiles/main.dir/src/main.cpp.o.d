@@ -507,25 +507,11 @@ CMakeFiles/main.dir/src/main.cpp.o: \
  /usr/include/c++/10/bits/quoted_string.h /usr/include/c++/10/codecvt \
  /usr/include/c++/10/bits/fs_dir.h /usr/include/c++/10/bits/fs_ops.h \
  /home/toshi/dev/CXX/Subspace/header/ShaderCommand.hpp \
- /home/toshi/dev/CXX/Subspace/cuda_util/cuda_util.cuh \
- /usr/include/cusparse.h /usr/include/cuComplex.h \
- /usr/include/c++/10/math.h /usr/include/vector_types.h \
- /usr/include/crt/host_defines.h /usr/include/cuda_fp16.h \
- /usr/include/cuda_fp16.hpp /usr/include/driver_types.h \
- /usr/include/library_types.h /usr/include/cublas_v2.h \
- /usr/include/cublas_api.h /usr/include/driver_types.h \
- /usr/include/cuComplex.h /usr/include/cuda_bf16.h \
- /usr/include/cuda_bf16.hpp /usr/include/library_types.h \
- /usr/include/cuda_runtime.h /usr/include/crt/host_config.h \
- /usr/include/builtin_types.h /usr/include/device_types.h \
- /usr/include/surface_types.h /usr/include/texture_types.h \
- /usr/include/channel_descriptor.h /usr/include/cuda_runtime_api.h \
- /usr/include/cuda_device_runtime_api.h /usr/include/driver_functions.h \
- /usr/include/vector_functions.h /usr/include/vector_functions.hpp \
  /home/toshi/dev/CXX/Subspace/header/FixedObjectRenderer.hpp \
  /home/toshi/dev/CXX/Subspace/header/SolidShapeIndex.h \
  /home/toshi/dev/CXX/Subspace/header/SolidShape.h \
  /home/toshi/dev/CXX/Subspace/header/Matrix4x4.h \
  /home/toshi/dev/CXX/Subspace/header/SliceRenderer.hpp \
  /home/toshi/dev/CXX/Subspace/header/ShaderDebugger.hpp \
- /home/toshi/dev/CXX/Subspace/header/stb_image_write.h
+ /home/toshi/dev/CXX/Subspace/header/stb_image_write.h \
+ /usr/include/c++/10/math.h

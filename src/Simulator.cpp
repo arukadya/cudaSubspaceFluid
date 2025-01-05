@@ -23,7 +23,7 @@ void CalForceEncoder::encode
     
     GLfloat uniform_g0 = glGetUniformLocation(shader_program, "g0");
     GLfloat uniform_t_amb = glGetUniformLocation(shader_program, "t_amb");
-    GLfloat uniform_beta = glGetUniformLocation(shader_program, "beta");
+    // GLfloat uniform_beta = glGetUniformLocation(shader_program, "beta");
 
     glUniform1f(uniform_g0, G0);
     glUniform1f(uniform_t_amb, AMB_TEMPLATURE);
@@ -751,32 +751,17 @@ void Simulator::subspace_oneloop()
 }
 
 void Simulator::subspace_project(){
-    // Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
     Eigen::VectorXf b;
-    // Eigen::ConjugateGradient<SparseMatrix> solver;
-    // Eigen::ConjugateGradient<Eigen::MatrixXf> solver;
-    Eigen::FullPivHouseholderQR<Eigen::MatrixXf> solver;
-    // for(unsigned int i=0;i<_texwidth;i++){
-    //     for(unsigned int j=0;j<_texheight;j++){
-    //         for(unsigned int k=0;k<_texdepth;k++){
-    //             px[i+j*_texwidth+k*_texwidth*_texheight] = pressure.get_volume_value(i,j,k);
-    //         }
-    //     }
-    // }
+    Eigen::ConjugateGradient<Eigen::MatrixXf> solver;
+    // Eigen::FullPivHouseholderQR<Eigen::MatrixXf> solver;
     // solver.setTolerance(1e-6);
     // solver.setMaxIterations(20);
-    // solver.compute(A);
-    // init_all_velocity();
-    // b = Vel2DivMatrix * all_velocity;
     b = reduced_Vel2DivMatrix * reduced_DirichletBoundaryMatrix * reduced_all_velocity;
-    // b = reduced_Vel2DivMatrix * reduced_all_velocity;
-    //initialize
     solver.compute(reduced_PoissonMatrix);
-    // px = solver.solveWithGuess(b, px);
 
     // std::cout << "before reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
-    // reduced_px = solver.solveWithGuess(b, reduced_px);
-    reduced_px = solver.solve(b);
+    reduced_px = solver.solveWithGuess(b, reduced_px);
+    // reduced_px = solver.solve(b);
     std::cout << "subspace reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
     reduced_px = P.transpose() * P_all_frame.col(_timestamp);
     std::cout << "exact    reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
