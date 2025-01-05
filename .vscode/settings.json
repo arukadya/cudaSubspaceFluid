@@ -79,6 +79,7 @@
         "core": "cpp",
         "locale": "cpp",
         "fft": "cpp",
-        "alignedvector3": "cpp"
+        "alignedvector3": "cpp",
+        "__split_buffer": "cpp"
     }
 }

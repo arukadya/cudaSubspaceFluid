@@ -227,10 +227,12 @@ struct Simulator{
     SparseMatrix Vel2DivMatrix;//W
     SparseMatrix PoissonMatrix;//X
     SparseMatrix Pressure2VelocityMatrix;//Y
+    SparseMatrix DirichletBoundaryMatrix;//D
 
     Eigen::MatrixXf reduced_Vel2DivMatrix;//W
     Eigen::MatrixXf reduced_PoissonMatrix;//X　???こいつが正定値対称行列になるのすごい　要確認
     Eigen::MatrixXf reduced_Pressure2VelocityMatrix;//Y
+    Eigen::MatrixXf reduced_DirichletBoundaryMatrix;//D
 
     Eigen::MatrixXf U0;
     Eigen::MatrixXf U1;
@@ -274,6 +276,7 @@ struct Simulator{
         std::filesystem::create_directories(density_floder_name);
         PoissonMatrix = SparseMatrix(_texwidth*_texheight*_texdepth,texwidth*_texheight*_texdepth);
         Vel2DivMatrix = SparseMatrix(_texwidth*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
+        DirichletBoundaryMatrix = SparseMatrix(3*(texwidth + 1)*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
         Pressure2VelocityMatrix = SparseMatrix(3*(_texwidth + 1)*_texheight*_texdepth, texwidth*_texheight*_texdepth);
         all_velocity = Eigen::VectorXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth);
         px = Eigen::VectorXf::Zero(_texwidth *_texheight*_texdepth);
@@ -294,6 +297,7 @@ struct Simulator{
         // std::cout << "V2D" << std::endl;
         calPressure2VelocityMatrix();
         // std::cout << "P2V" << std::endl;
+        calDirichletBoundaryMatrix();
     };
     //full simulator
     void oneloop();
@@ -314,6 +318,7 @@ struct Simulator{
     void calPoissonMatrix();
     void calVel2DivMatrix();
     void calPressure2VelocityMatrix();
+    void calDirichletBoundaryMatrix();
     void init_all_velocity();
     void write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap);
     void write_exact_solution(Eigen::MatrixXf &mat, Eigen::VectorXf &snap);

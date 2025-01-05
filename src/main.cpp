@@ -54,42 +54,41 @@ int main(int argc, char * argv[])
         unsigned int r = atoi(argv[1]);
         simulator._reduce_dimention = r;
     }
-    if(is_simulate)
-    {
-        // FixedObjectRenderer fixedObjectRenderer;
-        // SliceRenderer sliceRenderer(texwidth,texheight,texdepth,slice_num);
-        // std::cout << "Sucssess initialize Simulator" << std::endl;
-        //GLFWを初期化する
-        // if(glfwInit() == GL_FALSE){
-        //     std::cerr << "Can't initialize GLFW" << std::endl;
-        //     return 1;
-        // }
-        // //プログラム終了時の処理を登録する
-        // atexit(glfwTerminate);
-        // //glfwのバージョン等の指定
-        // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
-        // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-        // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-        // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        // //ウィンドウを作成する
-        // Window window;
-        // //背景色を指定する
-        // glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+    // if(is_simulate)
+    // {
+    //     FixedObjectRenderer fixedObjectRenderer;
+    //     SliceRenderer sliceRenderer(texwidth,texheight,texdepth,slice_num);
+    //     std::cout << "Sucssess initialize Simulator" << std::endl;
+    //     // GLFWを初期化する
+    //     if(glfwInit() == GL_FALSE){
+    //         std::cerr << "Can't initialize GLFW" << std::endl;
+    //         return 1;
+    //     }
+    //     //プログラム終了時の処理を登録する
+    //     atexit(glfwTerminate);
+    //     //glfwのバージョン等の指定
+    //     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
+    //     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    //     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    //     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //     //ウィンドウを作成する
+    //     Window window;
+    //     //背景色を指定する
+    //     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
         
-        // glDisable(GL_DEPTH_TEST);
-        // glDisable(GL_CULL_FACE);
+    //     glDisable(GL_DEPTH_TEST);
+    //     glDisable(GL_CULL_FACE);
         
-        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        // //ビューボートを設定する
-        // glViewport(100, 50, 300, 300);
-        // //タイマーを0にセット
-        // glfwSetTime(0.0);
-        // //テキストデータのID
-        
+    //     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //     //ビューボートを設定する
+    //     glViewport(100, 50, 300, 300);
+    //     //タイマーを0にセット
+    //     glfwSetTime(0.0);
+    //     //テキストデータのID
 
-        // int sumcnt = 0;
-        // float startTime;
-        // float sum = 0;
+    //     int sumcnt = 0;
+    //     float startTime;
+    //     float sum = 0;
     //     while(window && id < flame_num)
     //     {
     //         std::string str_density = "densityTexture";
@@ -105,13 +104,12 @@ int main(int argc, char * argv[])
     //             // buffer_write_png(texwidth,TEXHEIGHT,TEXDEPTH,4,simulator.templature.src_texture,str_templature);
     //             // buffer_write_png(texwidth,TEXHEIGHT,1,1,simulator.test.src_texture,str_test);
     //         }
-    //         std::string inputFileName = "density_txt/output";
-            
-    //         ++id;
-    //         inputFileName += std::to_string(id % flame_num)+".txt";
-    //         std::cout << inputFileName << std::endl;
-    //         simulator.inputTXT(inputFileName);
-    //         // simulator.oneloop();
+    //         // std::string inputFileName = "density_txt/output";
+    //         // ++id;
+    //         // inputFileName += std::to_string(id % flame_num)+".txt";
+    //         // std::cout << inputFileName << std::endl;
+    //         // simulator.inputTXT(inputFileName);
+    //         simulator.oneloop();
     //         // simulator.output_txt(id);
     //         Eigen::Vector3f viewPoint(4.0f, 0.0f, 4.0f);
     // //        viewPoint /= 1.732;
@@ -155,7 +153,7 @@ int main(int argc, char * argv[])
     //         window.swapBuffers();
     //     }
     // std::cout << "fin_window" << std::endl;
-    }
+    // }
     
     if(is_simulate)
     {
