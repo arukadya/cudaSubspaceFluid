@@ -31,6 +31,7 @@ CMakeFiles/main.dir/src/ComputeCommand.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar2.h \
  /usr/include/c++/10/exception /usr/include/c++/10/bits/exception.h \
  /usr/include/c++/10/bits/exception_ptr.h \
  /usr/include/c++/10/bits/exception_defines.h \
@@ -120,16 +121,20 @@ CMakeFiles/main.dir/src/ComputeCommand.cpp.o: \
  /usr/include/x86_64-linux-gnu/sys/select.h \
  /usr/include/x86_64-linux-gnu/bits/select.h \
  /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
- /usr/include/alloca.h /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+ /usr/include/x86_64-linux-gnu/bits/select2.h /usr/include/alloca.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib.h \
  /usr/include/c++/10/bits/std_abs.h /usr/include/c++/10/cstdio \
  /usr/include/stdio.h /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
  /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
- /usr/include/c++/10/cerrno /usr/include/errno.h \
- /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
- /usr/include/x86_64-linux-gnu/asm/errno.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio2.h /usr/include/c++/10/cerrno \
+ /usr/include/errno.h /usr/include/x86_64-linux-gnu/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
  /usr/include/c++/10/bits/charconv.h \
@@ -154,4 +159,213 @@ CMakeFiles/main.dir/src/ComputeCommand.cpp.o: \
  /usr/include/c++/10/vector /usr/include/c++/10/bits/stl_uninitialized.h \
  /usr/include/c++/10/bits/stl_vector.h \
  /usr/include/c++/10/bits/stl_bvector.h \
- /usr/include/c++/10/bits/vector.tcc
+ /usr/include/c++/10/bits/vector.tcc /usr/include/c++/10/sstream \
+ /usr/include/c++/10/bits/sstream.tcc /usr/include/c++/10/fstream \
+ /usr/include/c++/10/bits/codecvt.h \
+ /usr/include/x86_64-linux-gnu/c++/10/bits/basic_file.h \
+ /usr/include/x86_64-linux-gnu/c++/10/bits/c++io.h \
+ /usr/include/c++/10/bits/fstream.tcc /usr/include/c++/10/filesystem \
+ /usr/include/c++/10/bits/fs_fwd.h /usr/include/c++/10/bits/fs_path.h \
+ /usr/include/c++/10/utility /usr/include/c++/10/bits/stl_relops.h \
+ /usr/include/c++/10/locale \
+ /usr/include/c++/10/bits/locale_facets_nonio.h \
+ /usr/include/x86_64-linux-gnu/c++/10/bits/time_members.h \
+ /usr/include/x86_64-linux-gnu/c++/10/bits/messages_members.h \
+ /usr/include/libintl.h /usr/include/c++/10/bits/locale_facets_nonio.tcc \
+ /usr/include/c++/10/bits/locale_conv.h \
+ /usr/include/c++/10/bits/unique_ptr.h /usr/include/c++/10/tuple \
+ /usr/include/c++/10/array /usr/include/c++/10/bits/uses_allocator.h \
+ /usr/include/c++/10/bits/invoke.h /usr/include/c++/10/iomanip \
+ /usr/include/c++/10/bits/quoted_string.h /usr/include/c++/10/codecvt \
+ /usr/include/c++/10/ext/concurrence.h \
+ /usr/include/c++/10/bits/shared_ptr.h \
+ /usr/include/c++/10/bits/shared_ptr_base.h \
+ /usr/include/c++/10/bits/allocated_ptr.h \
+ /usr/include/c++/10/bits/refwrap.h \
+ /usr/include/c++/10/ext/aligned_buffer.h \
+ /usr/include/c++/10/bits/fs_dir.h /usr/include/c++/10/bits/fs_ops.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/Core \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/DisableStupidWarnings.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/Macros.h \
+ /usr/include/c++/10/cmath /usr/include/math.h \
+ /usr/include/x86_64-linux-gnu/bits/math-vector.h \
+ /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
+ /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
+ /usr/include/x86_64-linux-gnu/bits/fp-logb.h \
+ /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
+ /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
+ /usr/include/c++/10/bits/specfun.h /usr/include/c++/10/tr1/gamma.tcc \
+ /usr/include/c++/10/tr1/special_function_util.h \
+ /usr/include/c++/10/tr1/bessel_function.tcc \
+ /usr/include/c++/10/tr1/beta_function.tcc \
+ /usr/include/c++/10/tr1/ell_integral.tcc \
+ /usr/include/c++/10/tr1/exp_integral.tcc \
+ /usr/include/c++/10/tr1/hypergeometric.tcc \
+ /usr/include/c++/10/tr1/legendre_function.tcc \
+ /usr/include/c++/10/tr1/modified_bessel_func.tcc \
+ /usr/include/c++/10/tr1/poly_hermite.tcc \
+ /usr/include/c++/10/tr1/poly_laguerre.tcc \
+ /usr/include/c++/10/tr1/riemann_zeta.tcc \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/ConfigureVectorization.h \
+ /usr/lib/gcc/x86_64-linux-gnu/10/include/mmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/10/include/emmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/10/include/xmmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/10/include/mm_malloc.h \
+ /usr/include/c++/10/stdlib.h /usr/include/c++/10/complex \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/MKL_support.h \
+ /usr/include/c++/10/cstddef /usr/include/c++/10/cassert \
+ /usr/include/assert.h /usr/include/c++/10/functional \
+ /usr/include/c++/10/bits/std_function.h \
+ /usr/include/c++/10/unordered_map /usr/include/c++/10/bits/hashtable.h \
+ /usr/include/c++/10/bits/hashtable_policy.h \
+ /usr/include/c++/10/bits/enable_special_members.h \
+ /usr/include/c++/10/bits/node_handle.h /usr/include/c++/10/optional \
+ /usr/include/c++/10/bits/unordered_map.h \
+ /usr/include/c++/10/bits/erase_if.h /usr/include/c++/10/bits/stl_algo.h \
+ /usr/include/c++/10/bits/algorithmfwd.h \
+ /usr/include/c++/10/bits/stl_heap.h \
+ /usr/include/c++/10/bits/stl_tempbuf.h \
+ /usr/include/c++/10/bits/uniform_int_dist.h /usr/include/c++/10/cstring \
+ /usr/include/string.h /usr/include/strings.h \
+ /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
+ /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+ /usr/include/c++/10/climits \
+ /usr/lib/gcc/x86_64-linux-gnu/10/include/limits.h \
+ /usr/lib/gcc/x86_64-linux-gnu/10/include/syslimits.h \
+ /usr/include/limits.h /usr/include/x86_64-linux-gnu/bits/posix1_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/local_lim.h \
+ /usr/include/linux/limits.h \
+ /usr/include/x86_64-linux-gnu/bits/posix2_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/uio_lim.h \
+ /usr/include/c++/10/algorithm \
+ /usr/include/c++/10/pstl/glue_algorithm_defs.h \
+ /usr/include/c++/10/pstl/execution_defs.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/Constants.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/Meta.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/ForwardDeclarations.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/StaticAssert.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/XprHelper.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/Memory.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/IntegralConstant.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/SymbolicIndex.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/NumTraits.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/MathFunctions.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/GenericPacketMath.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/MathFunctionsImpl.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/ConjHelper.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/Half.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/BFloat16.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/TypeCasting.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/GenericPacketMathFunctionsFwd.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/SSE/PacketMath.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/SSE/TypeCasting.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/SSE/MathFunctions.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/SSE/Complex.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/Settings.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/arch/Default/GenericPacketMathFunctions.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/TernaryFunctors.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/BinaryFunctors.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/UnaryFunctors.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/NullaryFunctors.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/StlFunctors.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/functors/AssignmentFunctors.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/IndexedViewHelper.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/ReshapedHelper.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArithmeticSequence.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/IO.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/DenseCoeffsBase.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/DenseBase.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseUnaryOps.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/BlockMethods.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/IndexedViewMethods.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/IndexedViewMethods.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ReshapedMethods.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/MatrixBase.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/CommonCwiseBinaryOps.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/EigenBase.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Product.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CoreEvaluators.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/AssignEvaluator.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Assign.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArrayBase.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseUnaryOps.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/plugins/ArrayCwiseBinaryOps.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/BlasUtil.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/DenseStorage.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/NestByValue.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ReturnByValue.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/NoAlias.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/PlainObjectBase.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Matrix.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Array.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CwiseTernaryOp.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CwiseBinaryOp.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CwiseUnaryOp.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CwiseNullaryOp.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CwiseUnaryView.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/SelfCwiseBinaryOp.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Dot.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/StableNorm.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Stride.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/MapBase.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Map.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Ref.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Block.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/VectorBlock.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/IndexedView.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Reshaped.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Transpose.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/DiagonalMatrix.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Diagonal.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/DiagonalProduct.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Redux.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Visitor.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Fuzzy.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Swap.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CommaInitializer.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/GeneralProduct.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Solve.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Inverse.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/SolverBase.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/PermutationMatrix.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Transpositions.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/TriangularMatrix.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/SelfAdjointView.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/GeneralBlockPanelKernel.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/Parallelizer.h \
+ /usr/include/c++/10/atomic /usr/include/c++/10/bits/atomic_base.h \
+ /usr/include/c++/10/bits/atomic_lockfree_defines.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ProductEvaluators.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/GeneralMatrixVector.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/GeneralMatrixMatrix.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/SolveTriangular.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/GeneralMatrixMatrixTriangular.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/SelfadjointMatrixVector.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/SelfadjointMatrixMatrix.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/SelfadjointProduct.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/SelfadjointRank2Update.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/TriangularMatrixVector.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/TriangularMatrixMatrix.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/TriangularSolverMatrix.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/products/TriangularSolverVector.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/BandMatrix.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/CoreIterators.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ConditionEstimator.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/BooleanRedux.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Select.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/VectorwiseOp.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/PartialReduxEvaluator.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Random.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Replicate.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/Reverse.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/ArrayWrapper.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/StlIterators.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/GlobalFunctions.h \
+ /home/toshi/dev/lib/eigen-3.4.0/Eigen/src/Core/util/ReenableStupidWarnings.h

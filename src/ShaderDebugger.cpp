@@ -3,11 +3,11 @@ void normalize(unsigned int buffer_width, unsigned int buffer_height, unsigned i
 {
     float max = 1.0f;
     unsigned int size = buffer_width * buffer_height * buffer_depth;
-    for(int i=0;i<size;++i)
+    for(unsigned int i=0;i<size;++i)
     {
         if(max < src_buffer[i])max = src_buffer[i];
     }
-    for(int i=0;i<size;++i)
+    for(unsigned int i=0;i<size;++i)
     {
        dst_buffer[i] = src_buffer[i]/max;
     }

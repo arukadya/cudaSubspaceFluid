@@ -8,11 +8,6 @@
 #ifndef FixedObjectRenderer_hpp
 #define FixedObjectRenderer_hpp
 
-#define TEXWIDTH 64
-#define TEXHEIGHT 64
-#define TEXDEPTH 64
-#define SLICENUM 64
-
 #include "Eigen/Core"
 #include <iostream>
 #include <vector>

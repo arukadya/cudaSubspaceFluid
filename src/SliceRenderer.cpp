@@ -85,9 +85,9 @@ void getBackmostSlice(Eigen::Matrix3f &ldVertices,
     }
 }
 
-SliceRenderer::SliceRenderer()
-{
-}
+// SliceRenderer::SliceRenderer()
+// {
+// }
 GLuint SliceRenderer::makeSlice()
 {
     GLuint vao;
@@ -113,16 +113,14 @@ GLuint SliceRenderer::makeVolume(float* densityTexture, GLfloat *smokeColor,Eige
     std::vector<GLfloat>volume;
     raySliceAngleCos = getRaySliceAngleCos(tgt);
     float marchingLength = sliceThickness / raySliceAngleCos;
-    for(int k=0;k<TEXDEPTH;++k){
-        for(int j=0;j<TEXHEIGHT;++j){
-            for(int i=0;i<TEXWIDTH;++i){
-                float transparency = exp( -1.0 * densityTexture[resequence3to1(i, j, k, TEXWIDTH, TEXHEIGHT, TEXDEPTH)] * marchingLength);
-                float transparency10 = exp( -1.0 * 10 * marchingLength);
-                float transparency255 = exp( -1.0 * 255 * marchingLength);
-//                std::cout << densityTexture[resequence3to1(i, j, k, TEXWIDTH, TEXHEIGHT, TEXDEPTH)] << std::endl;
+    for(unsigned int k=0;k<_texdepth;++k){
+        for(unsigned int j=0;j<_texheight;++j){
+            for(unsigned int i=0;i<_texwidth;++i){
+                float transparency = exp( -1.0 * densityTexture[resequence3to1(i, j, k, _texwidth, _texheight, _texdepth)] * marchingLength);
+                // float transparency10 = exp( -1.0 * 10 * marchingLength);
+                // float transparency255 = exp( -1.0 * 255 * marchingLength);
+//                std::cout << densityTexture[resequence3to1(i, j, k, texwidth, _texheight, _texdepth)] << std::endl;
                 float opacity = 1 - transparency;
-                float opacity10 = 1 - transparency10;
-                float opacity255 = 1 - transparency255;
 //                else volume.push_back(opacity);
                 volume.push_back(opacity);
 //                std::cout << (float)volume[volume.size()-1] << "," << opacity10 << "," << opacity255 << std::endl;
@@ -136,7 +134,7 @@ GLuint SliceRenderer::makeVolume(float* densityTexture, GLfloat *smokeColor,Eige
     
     //GL_RGBA8,GL_RGBA:Each element contains all four components. Each component is clamped to the range [0,1].
     //テクスチャを割り当てる
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, TEXWIDTH, TEXHEIGHT, TEXDEPTH, 0,
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, _texwidth, _texheight, _texdepth, 0,
                  GL_RED, GL_FLOAT, &volume[0]);
     //拡大・補間方法の設定
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -222,7 +220,7 @@ void SliceRenderer::rendering(Matrix4x4 &projection,Matrix4x4 &modelview,Matrix4
     const GLint volumeLoc(glGetUniformLocation(volumeProgram, "volume"));
 
     glUseProgram(volumeProgram);
-    glUniform1f(spacingLoc, 1.0f / static_cast<GLfloat>(SLICENUM - 1));
+    glUniform1f(spacingLoc, 1.0f / static_cast<GLfloat>(_slice_num - 1));
     glUniformMatrix4fv(mpLoc, 1, GL_FALSE, projection.data());
     glUniformMatrix4fv(mwLoc, 1, GL_FALSE, modelview.data());
     glUniformMatrix4fv(sliceRot_Loc, 1, GL_FALSE, sliceRot.data());
@@ -243,7 +241,7 @@ void SliceRenderer::rendering(Matrix4x4 &projection,Matrix4x4 &modelview,Matrix4
     glBindVertexArray(slice);
     //複製する描画方法．第四引数がインスタンスの数
     
-    glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, SLICENUM);
+    glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, _slice_num);
 //    timer.end();
     glDisable(GL_TEXTURE_3D);
     glDisable(GL_BLEND);
@@ -253,7 +251,7 @@ void SliceRenderer::makeCosTexture()
 {
     const GLuint program(loadComputeProgram("Shader/cos.comp"));
     const GLint eye_posLoc(glGetUniformLocation(program, "eye_pos"));
-    const GLint volumeLoc(glGetUniformLocation(program, "volume"));
+    // const GLint volumeLoc(glGetUniformLocation(program, "volume"));
 
     glUseProgram(program);
     glUniform4f(eye_posLoc, 3.0f, 4.0f, 5.0f, 0.0f);
@@ -262,7 +260,7 @@ void SliceRenderer::makeCosTexture()
 
     // create buffer
 //    GLuint uniform_element_size = glGetUniformLocation(shader_program, "element_size");
-    uint32_t num = TEXDEPTH * TEXHEIGHT * TEXWIDTH;
+    uint32_t num = _texdepth * _texheight * _texwidth;
     GLuint ssbo;
     glGenBuffers(1, &ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
