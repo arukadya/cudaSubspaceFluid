@@ -163,6 +163,7 @@ struct Simulator{
     unsigned int _timestamp;
     unsigned int _delta_snap;
     unsigned int _reduce_dimention;
+    unsigned int _snap_devide_num;
     Slab x_velocity;
     Slab y_velocity;
     Slab z_velocity;
@@ -187,6 +188,8 @@ struct Simulator{
     Eigen::MatrixXf U2_all_frame;
     Eigen::MatrixXf U3_all_frame;
     Eigen::MatrixXf P_all_frame;
+    Eigen::MatrixXf b_all_frame;
+    SparseMatrix DiffusionMatrix;//V
     SparseMatrix Vel2DivMatrix;//W
     SparseMatrix PoissonMatrix;//X
     SparseMatrix Pressure2VelocityMatrix;//Y
@@ -197,12 +200,16 @@ struct Simulator{
     Eigen::MatrixXf reduced_Pressure2VelocityMatrix;//Y
     Eigen::MatrixXf reduced_DirichletBoundaryMatrix;//D
 
+    std::vector<Eigen::MatrixXf> devided_reduced_PoissonMatrix;//X
+    std::vector<Eigen::MatrixXf> devided_reduced_Pressure2VelocityMatrix;//Y
+    std::vector<Eigen::MatrixXf> devided_reduced_DirichletBoundaryMatrix;//D
+
     Eigen::MatrixXf U0;
     Eigen::MatrixXf U1;
     Eigen::MatrixXf U2;
     Eigen::MatrixXf U3;
     Eigen::MatrixXf P;
-    
+    std::vector<Eigen::MatrixXf> divide_P;
     // Eigen::MatrixXf reduced_U2_SnapShot;
     // Eigen::MatrixXf reduced_U3_SnapShot;
     Eigen::VectorXf reduced_all_velocity;
@@ -213,12 +220,13 @@ struct Simulator{
     Simulator(float dx,float dt,float beta,
     unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
     unsigned int flame_num, unsigned int snap_num, float threshold) 
-    : _dx(dx/texwidth),_dt(dt),_beta(beta),
+    : _dx(dx/texwidth),_dt(dt * texwidth),_beta(beta),
     _texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),
     _flame_num(flame_num),_snap_num(snap_num),_threshold(threshold)
     {
         _timestamp = 0;
         _delta_snap = _flame_num / _snap_num;
+        _snap_devide_num = _snap_num / 3;
         if(_flame_num % _snap_num != 0)std::cout << " Warning : _flame_num % _snap_num != 0" << std::endl;
         std::cout << "dx,dt,beta = " << _dx << "," << _dt << "," << _beta << std::endl;
         std::cout << "width,height,depth = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
@@ -239,6 +247,7 @@ struct Simulator{
         std::filesystem::create_directories(density_floder_name);
         PoissonMatrix = SparseMatrix(_texwidth*_texheight*_texdepth,texwidth*_texheight*_texdepth);
         Vel2DivMatrix = SparseMatrix(_texwidth*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
+        // DiffusionMatrix = SparseMatrix(3*_texwidth*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
         DirichletBoundaryMatrix = SparseMatrix(3*(texwidth + 1)*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
         Pressure2VelocityMatrix = SparseMatrix(3*(_texwidth + 1)*_texheight*_texdepth, texwidth*_texheight*_texdepth);
         all_velocity = Eigen::VectorXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth);
@@ -254,6 +263,7 @@ struct Simulator{
         U2_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         U3_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         P_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
+        b_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         calPoissonMatrix();
         // std::cout << "Poison" << std::endl;
         calVel2DivMatrix();
@@ -264,6 +274,12 @@ struct Simulator{
     };
     //full simulator
     void oneloop();
+    void calDiffusionMatrix();
+    void calPoissonMatrix();
+    void calVel2DivMatrix();
+    void calPressure2VelocityMatrix();
+    void calDirichletBoundaryMatrix();
+    void init_all_velocity();
     void init_velocity();
     void init_density(float init_density_value);
     void init_templature(float init_templature_value);
@@ -274,19 +290,18 @@ struct Simulator{
     void faceAdvect();
     void centerAdvect(Slab &val);
     void project();
+    void diffusion();
     void addForce();
     Eigen::Vector3d getBuoyanacy(int i,int j, int k);
 
     //construct basis
-    void calPoissonMatrix();
-    void calVel2DivMatrix();
-    void calPressure2VelocityMatrix();
-    void calDirichletBoundaryMatrix();
-    void init_all_velocity();
+    
     void write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap);
     void write_exact_solution(Eigen::MatrixXf &mat, Eigen::VectorXf &snap);
     void getBasisQRSVD();
     void getReducedLinearOperator();
+    void getDevidedBasis();
+    void getDevidedReducedLinearOperator();
 
     //subspace
     void subspace_execute();

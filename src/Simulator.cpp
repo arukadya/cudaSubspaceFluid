@@ -4,35 +4,35 @@ float* Simulator::get_currentTexture()
 {
     return density_tgt.src_texture;
 }
-void CalForceEncoder::encode
-(
-    Slab &out_y_force,
-    Slab &density_tgt,
-    Slab &density_amb,
-    Slab &templature
-)
-{
-    // GLuint shader_program = loadComputeProgram("../../shader/calForce.comp");
-    GLuint shader_program = loadComputeProgram(_shader_path);
-    glUseProgram(shader_program);
-    //ssboにBindするBufferを用意
-    out_y_force.setupBuffer(0);
-    density_tgt.setupBuffer(1);
-    density_amb.setupBuffer(2);
-    templature.setupBuffer(3);
+// void CalForceEncoder::encode
+// (
+//     Slab &out_y_force,
+//     Slab &density_tgt,
+//     Slab &density_amb,
+//     Slab &templature
+// )
+// {
+//     // GLuint shader_program = loadComputeProgram("../../shader/calForce.comp");
+//     GLuint shader_program = loadComputeProgram(_shader_path);
+//     glUseProgram(shader_program);
+//     //ssboにBindするBufferを用意
+//     out_y_force.setupBuffer(0);
+//     density_tgt.setupBuffer(1);
+//     density_amb.setupBuffer(2);
+//     templature.setupBuffer(3);
     
-    GLfloat uniform_g0 = glGetUniformLocation(shader_program, "g0");
-    GLfloat uniform_t_amb = glGetUniformLocation(shader_program, "t_amb");
-    // GLfloat uniform_beta = glGetUniformLocation(shader_program, "beta");
+//     GLfloat uniform_g0 = glGetUniformLocation(shader_program, "g0");
+//     GLfloat uniform_t_amb = glGetUniformLocation(shader_program, "t_amb");
+//     // GLfloat uniform_beta = glGetUniformLocation(shader_program, "beta");
 
-    glUniform1f(uniform_g0, G0);
-    glUniform1f(uniform_t_amb, AMB_TEMPLATURE);
-    // glUniform1f(uniform_beta, _beta);
-    glDispatchCompute(std::pow(2,10),1,1);
-    out_y_force.sl_getSrcBufferSubData();
-    // out_y_force.print_src();
-    out_y_force.swap_src_dst();
-}
+//     glUniform1f(uniform_g0, G0);
+//     glUniform1f(uniform_t_amb, AMB_TEMPLATURE);
+//     // glUniform1f(uniform_beta, _beta);
+//     glDispatchCompute(std::pow(2,10),1,1);
+//     out_y_force.sl_getSrcBufferSubData();
+//     // out_y_force.print_src();
+//     out_y_force.swap_src_dst();
+// }
 //Simulator
 void Simulator::inputTXT(std::string &InputFileName)
 {
@@ -383,6 +383,67 @@ void Simulator::calVel2DivMatrix()
     Vel2DivMatrix.setFromTriplets(triplets.begin(), triplets.end());
 }
 
+void Simulator::calDiffusionMatrix()
+{
+    std::vector<Triplet> triplets;
+    float size = (_texwidth + 1) * _texheight * _texdepth;
+    for(unsigned int i=0;i<_texwidth;i++){
+        for(unsigned int j=0;j<_texheight;j++){
+            for(unsigned int k=0;k<_texdepth;k++){
+                // float D[6] = {1.0,1.0,-1.0,-1.0,-1.0,1.0};//周囲6方向に向かって働く、圧力の向き
+                float scale = _dt / (4 * _dx* _dx);
+                std::vector<int> F = {i<_texwidth-2,j<_texheight-2,i>1,j>1,k>1,k<_texdepth-2};
+                //速度の境界値は0に設定しているので、境界成分に対応する係数は0でよい
+                if(F[0])
+                {
+                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+2+j*_texwidth+k*_texwidth*_texheight, scale);//x
+                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+2+j*_texwidth+k*_texwidth*_texheight, scale);//y
+                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+2+j*_texwidth+k*_texwidth*_texheight, scale);//z
+                }
+                if(F[1])
+                {
+                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+(j+2)*_texwidth+k*_texwidth*_texheight, scale);
+                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+(j+2)*_texwidth+k*_texwidth*_texheight, scale);
+                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+(j+2)*_texwidth+k*_texwidth*_texheight, scale);
+                }
+                // if(F[0] && F[1])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, -2 * scale);
+                if(F[2])
+                {
+                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i-2+j*_texwidth+k*_texwidth*_texheight, scale);
+                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i-2+j*_texwidth+k*_texwidth*_texheight, scale);
+                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i-2+j*_texwidth+k*_texwidth*_texheight, scale);
+                }
+                if(F[3])
+                {
+                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+(j-2)*_texwidth+k*_texwidth*_texheight, scale);
+                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+(j-2)*_texwidth+k*_texwidth*_texheight, scale);
+                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+(j-2)*_texwidth+k*_texwidth*_texheight, scale);
+                }
+                // if(F[2] && F[3])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, -2 * scale);
+                if(F[4])
+                {
+                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+(k-2)*_texwidth*_texheight, scale);
+                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+j*_texwidth+(k-2)*_texwidth*_texheight, scale);
+                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k-2)*_texwidth*_texheight, scale);
+                }
+                if(F[5])
+                {
+                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
+                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
+                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
+                }
+                if(F[0] && F[1] && F[2] && F[3] && F[4] && F[5])
+                {
+                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, 1 - 6 * scale);
+                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+j*_texwidth+k*_texwidth*_texheight, 1 - 6 * scale);
+                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+k*_texwidth*_texheight, 1 - 6 * scale);
+                }
+            }
+        }
+    }
+    DiffusionMatrix.setFromTriplets(triplets.begin(), triplets.end());
+}
+
 void Simulator::calPressure2VelocityMatrix()
 {
     std::vector<Triplet> triplets;
@@ -432,6 +493,7 @@ void Simulator::project(){
     // solver.compute(A);
     init_all_velocity();
     b = Vel2DivMatrix * DirichletBoundaryMatrix * all_velocity;
+    write_exact_solution(b_all_frame,b);
     //initialize
     solver.compute(PoissonMatrix);
     px = solver.solveWithGuess(b, px);
@@ -524,7 +586,7 @@ Eigen::Vector3d Simulator::getBuoyanacy(int i,int j, int k){
     float rho_amb = density_amb.get_volume_value(i,j,k);
     float temp = templature.get_volume_value(i,j,k);
     // float value = -(-G0*(rho +rho_amb) + BETA*(temp - AMB_TEMPLATURE));
-    return -(-G0*(rho +rho_amb) + _beta*(temp - AMB_TEMPLATURE))*dir_gravity;
+    return -(-G0*_dx*(rho +rho_amb) + _beta*(temp - AMB_TEMPLATURE))*dir_gravity;
 }
 
 void Simulator::getBasisQRSVD()
@@ -555,6 +617,8 @@ void Simulator::getBasisQRSVD()
     (P.transpose() * P - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
 }
 
+
+
 void Simulator::getReducedLinearOperator()
 {
     reduced_Vel2DivMatrix = P.transpose() * Vel2DivMatrix * U2;
@@ -579,6 +643,11 @@ void Simulator::getReducedLinearOperator()
     }
     if(!is_symmetric)std::cout << "non symmetric matrix" << std::endl;
     if(is_positive_definite && is_symmetric)std::cout << "reduced_X is symmetric positive definite matrix" << std::endl;
+    std::cout << "(P^T X P)^-1.det = " << reduced_PoissonMatrix.determinant() << std::endl;
+    // std::cout << "(P^T X P)^-1 = " << std::endl << reduced_PoissonMatrix.inverse() << std::endl;
+    std::cout << "((P^T X P) * (P^T X P)^-1 - I).norm() = " << std::endl <<
+    (reduced_PoissonMatrix * reduced_PoissonMatrix.inverse() - Eigen::MatrixXf::Identity(reduced_PoissonMatrix.rows(),reduced_PoissonMatrix.cols())).norm() << std::endl;
+    // std::cout << "X^-1.det = " << PoissonMatrix. << std::endl;
     // std::cout << "reduced_W size" << std::endl << 
     // "rows,cols = " << reduced_Vel2DivMatrix.rows() << "," << reduced_Vel2DivMatrix.cols() << std::endl;
     // std::cout << "reduced_X size" << std::endl << 
@@ -719,7 +788,6 @@ void Simulator::subspace_oneloop()
     //U0
     // std::cout << "U0 snap norm = " << U0_SnapShot.row(_timestamp).norm() << std::endl;
     faceAdvect();
-
     //linear
     init_all_velocity();
 
@@ -730,9 +798,10 @@ void Simulator::subspace_oneloop()
     // std::cout << "all velocity    size, norm = " << all_velocity.size()<< "," << all_velocity.norm() << std::endl;
     // std::cout << "U2              size, norm = " << U2.rows() << "," << U2.cols() << "," << U2.norm() << std::endl;
     // std::cout << "reduce velocity size, norm = " << reduced_all_velocity.size()<< "," << reduced_all_velocity.norm() << std::endl;
-    std::cout << "accuracy check flame : " << _timestamp << std::endl;
-    std::cout << "U2 : " << (U2_all_frame.col(_timestamp) - U2 * reduced_all_velocity).norm() / U2_all_frame.col(_timestamp).norm() << std::endl;
-    std::cout << "exact, reduce : " << U2_all_frame.col(_timestamp).norm() << "," <<  (U2 * reduced_all_velocity).norm() << std::endl;
+    // std::cout << "accuracy check flame : " << _timestamp << std::endl;
+    // std::cout << "U2 : " << (U2_all_frame.col(_timestamp) - U2 * reduced_all_velocity).norm() / U2_all_frame.col(_timestamp).norm() << std::endl;
+    // std::cout << "exact, reduce : " << U2_all_frame.col(_timestamp).norm() << "," <<  (U2 * reduced_all_velocity).norm() << std::endl;
+    reduced_all_velocity = U2.transpose() * U2_all_frame.col(_timestamp);
     subspace_project();
     std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
     std::cout << "exact, reduce : " << U3_all_frame.col(_timestamp).norm() << "," <<  (U3 * reduced_all_velocity).norm() << std::endl;
@@ -756,30 +825,26 @@ void Simulator::subspace_project(){
     // Eigen::FullPivHouseholderQR<Eigen::MatrixXf> solver;
     // solver.setTolerance(1e-6);
     // solver.setMaxIterations(20);
+    // b = P.transpose() * b_all_frame.col(_timestamp);
+    // std::cout << "exact    reduced_b" << std::endl << b.transpose() << std::endl;
     b = reduced_Vel2DivMatrix * reduced_DirichletBoundaryMatrix * reduced_all_velocity;
+    // std::cout << "subspace reduced_b" << std::endl << b.transpose() << std::endl;
     solver.compute(reduced_PoissonMatrix);
-
     // std::cout << "before reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
     reduced_px = solver.solveWithGuess(b, reduced_px);
     // reduced_px = solver.solve(b);
-    std::cout << "subspace reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
-    reduced_px = P.transpose() * P_all_frame.col(_timestamp);
-    std::cout << "exact    reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
-    // std::cout << "after reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
-    // for(unsigned int i=0;i<_texwidth;i++){
-    //     for(unsigned int j=0;j<_texheight;j++){
-    //         for(unsigned int k=0;k<_texdepth;k++){
-    //             pressure.set_volume_value(i,j,k,px(i+j*_texwidth+k*_texwidth*_texheight));
-    //         }
-    //     }
-    // }
-    // pressure.swap_src_dst();
+    // std::cout << "subspace reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
+    // reduced_px = reduced_PoissonMatrix.inverse() * b;
+    // std::cout << "inverce  reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
 
     // all_velocity = all_velocity - Pressure2VelocityMatrix * px;
     // std::cout << "before reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
     reduced_all_velocity = reduced_DirichletBoundaryMatrix * reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
     // std::cout << "after reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
-
     all_velocity = U3 * reduced_all_velocity;
     all2xyz();
 }
+
+
+void getDevidedBasis();
+void getDevidedReducedLinearOperator();
