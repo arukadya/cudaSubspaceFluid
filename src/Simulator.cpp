@@ -647,12 +647,11 @@ void Simulator::getReducedLinearOperator()
     // std::cout << "(P^T X P)^-1 = " << std::endl << reduced_PoissonMatrix.inverse() << std::endl;
     std::cout << "((P^T X P) * (P^T X P)^-1 - I).norm() = " << std::endl <<
     (reduced_PoissonMatrix * reduced_PoissonMatrix.inverse() - Eigen::MatrixXf::Identity(reduced_PoissonMatrix.rows(),reduced_PoissonMatrix.cols())).norm() << std::endl;
-    // std::cout << "X^-1.det = " << PoissonMatrix. << std::endl;
     // std::cout << "reduced_W size" << std::endl << 
     // "rows,cols = " << reduced_Vel2DivMatrix.rows() << "," << reduced_Vel2DivMatrix.cols() << std::endl;
     // std::cout << "reduced_X size" << std::endl << 
     // "rows,cols = " << reduced_PoissonMatrix.rows() << "," << reduced_PoissonMatrix.cols() << std::endl;
-    // std::cout << "reduced_X" << std::endl << reduced_PoissonMatrix << std::endl;
+    std::cout << "reduced_X" << std::endl << reduced_PoissonMatrix << std::endl;
     // std::cout << "reduced_Y size" << std::endl << 
     // "rows,cols = " << reduced_Pressure2VelocityMatrix.rows() << "," << reduced_Pressure2VelocityMatrix.cols() << std::endl;
     // std::cout << "reduced_D size" << std::endl << 
@@ -702,6 +701,7 @@ void Simulator::input_Basis()
 
 Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_dimention,float threshold)
 {
+    int singularity_threshold = 1e-3;
     Eigen::HouseholderQR<Eigen::MatrixXf> QRSolver(SnapShot);
     int m = SnapShot.rows();
     int n = SnapShot.cols();
@@ -738,7 +738,10 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_diment
             break;
         }
     }
-    std::cout << "singular value" << std::endl << singular_values.transpose() << std::endl;
+    float singularity = *singular_values.begin() / *(singular_values.end() - 1);
+    // std::cout << "singular value" << std::endl << singular_values.transpose() << std::endl;
+    if(singularity < singularity_threshold)std::cout << "worning!! : singularity is too large : "<< singularity << std::endl;
+    // std::cout << "max,min : " << *singular_values.begin() << "," << *(singular_values.end() - 1) << std::endl;
 //    Eigen::MatrixXf Basis = HhQR.matrixQ()*svd.matrixU();
     Eigen::MatrixXf Basis(m,n);
 
@@ -746,7 +749,7 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_diment
     Basis = HhQR.householderQ()*svd.matrixU(); //m * n
     // Basis = HhQR.householderQ()*svd.matrixU()*singular_value_matrix; //m * n
     std::cout << "Basis size : " << Basis.rows() << "," << Basis.cols() << std::endl;
-    std::cout << "m , n : " << m << "," << n << std::endl;
+    // std::cout << "m , n : " << m << "," << n << std::endl;
 
     // std::cout << "Basis is orthonomality check : " << (Basis.transpose() * Basis - Eigen::MatrixXf::Identity(n,n)).norm() << std::endl;
     return Basis;
@@ -833,11 +836,11 @@ void Simulator::subspace_project(){
     // std::cout << "before reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
     reduced_px = solver.solveWithGuess(b, reduced_px);
     // reduced_px = solver.solve(b);
-    // std::cout << "subspace reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
+    // reduced_px = P.transpose() * P_all_frame.col(_timestamp);
+    std::cout << "subspace reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
     // reduced_px = reduced_PoissonMatrix.inverse() * b;
     // std::cout << "inverce  reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
 
-    // all_velocity = all_velocity - Pressure2VelocityMatrix * px;
     // std::cout << "before reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
     reduced_all_velocity = reduced_DirichletBoundaryMatrix * reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
     // std::cout << "after reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
@@ -845,6 +848,120 @@ void Simulator::subspace_project(){
     all2xyz();
 }
 
+void Simulator::devided_subspace_execute()
+{
+    x_velocity = Slab(_texwidth+1,_texheight,_texdepth,0.0f);
+    y_velocity = Slab(_texwidth,_texheight+1,_texdepth,0.0f);
+    z_velocity = Slab(_texwidth,_texheight,_texdepth+1,0.0f);
+    x_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
+    y_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
+    z_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
+    pressure = Slab(_texwidth,_texheight,_texdepth,0.0f);
+    density_tgt = Slab(_texwidth,_texheight,_texdepth,0.0f);
+    density_amb = Slab(_texwidth,_texheight,_texdepth,AMB_DENSITY);
+    templature = Slab(_texwidth,_texheight,_texdepth,AMB_TEMPLATURE);
+    init_all_velocity();
+    for(_timestamp = 0; _timestamp<_flame_num; ++_timestamp)
+    {
+        devided_subspace_oneloop();
+    }
+}
 
-void getDevidedBasis();
-void getDevidedReducedLinearOperator();
+void Simulator::devided_subspace_oneloop()
+{
+    unsigned int devide_index = 123456789;
+    init_density(TGT_DENSITY);
+    init_templature(TGT_TEMPLATURE);
+    //nonlinear
+    // std::cout << "sub_calForce" << std::endl;
+    addForce();
+    std::cout << "dev_sub_addForce" << std::endl;
+    init_all_velocity();
+    std::cout << "dev_sub_init_all_velocity" << std::endl;
+    faceAdvect();
+    //linear
+    init_all_velocity();
+
+    //U1
+    //Diffusion
+    //U2
+    reduced_all_velocity = U2.transpose() * all_velocity;
+    reduced_all_velocity = U2.transpose() * U2_all_frame.col(_timestamp);
+    subspace_project();
+    std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
+    std::cout << "exact, reduce : " << U3_all_frame.col(_timestamp).norm() << "," <<  (U3 * reduced_all_velocity).norm() << std::endl;
+    std::cout << "P  : " << ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm() << std::endl;
+    std::cout << "exact, reduce : " << P_all_frame.col(_timestamp).norm() << "," <<  (P * reduced_px).norm() << std::endl;
+    //nonlinear
+    //U3
+    // times.push_back(TD.endTimer());
+    std::cout << "dev_sub_project" << std::endl;
+    centerAdvect(templature);
+    // std::cout << "centerAdvectTemp" << std::endl;
+    centerAdvect(density_tgt);
+    centerAdvect(density_amb);
+    output_txt(_timestamp);
+    // std::cout << "centerAdvectRho" << std::endl;
+}
+
+void Simulator::devided_subspace_project()
+{
+
+}
+
+void Simulator::getDevidedBasis()
+{
+    unsigned int devided_reduce_dimention = _snap_num/_snap_devide_num;
+    unsigned int devided_step = _snap_num/_snap_devide_num;
+    Eigen::MatrixXf tmp_U0;
+    Eigen::MatrixXf tmp_U1;
+    Eigen::MatrixXf tmp_U2;
+    Eigen::MatrixXf tmp_U3;
+    Eigen::MatrixXf tmp_P;
+    Eigen::MatrixXf tmp_U0_SnapShot(U0_SnapShot.rows(),devided_step);
+    Eigen::MatrixXf tmp_U1_SnapShot(U1_SnapShot.rows(),devided_step);
+    Eigen::MatrixXf tmp_U2_SnapShot(U2_SnapShot.rows(),devided_step);
+    Eigen::MatrixXf tmp_U3_SnapShot(U3_SnapShot.rows(),devided_step);
+    Eigen::MatrixXf tmp_P_SnapShot(P_SnapShot.rows(),devided_step);
+    
+    for(unsigned int i=0;i<_snap_devide_num;++i)
+    {
+        for(unsigned int j=0;j<devided_step;++j)
+        {
+            tmp_U0_SnapShot.col(j) = U0_SnapShot.col(i*devided_step + j);
+            tmp_U1_SnapShot.col(j) = U1_SnapShot.col(i*devided_step + j);
+            tmp_U2_SnapShot.col(j) = U2_SnapShot.col(i*devided_step + j);
+            tmp_U3_SnapShot.col(j) = U3_SnapShot.col(i*devided_step + j);
+            tmp_P_SnapShot.col(j) = P_SnapShot.col(i*devided_step + j);
+        }
+        tmp_U0 = cal_Basis(tmp_U0_SnapShot,devided_reduce_dimention,_threshold);
+        tmp_U1 = cal_Basis(tmp_U1_SnapShot,devided_reduce_dimention,_threshold);
+        tmp_U2 = cal_Basis(tmp_U2_SnapShot,devided_reduce_dimention,_threshold);
+        tmp_U3 = cal_Basis(tmp_U3_SnapShot,devided_reduce_dimention,_threshold);
+        tmp_P = cal_Basis(tmp_P_SnapShot,devided_reduce_dimention,_threshold);
+        devided_U0.push_back(tmp_U0);
+        devided_U1.push_back(tmp_U1);
+        devided_U2.push_back(tmp_U2);
+        devided_U3.push_back(tmp_U3);
+        devided_P.push_back(tmp_P);
+    }
+}
+
+void Simulator::getDevidedReducedLinearOperator()
+{
+    Eigen::MatrixXf tmp_reduced_Vel2DivMatrix;
+    Eigen::MatrixXf tmp_reduced_PoissonMatrix;
+    Eigen::MatrixXf tmp_reduced_Pressure2VelocityMatrix;
+    Eigen::MatrixXf tmp_reduced_DirichletBoundaryMatrix;
+    for(unsigned int i=0;i<_snap_devide_num;++i)
+    {
+        tmp_reduced_Vel2DivMatrix = devided_P[i].transpose() * Vel2DivMatrix * devided_U2[i];
+        tmp_reduced_PoissonMatrix = devided_P[i].transpose() * PoissonMatrix * devided_P[i];
+        tmp_reduced_Pressure2VelocityMatrix = devided_U3[i].transpose() * Pressure2VelocityMatrix * devided_P[i];
+        tmp_reduced_DirichletBoundaryMatrix = devided_U2[i].transpose() * DirichletBoundaryMatrix * devided_U2[i];
+        devided_reduced_Vel2DivMatrix.push_back(tmp_reduced_Vel2DivMatrix);//W
+        devided_reduced_PoissonMatrix.push_back(tmp_reduced_PoissonMatrix);//X
+        devided_reduced_Pressure2VelocityMatrix.push_back(tmp_reduced_Pressure2VelocityMatrix);//Y
+        devided_reduced_DirichletBoundaryMatrix.push_back(tmp_reduced_DirichletBoundaryMatrix);//D
+    }
+}

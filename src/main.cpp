@@ -89,23 +89,10 @@ int main(int argc, char * argv[])
     //     int sumcnt = 0;
     //     float startTime;
     //     float sum = 0;
-    //     while(window && id < flame_num)
+    //     while(window && simulator._timestamp < flame_num)
     //     {
-    //         std::string str_density = "densityTexture";
-    //         std::string str_templature = "templatureTexture";
-    //         std::string str_force = "forceTexture";
-    //         std::string str_test = "testTexture";
-    //         if(id % flame_num == 5)
-    //         {
-    //             // buffer_write_png(texwidth,TEXHEIGHT,TEXDEPTH,4,simulator.densityTexture,str_density);
-    //             // buffer_write_png(texwidth,TEXHEIGHT,1,1,simulator.testTexture,str_test);
-    //             // buffer_write_png(texwidth,TEXHEIGHT,TEXDEPTH,4,simulator.density_tgt.src_texture,str_density);
-    //             // buffer_write_png(texwidth,TEXHEIGHT,TEXDEPTH,4,simulator.y_force.src_texture,str_force);
-    //             // buffer_write_png(texwidth,TEXHEIGHT,TEXDEPTH,4,simulator.templature.src_texture,str_templature);
-    //             // buffer_write_png(texwidth,TEXHEIGHT,1,1,simulator.test.src_texture,str_test);
-    //         }
     //         // std::string inputFileName = "density_txt/output";
-    //         // ++id;
+            
     //         // inputFileName += std::to_string(id % flame_num)+".txt";
     //         // std::cout << inputFileName << std::endl;
     //         // simulator.inputTXT(inputFileName);
@@ -157,10 +144,9 @@ int main(int argc, char * argv[])
     
     if(is_simulate)
     {
-        while(id < flame_num)
+        while(simulator._timestamp < flame_num)
         {
             simulator.oneloop();
-            ++id;
         }
         simulator.getBasisQRSVD();
         std::cout << "fin_calBasis" << std::endl;

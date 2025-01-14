@@ -200,6 +200,7 @@ struct Simulator{
     Eigen::MatrixXf reduced_Pressure2VelocityMatrix;//Y
     Eigen::MatrixXf reduced_DirichletBoundaryMatrix;//D
 
+    std::vector<Eigen::MatrixXf> devided_reduced_Vel2DivMatrix;//W
     std::vector<Eigen::MatrixXf> devided_reduced_PoissonMatrix;//X
     std::vector<Eigen::MatrixXf> devided_reduced_Pressure2VelocityMatrix;//Y
     std::vector<Eigen::MatrixXf> devided_reduced_DirichletBoundaryMatrix;//D
@@ -209,7 +210,11 @@ struct Simulator{
     Eigen::MatrixXf U2;
     Eigen::MatrixXf U3;
     Eigen::MatrixXf P;
-    std::vector<Eigen::MatrixXf> divide_P;
+    std::vector<Eigen::MatrixXf> devided_U0;
+    std::vector<Eigen::MatrixXf> devided_U1;
+    std::vector<Eigen::MatrixXf> devided_U2;
+    std::vector<Eigen::MatrixXf> devided_U3;
+    std::vector<Eigen::MatrixXf> devided_P;
     // Eigen::MatrixXf reduced_U2_SnapShot;
     // Eigen::MatrixXf reduced_U3_SnapShot;
     Eigen::VectorXf reduced_all_velocity;
@@ -307,6 +312,10 @@ struct Simulator{
     void subspace_execute();
     void subspace_oneloop();
     void subspace_project();
+
+    void devided_subspace_execute();
+    void devided_subspace_oneloop();
+    void devided_subspace_project();
     
     //test
     void inputTXT(std::string &InputFileName);

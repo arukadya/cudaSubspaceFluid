@@ -13,11 +13,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 #set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -ccbin g++-10)
 
-include_directories(SYSTEM ../../../dev/lib/eigen-3.4.0)
+#include_directories(SYSTEM ../../../dev/lib/eigen-3.4.0)
+include_directories(SYSTEM lib/eigen-3.4.0)
 include_directories(header)
 #include_directories(cuda_util)
 
-link_directories(/dev/lib/OpenGL/lib)
+#link_directories(/dev/lib/OpenGL/lib)
 
 file(GLOB_RECURSE CXX_SOURCE_LIST CONFIGURE_DEPENDS "src/*.cpp")
 #file(GLOB_RECURSE CUDA_SOURCE_LIST CONFIGURE_DEPENDS "src/*.cu")

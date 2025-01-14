@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/g++-10
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/toshi/dev/CXX/Subspace/header -isystem /home/toshi/dev/CXX/Subspace/../../../dev/lib/eigen-3.4.0
+CXX_INCLUDES = -I/home/toshi/dev/CXX/Subspace/header -isystem /home/toshi/dev/CXX/Subspace/lib/eigen-3.4.0
 
 CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17 -O2 -Wall
 
