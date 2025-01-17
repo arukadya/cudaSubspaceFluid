@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(MyProject VERSION 1.0 LANGUAGES CXX CUDA)
+project(MyProject VERSION 1.0 LANGUAGES CXX)
 
 #find_package(CUDA REQUIRED)
 
@@ -13,21 +13,26 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 #set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -ccbin g++-10)
 
-#include_directories(SYSTEM ../../../dev/lib/eigen-3.4.0)
+find_package(OpenGL REQUIRED)
+include_directories(
+    ${OPENGL_INCLUDE_DIR}
+)
 include_directories(SYSTEM lib/eigen-3.4.0)
 include_directories(header)
-#include_directories(cuda_util)
 
-#link_directories(/dev/lib/OpenGL/lib)
+
+include_directories(/opt/homebrew/include)
+
+link_directories(/opt/homebrew/lib)
 
 file(GLOB_RECURSE CXX_SOURCE_LIST CONFIGURE_DEPENDS "src/*.cpp")
 #file(GLOB_RECURSE CUDA_SOURCE_LIST CONFIGURE_DEPENDS "src/*.cu")
 
 add_executable(main ${CXX_SOURCE_LIST})
-#add_executable(main ${CXX_SOURCE_LIST} ${CUDA_SOURCE_LIST})
-#add_executable(viewer ${CXX_SOURCE_LIST} ${CUDA_SOURCE_LIST})
+#add_executable(viewer ${CXX_SOURCE_LIST})
 
-target_link_libraries(main glfw GLEW GL)
+target_link_libraries(main -lglfw -lGLEW ${OPENGL_LIBRARIES})
+#target_link_libraries(viewer -lglfw -lGLEW ${OPENGL_LIBRARIES})
 #target_link_libraries(main glfw GLEW GL cublas cusolver cusparse cudart)
 #target_link_libraries(viewer glfw GLEW GL cublas cusolver cusparse cudart)
 

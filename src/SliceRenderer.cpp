@@ -109,7 +109,6 @@ GLuint SliceRenderer::makeSlice()
 
 GLuint SliceRenderer::makeVolume(float* densityTexture, GLfloat *smokeColor,Eigen::Vector3f &tgt)
 {
-//    std::vector<GLubyte>volume;
     std::vector<GLfloat>volume;
     raySliceAngleCos = getRaySliceAngleCos(tgt);
     float marchingLength = sliceThickness / raySliceAngleCos;
@@ -119,11 +118,11 @@ GLuint SliceRenderer::makeVolume(float* densityTexture, GLfloat *smokeColor,Eige
                 float transparency = exp( -1.0 * densityTexture[resequence3to1(i, j, k, _texwidth, _texheight, _texdepth)] * marchingLength);
                 // float transparency10 = exp( -1.0 * 10 * marchingLength);
                 // float transparency255 = exp( -1.0 * 255 * marchingLength);
-//                std::cout << densityTexture[resequence3to1(i, j, k, texwidth, _texheight, _texdepth)] << std::endl;
+            //    std::cout << densityTexture[resequence3to1(i, j, k, texwidth, _texheight, _texdepth)] << std::endl;
                 float opacity = 1 - transparency;
-//                else volume.push_back(opacity);
+            //    else volume.push_back(opacity);
                 volume.push_back(opacity);
-//                std::cout << (float)volume[volume.size()-1] << "," << opacity10 << "," << opacity255 << std::endl;
+            //    std::cout << (float)volume[volume.size()-1] << "," << opacity10 << "," << opacity255 << std::endl;
             }
         }
     }

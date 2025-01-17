@@ -155,11 +155,12 @@ struct CalForceEncoder : Encoder{
 
 Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_dimention,float threshold);
 
+
 struct Simulator{
     //FluidVariables
     const float _dx; const float _dt;const float _beta;
     const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
-    const unsigned int _flame_num;const unsigned int _snap_num; const float _threshold;
+    const unsigned int _flame_num;const unsigned int _snap_num; const unsigned int _discard_flame; const float _threshold;
     unsigned int _timestamp;
     unsigned int _delta_snap;
     unsigned int _reduce_dimention;
@@ -224,10 +225,10 @@ struct Simulator{
     std::string density_floder_name;
     Simulator(float dx,float dt,float beta,
     unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
-    unsigned int flame_num, unsigned int snap_num, float threshold) 
+    unsigned int flame_num, unsigned int snap_num, unsigned int discard_flame,float threshold) 
     : _dx(dx/texwidth),_dt(dt * texwidth),_beta(beta),
     _texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),
-    _flame_num(flame_num),_snap_num(snap_num),_threshold(threshold)
+    _flame_num(flame_num),_snap_num(snap_num),_discard_flame(discard_flame),_threshold(threshold)
     {
         _timestamp = 0;
         _delta_snap = _flame_num / _snap_num;
@@ -236,6 +237,7 @@ struct Simulator{
         std::cout << "dx,dt,beta = " << _dx << "," << _dt << "," << _beta << std::endl;
         std::cout << "width,height,depth = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
         std::cout << "flame_num,snap_num,threshold = " << _flame_num << "," << _snap_num << "," << threshold << std::endl;
+        std::cout << "discard_flame = " << _discard_flame << std::endl; 
         x_velocity = Slab(_texwidth+1,_texheight,_texdepth,0.0f);
         y_velocity = Slab(_texwidth,_texheight+1,_texdepth,0.0f);
         z_velocity = Slab(_texwidth,_texheight,_texdepth+1,0.0f);

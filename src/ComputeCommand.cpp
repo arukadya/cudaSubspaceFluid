@@ -64,7 +64,7 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
 }
 int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
-    unsigned int &flame_num,unsigned int &snap_num,float &threshold){
+    unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame ,float &threshold){
     std::ifstream Inputfile(InputFileName);
     if (!Inputfile.is_open()) {
         std::cerr << "Could not open the file - '"
@@ -138,10 +138,16 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta,
                 threshold = std::stof(word);
             };
         }
+        else if(word == "discard_flame")
+        {
+            while(getline(ss_nums,word,' ')){
+                discard_flame = std::stof(word);
+            };
+        }
     };
-    std::cout << "dx,dt,beta = " << dx << "," << dt << "," << beta << std::endl;
-    std::cout << "width,height,depth,slice = " << texwidth << "," << texheight << "," << texdepth << "," << slice_num << std::endl;
-    std::cout << "flame_num, snap_num, threshold = " << flame_num << "," << snap_num <<"," << threshold << std::endl;
+    // std::cout << "dx,dt,beta = " << dx << "," << dt << "," << beta << std::endl;
+    // std::cout << "width,height,depth,slice = " << texwidth << "," << texheight << "," << texdepth << "," << slice_num << std::endl;
+    // std::cout << "flame_num, snap_num, threshold = " << flame_num << "," << snap_num <<"," << threshold << std::endl;
     Inputfile.close();
     return EXIT_SUCCESS;
 }

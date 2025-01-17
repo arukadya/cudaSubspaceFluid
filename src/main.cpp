@@ -38,17 +38,17 @@ int main(int argc, char * argv[])
     bool is_simulate = (command0 == "pre_compute");
     float dx;float dt;float beta;
     unsigned int texwidth;unsigned int texheight;unsigned int texdepth;unsigned int slice_num;
-    unsigned int flame_num;unsigned int snap_num;float threshold;
+    unsigned int flame_num;unsigned int snap_num;unsigned int discard_flame;float threshold;
     unsigned int id = 0;
     std::string paramatorsFileName = "../src/paramators.txt";
     inputParamator(paramatorsFileName,dx,dt,beta,
     texwidth,texheight,texdepth,slice_num,
-    flame_num,snap_num,threshold);
+    flame_num,snap_num,discard_flame,threshold);
 
     Simulator simulator(dx,dt,beta,
     texwidth,texheight,texdepth,
-    flame_num,snap_num,threshold);
-
+    flame_num,snap_num,discard_flame,threshold);
+    std::cout << "success init simulator" << std::endl;
     if(argc == 2 && !is_simulate)
     {
         unsigned int r = atoi(argv[1]);
@@ -93,9 +93,10 @@ int main(int argc, char * argv[])
     //     {
     //         // std::string inputFileName = "density_txt/output";
             
-    //         // inputFileName += std::to_string(id % flame_num)+".txt";
+    //         // inputFileName += std::to_string(simulator._timestamp % flame_num)+".txt";
     //         // std::cout << inputFileName << std::endl;
     //         // simulator.inputTXT(inputFileName);
+    //         // ++simulator._timestamp;
     //         simulator.oneloop();
     //         // simulator.output_txt(id);
     //         Eigen::Vector3f viewPoint(4.0f, 0.0f, 4.0f);

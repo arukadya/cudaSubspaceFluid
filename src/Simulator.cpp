@@ -4,35 +4,6 @@ float* Simulator::get_currentTexture()
 {
     return density_tgt.src_texture;
 }
-// void CalForceEncoder::encode
-// (
-//     Slab &out_y_force,
-//     Slab &density_tgt,
-//     Slab &density_amb,
-//     Slab &templature
-// )
-// {
-//     // GLuint shader_program = loadComputeProgram("../../shader/calForce.comp");
-//     GLuint shader_program = loadComputeProgram(_shader_path);
-//     glUseProgram(shader_program);
-//     //ssboにBindするBufferを用意
-//     out_y_force.setupBuffer(0);
-//     density_tgt.setupBuffer(1);
-//     density_amb.setupBuffer(2);
-//     templature.setupBuffer(3);
-    
-//     GLfloat uniform_g0 = glGetUniformLocation(shader_program, "g0");
-//     GLfloat uniform_t_amb = glGetUniformLocation(shader_program, "t_amb");
-//     // GLfloat uniform_beta = glGetUniformLocation(shader_program, "beta");
-
-//     glUniform1f(uniform_g0, G0);
-//     glUniform1f(uniform_t_amb, AMB_TEMPLATURE);
-//     // glUniform1f(uniform_beta, _beta);
-//     glDispatchCompute(std::pow(2,10),1,1);
-//     out_y_force.sl_getSrcBufferSubData();
-//     // out_y_force.print_src();
-//     out_y_force.swap_src_dst();
-// }
 //Simulator
 void Simulator::inputTXT(std::string &InputFileName)
 {
@@ -567,6 +538,7 @@ void Simulator::addForce(){
 void Simulator::write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap)
 {
     assert(mat.cols != snap.size || mat.rows > _timestamp);
+    if(_timestamp < _discard_flame)return;
     // if(_timestamp % _snap_num == 0)mat.row(timestamp) = snap;
     // if(_timestamp % _delta_snap == 0)mat.row(_timestamp / _delta_snap) = snap;
     if(_timestamp % _delta_snap == 0)mat.col(_timestamp / _delta_snap) = snap;
@@ -574,6 +546,7 @@ void Simulator::write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap)
 
 void Simulator::write_exact_solution(Eigen::MatrixXf &mat, Eigen::VectorXf &snap)
 {
+    // if(_timestamp < _discard_flame)return;
     assert(mat.cols != snap.size || mat.rows > _timestamp);
     // if(_timestamp % _snap_num == 0)mat.row(timestamp) = snap;
     // mat.row(_timestamp) = snap;
@@ -601,23 +574,21 @@ void Simulator::getBasisQRSVD()
     std::cout << "U2" << std::endl;
     U2 = cal_Basis(U2_SnapShot,_reduce_dimention,_threshold);
     // std::cout << "norm, reduce_dimention = " << U2.norm() << ", " << _reduce_dimention << std::endl;
-    // std::cout << "orthogonomality : " << 
-    // (U2.transpose() * U2 - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
+    std::cout << "orthogonomality : " << 
+    (U2.transpose() * U2 - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
 
     std::cout << "U3" << std::endl;
     U3 = cal_Basis(U3_SnapShot,_reduce_dimention,_threshold);
     // std::cout << "norm, reduce_dimention = " << U3.norm() << ", " << _reduce_dimention << std::endl;
-    // std::cout << "orthogonomality : " << 
-    // (U3.transpose() * U3 - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
+    std::cout << "orthogonomality : " << 
+    (U3.transpose() * U3 - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
 
     std::cout << "P" << std::endl;
     P = cal_Basis(P_SnapShot,_reduce_dimention,_threshold);
-    std::cout << "norm, reduce_dimention = " << P.norm() << ", " << _reduce_dimention << std::endl;
+    // std::cout << "norm, reduce_dimention = " << P.norm() << ", " << _reduce_dimention << std::endl;
     std::cout << "orthogonomality : " << 
     (P.transpose() * P - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
 }
-
-
 
 void Simulator::getReducedLinearOperator()
 {
@@ -638,20 +609,21 @@ void Simulator::getReducedLinearOperator()
     {
         for(int j=0;j<reduced_PoissonMatrix.cols();++j)
         {
-            if( reduced_PoissonMatrix(i,j) - reduced_PoissonMatrix(j,i) > 1e-6 )is_symmetric = false;
+            if( reduced_PoissonMatrix(i,j) - reduced_PoissonMatrix(j,i) > 1e-3 )is_symmetric = false;
         }
     }
     if(!is_symmetric)std::cout << "non symmetric matrix" << std::endl;
     if(is_positive_definite && is_symmetric)std::cout << "reduced_X is symmetric positive definite matrix" << std::endl;
-    std::cout << "(P^T X P)^-1.det = " << reduced_PoissonMatrix.determinant() << std::endl;
+    // std::cout << "reduced_X" << std::endl << reduced_PoissonMatrix << std::endl;
+    // std::cout << "(X - P X' P**T) = " << (PoissonMatrix - P * reduced_PoissonMatrix * P.transpose()) << std::endl;
+    // std::cout << "(P^T X P)^-1.det = " << reduced_PoissonMatrix.determinant() << std::endl;
     // std::cout << "(P^T X P)^-1 = " << std::endl << reduced_PoissonMatrix.inverse() << std::endl;
-    std::cout << "((P^T X P) * (P^T X P)^-1 - I).norm() = " << std::endl <<
-    (reduced_PoissonMatrix * reduced_PoissonMatrix.inverse() - Eigen::MatrixXf::Identity(reduced_PoissonMatrix.rows(),reduced_PoissonMatrix.cols())).norm() << std::endl;
+    // std::cout << "((P^T X P) * (P^T X P)^-1 - I).norm() = " << std::endl <<
+    // (reduced_PoissonMatrix * reduced_PoissonMatrix.inverse() - Eigen::MatrixXf::Identity(reduced_PoissonMatrix.rows(),reduced_PoissonMatrix.cols())).norm() << std::endl;
     // std::cout << "reduced_W size" << std::endl << 
     // "rows,cols = " << reduced_Vel2DivMatrix.rows() << "," << reduced_Vel2DivMatrix.cols() << std::endl;
     // std::cout << "reduced_X size" << std::endl << 
     // "rows,cols = " << reduced_PoissonMatrix.rows() << "," << reduced_PoissonMatrix.cols() << std::endl;
-    std::cout << "reduced_X" << std::endl << reduced_PoissonMatrix << std::endl;
     // std::cout << "reduced_Y size" << std::endl << 
     // "rows,cols = " << reduced_Pressure2VelocityMatrix.rows() << "," << reduced_Pressure2VelocityMatrix.cols() << std::endl;
     // std::cout << "reduced_D size" << std::endl << 
@@ -666,6 +638,8 @@ void Simulator::output_Basis()
     // int r = _reduce_dimention;
     int r = _snap_num;
     std::string basis_foldername = "basis/n" + std::to_string(n) + "r" + std::to_string(r); 
+    std::cout << "outputbasis" << std::endl;
+    std::cout << basis_foldername << std::endl;
     std::filesystem::create_directories(basis_foldername);
     std::string U0FileName = basis_foldername + "/U0.txt";
     std::string U2FileName = basis_foldername + "/U2.txt";
@@ -701,7 +675,7 @@ void Simulator::input_Basis()
 
 Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_dimention,float threshold)
 {
-    int singularity_threshold = 1e-3;
+    float singularity_threshold = 1e-3;
     Eigen::HouseholderQR<Eigen::MatrixXf> QRSolver(SnapShot);
     int m = SnapShot.rows();
     int n = SnapShot.cols();
@@ -727,12 +701,12 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_diment
     // std::cout << "fix_R" << std::endl;
     Eigen::JacobiSVD<Eigen::MatrixXf> svd(_R,Eigen::ComputeThinU);
     // std::cout << "svd" << std::endl;
-//    //特異値
+    //特異値
     Eigen::VectorXf singular_values = svd.singularValues();
     Eigen::MatrixXf singular_value_matrix = singular_values.asDiagonal();
     for(unsigned int i=0;i<singular_values.size();++i)
     {
-        if(singular_values(i) < threshold)
+        if(singular_values(i) < singularity_threshold)
         {
             if(reduce_dimention < i)reduce_dimention = i;
             break;
@@ -742,7 +716,7 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_diment
     // std::cout << "singular value" << std::endl << singular_values.transpose() << std::endl;
     if(singularity < singularity_threshold)std::cout << "worning!! : singularity is too large : "<< singularity << std::endl;
     // std::cout << "max,min : " << *singular_values.begin() << "," << *(singular_values.end() - 1) << std::endl;
-//    Eigen::MatrixXf Basis = HhQR.matrixQ()*svd.matrixU();
+    // Eigen::MatrixXf Basis = HhQR.matrixQ()*svd.matrixU();
     Eigen::MatrixXf Basis(m,n);
 
     // Eigen::MatrixXf Basis(m,reduce_dimention);
@@ -798,22 +772,31 @@ void Simulator::subspace_oneloop()
     //Diffusion
     //U2
     reduced_all_velocity = U2.transpose() * all_velocity;
-    // std::cout << "all velocity    size, norm = " << all_velocity.size()<< "," << all_velocity.norm() << std::endl;
-    // std::cout << "U2              size, norm = " << U2.rows() << "," << U2.cols() << "," << U2.norm() << std::endl;
-    // std::cout << "reduce velocity size, norm = " << reduced_all_velocity.size()<< "," << reduced_all_velocity.norm() << std::endl;
+    Eigen::VectorXf restore_all_velocity = U2 * reduced_all_velocity;
+    std::cout << "U2 restore error = " << (all_velocity - restore_all_velocity).norm() << std::endl;
+    // std::cout << "U2 : subspace" << std::endl;
+    // std::cout << reduced_all_velocity.transpose() << std::endl;
+    // reduced_all_velocity = U2.transpose() * U2_all_frame.col(_timestamp);
+    // std::cout << "U2 : exact" << std::endl;
+    // std::cout << U2.transpose() * U2_all_frame.col(_timestamp) << std::endl;
+
     // std::cout << "accuracy check flame : " << _timestamp << std::endl;
-    // std::cout << "U2 : " << (U2_all_frame.col(_timestamp) - U2 * reduced_all_velocity).norm() / U2_all_frame.col(_timestamp).norm() << std::endl;
     // std::cout << "exact, reduce : " << U2_all_frame.col(_timestamp).norm() << "," <<  (U2 * reduced_all_velocity).norm() << std::endl;
-    reduced_all_velocity = U2.transpose() * U2_all_frame.col(_timestamp);
-    subspace_project();
-    std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
-    std::cout << "exact, reduce : " << U3_all_frame.col(_timestamp).norm() << "," <<  (U3 * reduced_all_velocity).norm() << std::endl;
-    std::cout << "P  : " << ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm() << std::endl;
-    std::cout << "exact, reduce : " << P_all_frame.col(_timestamp).norm() << "," <<  (P * reduced_px).norm() << std::endl;
+    // if(_timestamp < _discard_flame)
+    // all_velocity = U2 * reduced_all_velocity;
+    Eigen::VectorXf projected_all_velocity = U2 * reduced_all_velocity;
+    std::cout << "L2 error = " << (all_velocity - projected_all_velocity).norm() / all_velocity.norm() << std::endl;
+    all_velocity = projected_all_velocity;
+    all2xyz();
+    project();
+    // subspace_project();
+    // std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
+    // std::cout << "exact, reduce : " << U3_all_frame.col(_timestamp).norm() << "," <<  (U3 * reduced_all_velocity).norm() << std::endl;
+    // std::cout << "P  : " << ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm() << std::endl;
+    // std::cout << "exact, reduce : " << P_all_frame.col(_timestamp).norm() << "," <<  (P * reduced_px).norm() << std::endl;
     //nonlinear
     //U3
     // times.push_back(TD.endTimer());
-    std::cout << "sub_project" << std::endl;
     centerAdvect(templature);
     // std::cout << "centerAdvectTemp" << std::endl;
     centerAdvect(density_tgt);
@@ -835,14 +818,16 @@ void Simulator::subspace_project(){
     solver.compute(reduced_PoissonMatrix);
     // std::cout << "before reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
     reduced_px = solver.solveWithGuess(b, reduced_px);
-    // reduced_px = solver.solve(b);
-    // reduced_px = P.transpose() * P_all_frame.col(_timestamp);
     std::cout << "subspace reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
+    // reduced_px = solver.solve(b);
+    reduced_px = P.transpose() * P_all_frame.col(_timestamp);
+    std::cout << "exact reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
     // reduced_px = reduced_PoissonMatrix.inverse() * b;
     // std::cout << "inverce  reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
 
     // std::cout << "before reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
-    reduced_all_velocity = reduced_DirichletBoundaryMatrix * reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
+    // reduced_all_velocity = reduced_DirichletBoundaryMatrix * reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
+    reduced_all_velocity = reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
     // std::cout << "after reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
     all_velocity = U3 * reduced_all_velocity;
     all2xyz();
@@ -869,7 +854,6 @@ void Simulator::devided_subspace_execute()
 
 void Simulator::devided_subspace_oneloop()
 {
-    unsigned int devide_index = 123456789;
     init_density(TGT_DENSITY);
     init_templature(TGT_TEMPLATURE);
     //nonlinear
