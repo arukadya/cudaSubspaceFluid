@@ -155,7 +155,6 @@ struct CalForceEncoder : Encoder{
 
 Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_dimention,float threshold);
 
-
 struct Simulator{
     //FluidVariables
     const float _dx; const float _dt;const float _beta;
@@ -311,6 +310,7 @@ struct Simulator{
     void getDevidedReducedLinearOperator();
 
     //subspace
+    Eigen::MatrixXf getRowsCorrespondPoint(Eigen::MatrixXf &Basis, unsigned int x,unsigned int y, unsigned int z);
     void subspace_execute();
     void subspace_oneloop();
     void subspace_project();

@@ -1,11 +1,11 @@
 dx 0.64
-dt 0.0000015625
+dt 0.00015625
 beta 1000
 texwidth 64
 texheight 64
 texdepth 64
 slice_num 64
-flame_num 1000
-snap_num 100
+flame_num 50
+snap_num 10
 discard_flame 0
 threshold 0.001
