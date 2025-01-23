@@ -178,6 +178,8 @@ struct Simulator{
 
     Eigen::VectorXf all_velocity;
     Eigen::VectorXf px;
+    Eigen::VectorXf b;
+    Eigen::VectorXf origin_b;
     Eigen::MatrixXf U0_SnapShot;
     Eigen::MatrixXf U1_SnapShot;
     Eigen::MatrixXf U2_SnapShot;
@@ -258,7 +260,8 @@ struct Simulator{
         Pressure2VelocityMatrix = SparseMatrix(3*(_texwidth + 1)*_texheight*_texdepth, texwidth*_texheight*_texdepth);
         all_velocity = Eigen::VectorXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth);
         px = Eigen::VectorXf::Zero(_texwidth *_texheight*_texdepth);
-
+        b = Eigen::VectorXf::Zero(_texwidth *_texheight*_texdepth);
+        origin_b = Eigen::VectorXf::Zero(_texwidth *_texheight*_texdepth);
         U0_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
         U1_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
         U2_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
@@ -271,12 +274,13 @@ struct Simulator{
         P_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         b_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         calPoissonMatrix();
-        // std::cout << "Poison" << std::endl;
+        std::cout << "Poison" << std::endl;
         calVel2DivMatrix();
-        // std::cout << "V2D" << std::endl;
+        std::cout << "V2D" << std::endl;
         calPressure2VelocityMatrix();
-        // std::cout << "P2V" << std::endl;
+        std::cout << "P2V" << std::endl;
         calDirichletBoundaryMatrix();
+        std::cout << "DB" << std::endl;
     };
     //full simulator
     void oneloop();
@@ -326,6 +330,7 @@ struct Simulator{
     void input_Basis();
     void all2xyz();
     void testCompute();
+    void origin_project();
 private:
     void testSDF();
 };

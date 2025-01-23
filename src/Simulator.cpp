@@ -1,5 +1,6 @@
 #include "Simulator.hpp"
 // #include "Simulator.cuh"
+
 float* Simulator::get_currentTexture()
 {
     return density_tgt.src_texture;
@@ -40,6 +41,7 @@ void Simulator::init_velocity(float init_templature_value)
 }
 void Simulator::init_all_velocity()
 {
+
     unsigned int size = (_texwidth + 1) * _texheight * _texdepth;
     for(unsigned int i=0;i<_texwidth+1;++i)
     {
@@ -47,7 +49,9 @@ void Simulator::init_all_velocity()
         {
             for(unsigned int k=0;k<_texdepth;++k)
             {
-                all_velocity(resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth)) = x_velocity.get_volume_value(i,j,k);
+                unsigned int reseq = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
+                // all_velocity(resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth)) = x_velocity.get_volume_value(i,j,k);
+                all_velocity(reseq) = x_velocity.src_texture[reseq];
             }
         }
     }
@@ -57,7 +61,9 @@ void Simulator::init_all_velocity()
         {
             for(unsigned int k=0;k<_texdepth;++k)
             {
-                all_velocity(size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth)) = y_velocity.get_volume_value(i,j,k);
+                // all_velocity(size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth)) = y_velocity.get_volume_value(i,j,k);
+                unsigned int reseq = resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth);
+                all_velocity(size + reseq) = y_velocity.src_texture[reseq];
             }
         }
     }
@@ -67,7 +73,9 @@ void Simulator::init_all_velocity()
         {
             for(unsigned int k=0;k<_texdepth+1;++k)
             {
-                all_velocity(2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1)) = z_velocity.get_volume_value(i,j,k);
+                // all_velocity(2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1)) = z_velocity.get_volume_value(i,j,k);
+                unsigned int reseq = resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1);
+                all_velocity(2*size + reseq) = z_velocity.src_texture[reseq];
             }
         }
     }
@@ -81,8 +89,9 @@ void Simulator::all2xyz()
         {
             for(unsigned int k=0;k<_texdepth;++k)
             {
-                x_velocity.set_volume_value(i,j,k,all_velocity(resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth)));
-                // all_velocity(resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)) = x_velocity.get_volume_value(i,j,k);
+                // x_velocity.set_volume_value(i,j,k,all_velocity(resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth)));
+                unsigned int reseq = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
+                x_velocity.dst_texture[reseq] = all_velocity(reseq);
             }
         }
     }
@@ -92,8 +101,9 @@ void Simulator::all2xyz()
         {
             for(unsigned int k=0;k<_texdepth;++k)
             {
-                y_velocity.set_volume_value(i,j,k,all_velocity(size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth)));
-                // all_velocity(size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)) = y_velocity.get_volume_value(i,j,k);
+                // y_velocity.set_volume_value(i,j,k,all_velocity(size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth)));
+                unsigned int reseq = resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth);
+                y_velocity.dst_texture[reseq] = all_velocity(size + reseq);
             }
         }
     }
@@ -103,8 +113,9 @@ void Simulator::all2xyz()
         {
             for(unsigned int k=0;k<_texdepth+1;++k)
             {
-                z_velocity.set_volume_value(i,j,k,all_velocity(2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1)));
-                // all_velocity(2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)) = z_velocity.get_volume_value(i,j,k);
+                // z_velocity.set_volume_value(i,j,k,all_velocity(2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1)));
+                unsigned int reseq = resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1);
+                z_velocity.dst_texture[reseq] = all_velocity(2*size + reseq);
             }
         }
     }
@@ -132,8 +143,13 @@ void Simulator::oneloop()
     write_snapshot(U2_SnapShot, all_velocity);
     write_exact_solution(U2_all_frame, all_velocity);
     // std::cout << "U2 norm = " << U2_all_frame.row(_timestamp).norm() << std::endl;
-
+    std::cout << "all_velocity.norm = " << all_velocity.norm() << std::endl;
+    std::cout << "preproject" << std::endl;
     project();
+    // b = Vel2DivMatrix * DirichletBoundaryMatrix * all_velocity;
+    // b = Vel2DivMatrix * all_velocity;
+    // origin_project();
+    // std::cout << "(b - origin_b).norm = " << (b-origin_b).norm() << std::endl;
     // std::cout << "px norm = " << px.norm() << std::endl;
     write_snapshot(U3_SnapShot, all_velocity);
     write_snapshot(P_SnapShot, px);
@@ -187,7 +203,7 @@ float Simulator::TriLinearInterporation(float x,float y,float z,Slab &val)
 }
 
 void Simulator::faceAdvect(){
-    for(unsigned int i=1;i<x_velocity._width;++i){
+    for(unsigned int i=1;i<x_velocity._width-1;++i){
         for(unsigned int j=0;j<x_velocity._height;++j){
             for(unsigned int k=0;k<x_velocity._depth;++k){
                 float x = i*_dx;float y = (j+0.5)*_dx;float z = (k+0.5)*_dx;
@@ -200,7 +216,7 @@ void Simulator::faceAdvect(){
         }
     } 
     for(unsigned int i=0;i<y_velocity._width;++i){
-        for(unsigned int j=1;j<y_velocity._height;++j){
+        for(unsigned int j=1;j<y_velocity._height-1;++j){
             for(unsigned int k=0;k<y_velocity._depth;++k){
                 float x = (i+0.5)*_dx;float y = j*_dx;float z = (k+0.5)*_dx;
                 float adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
@@ -213,7 +229,7 @@ void Simulator::faceAdvect(){
     }
     for(unsigned int i=0;i<z_velocity._width;++i){
         for(unsigned int j=0;j<z_velocity._height;++j){
-            for(unsigned int k=1;k<z_velocity._depth;++k){
+            for(unsigned int k=1;k<z_velocity._depth-1;++k){
                 float x = (i+0.5)*_dx;float y = (j+0.5)*_dx;float z = k*_dx;
                 float adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
                 float adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
@@ -258,14 +274,30 @@ void Simulator::calPoissonMatrix()
                 float sumP = 0;
                 for(int n=0;n<6;n++){
                     sumP += -F[n]*scale;
+                    // sumP += -scale;
                 }
-                triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+k*_texwidth*_texheight, sumP);
-                if(F[0])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+1+j*_texwidth+k*_texwidth*_texheight, F[0]*scale);
-                if(F[1])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+(j+1)*_texwidth+k*_texwidth*_texheight, F[1]*scale);
-                if(F[2])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i-1+j*_texwidth+k*_texwidth*_texheight, F[2]*scale);
-                if(F[3])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+(j-1)*_texwidth+k*_texwidth*_texheight, F[3]*scale);
-                if(F[4])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+(k-1)*_texwidth*_texheight, F[4]*scale);
-                if(F[5])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+(k+1)*_texwidth*_texheight, F[5]*scale);
+                unsigned int p_id = resequence3to1(i,j,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_x_pre_id  = resequence3to1(i-1,j,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_x_post_id = resequence3to1(i+1,j,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_y_pre_id  = resequence3to1(i,j-1,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_y_post_id = resequence3to1(i,j+1,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_z_pre_id  = resequence3to1(i,j,k-1,_texwidth,_texheight,_texdepth);
+                unsigned int p_z_post_id = resequence3to1(i,j,k+1,_texwidth,_texheight,_texdepth);
+
+                // triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+k*_texwidth*_texheight, sumP);
+                // if(F[0])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+1+j*_texwidth+k*_texwidth*_texheight, F[0]*scale);
+                // if(F[1])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+(j+1)*_texwidth+k*_texwidth*_texheight, F[1]*scale);
+                // if(F[2])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i-1+j*_texwidth+k*_texwidth*_texheight, F[2]*scale);
+                // if(F[3])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+(j-1)*_texwidth+k*_texwidth*_texheight, F[3]*scale);
+                // if(F[4])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+(k-1)*_texwidth*_texheight, F[4]*scale);
+                // if(F[5])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+(k+1)*_texwidth*_texheight, F[5]*scale);
+                triplets.emplace_back(p_id,p_id, sumP);
+                if(F[0])triplets.emplace_back(p_id,p_x_post_id, F[0]*scale);
+                if(F[1])triplets.emplace_back(p_id,p_y_post_id, F[1]*scale);
+                if(F[2])triplets.emplace_back(p_id,p_x_pre_id,  F[2]*scale);
+                if(F[3])triplets.emplace_back(p_id,p_y_pre_id,  F[3]*scale);
+                if(F[4])triplets.emplace_back(p_id,p_z_pre_id,  F[4]*scale);
+                if(F[5])triplets.emplace_back(p_id,p_z_post_id, F[5]*scale);
             }
         }
     }
@@ -279,31 +311,37 @@ void Simulator::calDirichletBoundaryMatrix()
     for(unsigned int i=0;i<_texwidth+1;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
-                if(i ==0 || i == _texwidth)triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+k*_texwidth*_texheight, 0);
-                else triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+k*_texwidth*_texheight, 1);
+                // unsigned int x_vel_id = i+j*_texwidth+k*_texwidth*_texheight;
+                unsigned int x_vel_id = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
+                if(i ==0 || i == _texwidth)triplets.emplace_back(x_vel_id,x_vel_id, 0);
+                else triplets.emplace_back(x_vel_id,x_vel_id, 1);
             }
         }
     }
     for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight+1;j++){
             for(unsigned int k=0;k<_texdepth;k++){
-                if(j ==0 || j == _texheight)triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight,size + i+j*_texwidth+k*_texwidth*_texheight, 0);
-                else triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight,size + i+j*_texwidth+k*_texwidth*_texheight, 1);
+                // unsigned int y_vel_id = size + i+j*_texwidth+k*_texwidth*_texheight;
+                unsigned int y_vel_id = size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth);
+                if(j ==0 || j == _texheight)triplets.emplace_back(y_vel_id,y_vel_id, 0);
+                else triplets.emplace_back(y_vel_id,y_vel_id, 1);
             }
         }
     }
     for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth+1;k++){
-                if(k ==0 || k == _texdepth)triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight,2*size + i+j*_texwidth+k*_texwidth*_texheight, 0);
-                else triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight,2*size + i+j*_texwidth+k*_texwidth*_texheight, 1);
+                // unsigned int z_vel_id = 2*size + i+j*_texwidth+k*_texwidth*_texheight;
+                unsigned int z_vel_id = 2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1);
+                if(k ==0 || k == _texdepth)triplets.emplace_back(z_vel_id,z_vel_id, 0);
+                else triplets.emplace_back(z_vel_id,z_vel_id, 1);
             }
         }
     }
     DirichletBoundaryMatrix.setFromTriplets(triplets.begin(), triplets.end());
 }
 
-void Simulator::calVel2DivMatrix()
+void Simulator::calVel2DivMatrix()//W
 {
     std::vector<Triplet> triplets;
     float size = (_texwidth + 1) * _texheight * _texdepth;
@@ -316,12 +354,25 @@ void Simulator::calVel2DivMatrix()
                 // for(int n=0;n<6;n++){
                 //     b(i+j*texwidth+k*texwidth*_texheight) += D[n]*F[n]*U[n]/(_dx);
                 // }
-                if(F[0])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+1+j*_texwidth+k*_texwidth*_texheight, (D[0]*F[0])/(_dx));
-                if(F[1])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, size + i+(j+1)*_texwidth+k*_texwidth*_texheight, (D[1]*F[1])/(_dx));
-                if(F[2])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, (D[2]*F[2])/(_dx));
-                if(F[3])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, size + i+(j)*_texwidth+k*_texwidth*_texheight, (D[3]*F[3])/(_dx));
-                if(F[4])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k)*_texwidth*_texheight, (D[4]*F[4])/(_dx));
-                if(F[5])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k+1)*_texwidth*_texheight, (D[5]*F[5])/(_dx));
+                // if(F[0])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+1+j*_texwidth+k*_texwidth*_texheight, (D[0]*F[0])/(_dx));
+                // if(F[1])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, size + i+(j+1)*_texwidth+k*_texwidth*_texheight, (D[1]*F[1])/(_dx));
+                // if(F[2])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, (D[2]*F[2])/(_dx));
+                // if(F[3])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, size + i+(j)*_texwidth+k*_texwidth*_texheight, (D[3]*F[3])/(_dx));
+                // if(F[4])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k)*_texwidth*_texheight, (D[4]*F[4])/(_dx));
+                // if(F[5])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k+1)*_texwidth*_texheight, (D[5]*F[5])/(_dx));
+                unsigned int p_id = resequence3to1(i,j,k,_texwidth,_texheight,_texdepth);
+                unsigned int x_pre_id  = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
+                unsigned int x_post_id = resequence3to1(i+1,j,k,_texwidth+1,_texheight,_texdepth);
+                unsigned int y_pre_id  = size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth);
+                unsigned int y_post_id = size + resequence3to1(i,j+1,k,_texwidth,_texheight+1,_texdepth);
+                unsigned int z_pre_id  = 2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1);
+                unsigned int z_post_id = 2*size + resequence3to1(i,j,k+1,_texwidth,_texheight,_texdepth+1);
+                if(F[0])triplets.emplace_back(p_id, x_post_id,  (D[0]*F[0])/(_dx));
+                if(F[1])triplets.emplace_back(p_id, y_post_id,  (D[1]*F[1])/(_dx));
+                if(F[2])triplets.emplace_back(p_id, x_pre_id,   (D[2]*F[2])/(_dx));
+                if(F[3])triplets.emplace_back(p_id, y_pre_id,   (D[3]*F[3])/(_dx));
+                if(F[4])triplets.emplace_back(p_id, z_pre_id,   (D[4]*F[4])/(_dx));
+                if(F[5])triplets.emplace_back(p_id, z_post_id,  (D[5]*F[5])/(_dx));
             }
         }
     }
@@ -396,40 +447,174 @@ void Simulator::calPressure2VelocityMatrix()
     for(unsigned int i=1;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
-                triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, _dt/(_dx));
-                triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i-1+j*_texwidth+k*_texwidth*_texheight, -1*_dt/(_dx));
+                // triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, _dt/(_dx));
+                // triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i-1+j*_texwidth+k*_texwidth*_texheight, -1*_dt/(_dx));
+                unsigned int x_vel_id = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
+                unsigned int p_pre_id  = resequence3to1(i-1,j,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_post_id = resequence3to1(i,j,k,_texwidth,_texheight,_texdepth);
+                triplets.emplace_back(x_vel_id, p_post_id,    _dt/(_dx));
+                triplets.emplace_back(x_vel_id, p_pre_id,  -1*_dt/(_dx));
             }
         }
     }
     for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=1;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
-                triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, _dt/(_dx));
-                triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, i+(j-1)*_texwidth+k*_texwidth*_texheight, -1*_dt/(_dx));
+                // triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, _dt/(_dx));
+                // triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, i+(j-1)*_texwidth+k*_texwidth*_texheight, -1*_dt/(_dx));
+                unsigned int y_vel_id = size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth);
+                unsigned int p_pre_id  = resequence3to1(i,j-1,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_post_id = resequence3to1(i,j,k,_texwidth,_texheight,_texdepth);
+                triplets.emplace_back(y_vel_id, p_post_id,    _dt/(_dx));
+                triplets.emplace_back(y_vel_id, p_pre_id,  -1*_dt/(_dx));
             }
         }
     }
     for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=1;k<_texdepth;k++){
-                triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, _dt/(_dx));
-                triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+(k-1)*_texwidth*_texheight, -1*_dt/(_dx));
+                // triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, _dt/(_dx));
+                // triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+(k-1)*_texwidth*_texheight, -1*_dt/(_dx));
+                unsigned int z_vel_id = 2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1);
+                unsigned int p_pre_id  = resequence3to1(i,j,k-1,_texwidth,_texheight,_texdepth);
+                unsigned int p_post_id = resequence3to1(i,j,k,_texwidth,_texheight,_texdepth);
+                triplets.emplace_back(z_vel_id, p_post_id,    _dt/(_dx));
+                triplets.emplace_back(z_vel_id, p_pre_id,  -1*_dt/(_dx));
             }
         }
     }
     Pressure2VelocityMatrix.setFromTriplets(triplets.begin(), triplets.end());
 }
 
+void Simulator::origin_project()
+{
+    unsigned int grid_size = _texwidth*_texheight*_texdepth;
+    SparseMatrix A(grid_size,grid_size);
+    // Eigen::VectorXf origin_b = Eigen::VectorXf::Zero(grid_size);
+    Eigen::VectorXf origin_px = Eigen::VectorXf::Zero(grid_size);
+    //Tripletの計算
+    std::vector<Triplet> triplets;
+    for(int i=0;i<_texwidth;i++){
+        for(int j=0;j<_texheight;j++){
+            for(int k=0;k<_texdepth;k++){
+                unsigned int grid_id = resequence3to1(i,j,k,_texdepth,_texheight,_texdepth);
+                 // px[i+j*_texwidth+k*_texwidth*_texheight] = p.value[i][j][k];
+                // double scale = _dt/((rho_tgt.value[i][j][k] + rho_amb.value[i][j][k])*_dx*_dx);
+                float scale = _dt/(_dx*_dx);
+                float D[6] = {1.0,1.0,-1.0,-1.0,-1.0,1.0};//周囲6方向に向かって働く、圧力の向き
+                std::vector<int> F = {i<_texwidth-1,j<_texheight-1,i>0,j>0,k>0,k<_texdepth-1};
+                float U[6] = {
+                    x_velocity.get_volume_value(i+1,j,k),
+                    y_velocity.get_volume_value(i,j+1,k),
+                    x_velocity.get_volume_value(i,j,k),
+                    y_velocity.get_volume_value(i,j,k),
+                    z_velocity.get_volume_value(i,j,k),
+                    z_velocity.get_volume_value(i,j,k+1)
+                };
+                float sumP = 0;
+                for(int n=0;n<6;n++){
+                    sumP += -F[n]*scale;
+                    origin_b(resequence3to1(i,j,k,_texwidth,_texheight,_texdepth))+= D[n]*F[n]*U[n]/(_dx);
+                    // origin_b(i+j*_texwidth+k*_texwidth*_texheight) += D[n]*F[n]*U[n]/(_dx);
+                }
+                unsigned int p_id = resequence3to1(i,j,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_x_pre_id  = resequence3to1(i-1,j,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_x_post_id = resequence3to1(i+1,j,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_y_pre_id  = resequence3to1(i,j-1,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_y_post_id = resequence3to1(i,j+1,k,_texwidth,_texheight,_texdepth);
+                unsigned int p_z_pre_id  = resequence3to1(i,j,k-1,_texwidth,_texheight,_texdepth);
+                unsigned int p_z_post_id = resequence3to1(i,j,k+1,_texwidth,_texheight,_texdepth);
+                
+                triplets.emplace_back(p_id,p_id, sumP);
+                if(F[0])triplets.emplace_back(p_id,p_x_post_id, F[0]*scale);
+                if(F[1])triplets.emplace_back(p_id,p_y_post_id, F[1]*scale);
+                if(F[2])triplets.emplace_back(p_id,p_x_pre_id,  F[2]*scale);
+                if(F[3])triplets.emplace_back(p_id,p_y_pre_id,  F[3]*scale);
+                if(F[4])triplets.emplace_back(p_id,p_z_pre_id,  F[4]*scale);
+                if(F[5])triplets.emplace_back(p_id,p_z_post_id, F[5]*scale);
+
+                // triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+k*_texwidth*_texheight, sumP);
+                // if(F[0])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+1+j*_texwidth+k*_texwidth*_texheight, F[0]*scale);
+                // if(F[1])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+(j+1)*_texwidth+k*_texwidth*_texheight, F[1]*scale);
+                // if(F[2])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i-1+j*_texwidth+k*_texwidth*_texheight, F[2]*scale);
+                // if(F[3])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+(j-1)*_texwidth+k*_texwidth*_texheight, F[3]*scale);
+                // if(F[4])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+(k-1)*_texwidth*_texheight, F[4]*scale);
+                // if(F[5])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight,i+j*_texwidth+(k+1)*_texwidth*_texheight, F[5]*scale);
+            }
+        }
+    }
+    // origin_b = Vel2DivMatrix * DirichletBoundaryMatrix * all_velocity;
+    A.setFromTriplets(triplets.begin(), triplets.end());
+    // A = PoissonMatrix;
+    Eigen::ConjugateGradient<SparseMatrix> solver;
+    solver.setTolerance(1e-6);
+    // solver.setMaxIterations(20);
+    solver.compute(A);
+    // std::cout << "pre linear solve" << std::endl;
+    origin_px = solver.solve(origin_b);
+    // std::cout << "post linear solve" << std::endl;
+    std::cout << "origin_b.norm() = " << origin_b.norm() << std::endl;
+    std::cout << "origin_px.norm() = " << origin_px.norm() << std::endl;
+    for(int i=0;i<_texwidth;i++){
+        for(int j=0;j<_texheight;j++){
+            for(int k=0;k<_texdepth;k++){
+                // pressure.set_volume_value(i,j,k, origin_px(i+j*_texwidth+k*_texwidth*_texheight));
+                // pressure.set_volume_value(i,j,k, px(i+j*_texwidth+k*_texwidth*_texheight));
+                // p.value[i][j][k] = px(i+j*_texwidth+k*_texwidth*_texheight);
+                pressure.set_volume_value(i,j,k, origin_px(resequence3to1(i,j,k,_texwidth,_texheight,_texdepth)));
+            }
+        }
+    }
+    pressure.swap_src_dst();
+    for(int i=1; i<_texwidth;i++){
+        for(int j=0;j<_texheight;j++){
+            for(int k=0;k<_texdepth;k++)
+            {
+                // u.value[i][j][k] = u.value[i][j][k] - _dt/(rho_tgt.value[i][j][k] +rho_amb.value[i][j][k])* (p.value[i][j][k]-p.value[i-1][j][k])/_dx;
+                float value = x_velocity.get_volume_value(i,j,k) - _dt * (pressure.get_volume_value(i,j,k) - pressure.get_volume_value(i-1,j,k))/_dx;
+                x_velocity.set_volume_value(i,j,k,value);
+            }
+        }
+    }
+    for(int i=0;i<_texwidth;i++){
+        for(int j=1;j<_texheight;j++){
+            for(int k=0;k<_texdepth;k++)
+            {
+                // v.value[i][j][k] = v.value[i][j][k] - _dt/(rho_tgt.value[i][j][k] +rho_amb.value[i][j][k]) * (p.value[i][j][k]-p.value[i][j-1][k])/_dx;
+                float value = y_velocity.get_volume_value(i,j,k) - _dt * (pressure.get_volume_value(i,j,k) - pressure.get_volume_value(i,j-1,k))/_dx;
+                y_velocity.set_volume_value(i,j,k,value);
+            }
+        }
+    }
+    for(int i=0;i<_texwidth;i++){
+        for(int j=0;j<_texheight;j++){
+            for(int k=1;k<_texdepth;k++){
+                // w.value[i][j][k] = w.value[i][j][k] - _dt/(rho_tgt.value[i][j][k] +rho_amb.value[i][j][k]) * (p.value[i][j][k]-p.value[i][j][k-1])/_dx;
+                float value = z_velocity.get_volume_value(i,j,k) - _dt * (pressure.get_volume_value(i,j,k) - pressure.get_volume_value(i,j,k-1))/_dx;
+                z_velocity.set_volume_value(i,j,k,value);
+            }
+        }
+    }
+    x_velocity.swap_src_dst();
+    y_velocity.swap_src_dst();
+    z_velocity.swap_src_dst();
+    init_all_velocity();
+}
+
 void Simulator::project(){
     Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
     Eigen::ConjugateGradient<SparseMatrix> solver;
     solver.setTolerance(1e-6);
-    solver.setMaxIterations(20);
+    // solver.setMaxIterations(20);
     b = Vel2DivMatrix * DirichletBoundaryMatrix * all_velocity;
+    // b = Vel2DivMatrix * all_velocity;
     write_exact_solution(b_all_frame,b);
     solver.compute(PoissonMatrix);
-    px = solver.solveWithGuess(b,px);
-    all_velocity = all_velocity - Pressure2VelocityMatrix * px;
+    // px = solver.solveWithGuess(b,px);
+    px = solver.solve(b);
+    // std::cout << px.norm() << std::endl;
+    // all_velocity = all_velocity - Pressure2VelocityMatrix * px;
+    all_velocity = DirichletBoundaryMatrix * all_velocity - Pressure2VelocityMatrix * px;
     all2xyz();
 }
 
@@ -448,9 +633,9 @@ void Simulator::addForce(){
     y_force.swap_src_dst();
     // y_force.print_src();
 
-    // for(int i=1;i<Nx-1;i++){
-    //     for(int j=1;j<Ny-1;j++){
-    //         for(int k=1;k<Nz-1;k++){
+    // for(int i=1;i<_texwidth-1;i++){
+    //     for(int j=1;j<_texheight-1;j++){
+    //         for(int k=1;k<_texdepth-1;k++){
     //             f.value[i][j][k] += getConfinement(i, j, k);
     //         }
     //     }
@@ -788,7 +973,7 @@ void Simulator::subspace_oneloop()
     subspace_project();
     // all_velocity = U3 * (U3.transpose() * all_velocity);
     // all2xyz();
-    // std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
+    std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
     // std::cout << "exact, reduce : " << U3_all_frame.col(_timestamp).norm() << "," <<  (U3 * reduced_all_velocity).norm() << std::endl;
     // std::cout << "P  : " << ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm() << std::endl;
     // std::cout << "exact, reduce : " << P_all_frame.col(_timestamp).norm() << "," <<  (P * reduced_px).norm() << std::endl;
@@ -812,15 +997,15 @@ void Simulator::subspace_project(){
     b = reduced_Vel2DivMatrix * reduced_DirichletBoundaryMatrix * reduced_all_velocity;
     solver.compute(reduced_PoissonMatrix);
     reduced_px = solver.solveWithGuess(b, reduced_px);
-    std::cout << "subspace reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
+    // std::cout << "subspace reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
     // reduced_px = P.transpose() * P_all_frame.col(_timestamp);
-    std::cout << "exact reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
+    // std::cout << "exact reduced_pressure" << std::endl << reduced_px.transpose() << std::endl;
     
-    // reduced_all_velocity = reduced_DirichletBoundaryMatrix * reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
-    reduced_all_velocity = reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
-    std::cout << "subspace reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
+    reduced_all_velocity = reduced_DirichletBoundaryMatrix * reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
+    // reduced_all_velocity = reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
+    // std::cout << "subspace reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
     // reduced_all_velocity = U3.transpose() * U3_all_frame(_timestamp);
-    std::cout << "exact reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
+    // std::cout << "exact reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
     all_velocity = U3 * reduced_all_velocity;
     // std::cout << "after reduced_velocity" << std::endl << reduced_all_velocity.transpose() << std::endl;
     all2xyz();

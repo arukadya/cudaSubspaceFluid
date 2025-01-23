@@ -9,7 +9,9 @@
 
 unsigned int resequence3to1(unsigned int i,unsigned int j,unsigned int k,unsigned int Ni,unsigned int Nj,unsigned int Nk)
 {
-    return k * Ni*Nj + j * Ni + i;
+    unsigned int value = k * Ni*Nj + j * Ni + i;
+    // if(value > Ni * Nj * Nk)std::cout << "reseq overflow" <<std::endl;
+    return value;
 }
 void Timer::startWithMessage(const char* s)
 {

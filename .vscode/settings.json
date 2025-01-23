@@ -80,6 +80,17 @@
         "locale": "cpp",
         "fft": "cpp",
         "alignedvector3": "cpp",
-        "__split_buffer": "cpp"
+        "__split_buffer": "cpp",
+        "__config": "cpp",
+        "__hash_table": "cpp",
+        "__locale": "cpp",
+        "__threading_support": "cpp",
+        "__tree": "cpp",
+        "__verbose_abort": "cpp",
+        "charconv": "cpp",
+        "execution": "cpp",
+        "ios": "cpp",
+        "queue": "cpp",
+        "variant": "cpp"
     }
 }
