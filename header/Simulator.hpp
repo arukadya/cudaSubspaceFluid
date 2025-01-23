@@ -164,6 +164,7 @@ struct Simulator{
     unsigned int _delta_snap;
     unsigned int _reduce_dimention;
     unsigned int _snap_devide_num;
+    float _sub_dt;
     Slab x_velocity;
     Slab y_velocity;
     Slab z_velocity;
@@ -234,6 +235,7 @@ struct Simulator{
         _timestamp = 0;
         _delta_snap = _flame_num / _snap_num;
         _snap_devide_num = _snap_num / 3;
+        _sub_dt = _dt;
         if(_flame_num % _snap_num != 0)std::cout << " Warning : _flame_num % _snap_num != 0" << std::endl;
         std::cout << "dx,dt,beta = " << _dx << "," << _dt << "," << _beta << std::endl;
         std::cout << "width,height,depth = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
@@ -261,7 +263,6 @@ struct Simulator{
         all_velocity = Eigen::VectorXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth);
         px = Eigen::VectorXf::Zero(_texwidth *_texheight*_texdepth);
         b = Eigen::VectorXf::Zero(_texwidth *_texheight*_texdepth);
-        origin_b = Eigen::VectorXf::Zero(_texwidth *_texheight*_texdepth);
         U0_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
         U1_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
         U2_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
