@@ -13,6 +13,15 @@ unsigned int resequence3to1(unsigned int i,unsigned int j,unsigned int k,unsigne
     // if(value > Ni * Nj * Nk)std::cout << "reseq overflow" <<std::endl;
     return value;
 }
+
+void resequence1to3(unsigned int val,unsigned int &i,unsigned int &j,unsigned int &k,unsigned int Ni,unsigned int Nj,unsigned int Nk)
+{
+    k = val / (Ni*Nj);
+    val = val % (Ni*Nj);
+    j = val / Ni;
+    val = val % Ni;
+    i = val;
+}
 void Timer::startWithMessage(const char* s)
 {
     startTime = std::chrono::system_clock::now();

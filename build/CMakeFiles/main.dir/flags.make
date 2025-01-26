@@ -4,7 +4,7 @@
 # compile CXX with /Library/Developer/CommandLineTools/usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -F/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/System/Library/Frameworks -I/Users/sunouchitoshiki/dev/github/cudaSubspaceFluid/header -I/opt/homebrew/include -isystem /Users/sunouchitoshiki/dev/github/cudaSubspaceFluid/lib/eigen-3.4.0
+CXX_INCLUDES = -F/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/System/Library/Frameworks -I/Users/sunouchitoshiki/dev/github/cudaSubspaceFluid/header -I/opt/homebrew/include -isystem /Users/sunouchitoshiki/dev/github/cudaSubspaceFluid/lib/eigen-master
 
 CXX_FLAGSarm64 = -O3 -DNDEBUG -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -O2 -Wall
 

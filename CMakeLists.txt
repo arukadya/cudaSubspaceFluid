@@ -17,7 +17,8 @@ find_package(OpenGL REQUIRED)
 include_directories(
     ${OPENGL_INCLUDE_DIR}
 )
-include_directories(SYSTEM lib/eigen-3.4.0)
+#include_directories(SYSTEM lib/eigen-3.4.0)
+include_directories(SYSTEM lib/eigen-master)
 include_directories(header)
 
 

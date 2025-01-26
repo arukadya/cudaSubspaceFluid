@@ -673,7 +673,7 @@ void Simulator::addForce(){
 //snapshotPOD
 void Simulator::write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap)
 {
-    assert(mat.cols != snap.size || mat.rows > _timestamp);
+    // assert(mat.cols() != snap.size() || mat.rows() > _timestamp);
     if(_timestamp < _discard_flame)return;
     // if(_timestamp % _snap_num == 0)mat.row(timestamp) = snap;
     // if(_timestamp % _delta_snap == 0)mat.row(_timestamp / _delta_snap) = snap;
@@ -683,7 +683,7 @@ void Simulator::write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap)
 void Simulator::write_exact_solution(Eigen::MatrixXf &mat, Eigen::VectorXf &snap)
 {
     // if(_timestamp < _discard_flame)return;
-    assert(mat.cols != snap.size || mat.rows > _timestamp);
+    // assert(mat.cols() != snap.size() || mat.rows() > _timestamp);
     // if(_timestamp % _snap_num == 0)mat.row(timestamp) = snap;
     // mat.row(_timestamp) = snap;
     mat.col(_timestamp) = snap;
@@ -897,6 +897,7 @@ void Simulator::subspace_execute()
     density_tgt = Slab(_texwidth,_texheight,_texdepth,0.0f);
     density_amb = Slab(_texwidth,_texheight,_texdepth,AMB_DENSITY);
     templature = Slab(_texwidth,_texheight,_texdepth,AMB_TEMPLATURE);
+    largeSamplingCubature(cubaturePointSet, err_threshold, w_threshold);
     init_all_velocity();
     for(_timestamp = 0; _timestamp< (_dt/_sub_dt) * _flame_num; ++_timestamp)
     {
@@ -1068,13 +1069,103 @@ void Simulator::getDevidedReducedLinearOperator()
     }
 }
 
-Eigen::MatrixXf Simulator::getRowsCorrespondPoint(Eigen::MatrixXf &Basis, unsigned int x,unsigned int y, unsigned int z)
+Eigen::MatrixXf Simulator::getRowsCorrespondPoint(Eigen::MatrixXf &Mat, unsigned int x,unsigned int y, unsigned int z)
 {
-    unsigned int size = (_texwidth + 1) * _texheight * _texdepth;
-    Eigen::MatrixXf ret(3,Basis.cols());
-    ret.row(0) = Basis.row(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth));
-    ret.row(1) = Basis.row(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth));
-    ret.row(2) = Basis.row(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1));
+    unsigned int size = Mat.rows();
+    Eigen::MatrixXf ret(3,Mat.cols());
+    ret.row(0) = Mat.row(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth));
+    ret.row(1) = Mat.row(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth));
+    ret.row(2) = Mat.row(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1));
     return ret;
 }
 
+Eigen::Vector3f Simulator::getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,unsigned int x,unsigned int y,unsigned int z,unsigned int T)
+{
+    unsigned int size = Snapshot.rows();
+    Eigen::Vector3f ret;
+    ret.x() = Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T);
+    ret.y() = Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T);
+    ret.z() = Snapshot(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1),T);
+    return ret;
+}
+
+void Simulator::largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,float error_thresold,float weight_threshold)
+{
+    Eigen::MatrixXf A;
+    Eigen::VectorXf b = getSubspaceAdvect_b(U1_SnapShot,U1);
+    Eigen::VectorXf w;
+    Eigen::VectorXf residual = b;
+    Eigen::NNLS<Eigen::MatrixXf> nnls_solver;
+    int space_resolution = _texwidth * _texheight * _texdepth;
+    std::uniform_int_distribution uid(0,space_resolution);
+    std::uniform_real_distribution<float> urd(0,1);
+    std::mt19937_64 mt_point(0);
+    std::mt19937_64 mt_probablity(0);
+    CubaturePointSet.clear();
+    while(residual.norm() > error_thresold)
+    {
+        unsigned int point_id = uid(mt_point);
+        if(CubaturePointSet.find(point_id) == CubaturePointSet.end())continue;
+        Eigen::VectorXf Acol = getColACoresspondCubaturePoint(point_id,U1_SnapShot,U1);
+        unsigned int restPoint_num = space_resolution - CubaturePointSet.size();
+        float probablity = restPoint_num * ( Acol.dot(residual) / (residual.dot(residual)));
+        if(probablity < urd(mt_probablity))continue;
+        CubaturePointSet.insert(point_id);
+        A = getSubspaceAdvect_A(CubaturePointSet,U1_SnapShot,U1);
+        nnls_solver.compute(A);
+        w = nnls_solver.solve(b);
+        auto itr = CubaturePointSet.begin();
+        for(int i=0;i<w.size();++i)
+        {
+            if(w(i) > weight_threshold)residual(i) = b(i) - (A*w)(i);
+            else CubaturePointSet.erase(itr);
+            itr++;
+        }
+    }
+}
+
+Eigen::VectorXf Simulator::getColACoresspondCubaturePoint(unsigned int point_id,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
+{
+    Eigen::VectorXf ret;
+    unsigned int r = Basis.cols();
+    unsigned int p_x;unsigned int p_y;unsigned int p_z;
+    resequence1to3(point_id,p_x,p_y,p_z,_texwidth,_texheight,_texdepth);
+    Eigen::MatrixXf subBasis = getRowsCorrespondPoint(Basis,p_x,p_y,p_z);
+    for(int snap=0; snap<_snap_num; ++snap)
+    {
+        Eigen::Vector3f pointVelocity = getVelocityFromSnapshot(Snapshot,p_x,p_y,p_z,snap);
+        Eigen::VectorXf projectedPointVelocity = subBasis.transpose() * pointVelocity;
+        for(int i = 0; i < r;++i)ret(r * _snap_num, i) = projectedPointVelocity(i);
+    }
+    return ret;
+}
+
+Eigen::MatrixXf Simulator::getSubspaceAdvect_A(std::set<unsigned int> &CubaturePointSet,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
+{
+    unsigned int P = CubaturePointSet.size();
+    unsigned int r = Basis.cols();
+    Eigen::MatrixXf ret(r * _snap_num, P);
+    int col = 0;
+    for(auto p:CubaturePointSet)
+    {
+        Eigen::VectorXf Acol = getColACoresspondCubaturePoint(p,Snapshot,Basis);
+        ret.col(col) = Acol;
+        ++col;
+    }
+    return ret;
+}
+
+Eigen::VectorXf Simulator::getSubspaceAdvect_b(Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
+{
+    unsigned int r = Basis.cols();
+    Eigen::VectorXf ret(r * _snap_num);
+    for(unsigned int snap = 0; snap < _snap_num; ++snap)
+    {
+        Eigen::VectorXf projected_vector = Snapshot.col(snap);
+        for(unsigned int i=0;i<r;++i)
+        {
+            ret(r * snap + i) = projected_vector(i);
+        }
+    }
+    return ret;
+}

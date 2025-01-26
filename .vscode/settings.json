@@ -1,5 +1,9 @@
 {
     "C_Cpp.errorSquiggles": "disabled",
+    "files.watcherExclude": {
+    "**/build/": true,
+    "**/lib/": true,
+    },
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",
@@ -93,4 +97,5 @@
         "queue": "cpp",
         "variant": "cpp"
     }
+    
 }

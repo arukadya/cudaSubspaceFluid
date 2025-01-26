@@ -3,20 +3,25 @@
 #include "Eigen/Core"
 #include <Eigen/Dense>
 #include <Eigen/IterativeLinearSolvers>
+#include <unsupported/Eigen/NNLS>
 #include <iostream>
 #include <vector>
 #include <string>
+#include <set>
 #include "ComputeCommand.hpp"
 #include "ShaderCommand.hpp"
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <random>
 
 #define G0 9.8f
 #define AMB_TEMPLATURE 90.0f
 #define AMB_DENSITY 100.0f
 #define TGT_TEMPLATURE 100.0f
 #define TGT_DENSITY 100.0f
+#define err_threshold 0.01
+#define w_threshold 0.01
 
 using ScalarType = float;
 using IndexType = int64_t;
@@ -213,13 +218,14 @@ struct Simulator{
     Eigen::MatrixXf U2;
     Eigen::MatrixXf U3;
     Eigen::MatrixXf P;
+    Eigen::MatrixXf cubatureAdvectMatrix;
+    Eigen::VectorXf cubatureWeightVector;
+    std::set<unsigned int>cubaturePointSet;
     std::vector<Eigen::MatrixXf> devided_U0;
     std::vector<Eigen::MatrixXf> devided_U1;
     std::vector<Eigen::MatrixXf> devided_U2;
     std::vector<Eigen::MatrixXf> devided_U3;
     std::vector<Eigen::MatrixXf> devided_P;
-    // Eigen::MatrixXf reduced_U2_SnapShot;
-    // Eigen::MatrixXf reduced_U3_SnapShot;
     Eigen::VectorXf reduced_all_velocity;
     Eigen::VectorXf reduced_px;
 
@@ -315,10 +321,17 @@ struct Simulator{
     void getDevidedReducedLinearOperator();
 
     //subspace
-    Eigen::MatrixXf getRowsCorrespondPoint(Eigen::MatrixXf &Basis, unsigned int x,unsigned int y, unsigned int z);
+    Eigen::MatrixXf getRowsCorrespondPoint(Eigen::MatrixXf &Mat, unsigned int x,unsigned int y, unsigned int z);//Basis
+    Eigen::Vector3f getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,unsigned int x,unsigned int y,unsigned int z,unsigned int T);
+    Eigen::MatrixXf getSubspaceAdvect_A(std::set<unsigned int> &CubaturePointSet,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis);
+    Eigen::VectorXf getColACoresspondCubaturePoint(unsigned int point_id,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis);
+    float probablity_distribution_function(unsigned int point_id,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis,unsigned int restPoints_num,Eigen::VectorXf &residual);
+    void largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,float error_thresold,float weight_threshold);
+    Eigen::VectorXf getSubspaceAdvect_b(Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis);
     void subspace_execute();
     void subspace_oneloop();
     void subspace_project();
+    void subspace_advect();
 
     void devided_subspace_execute();
     void devided_subspace_oneloop();
