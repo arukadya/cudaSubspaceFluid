@@ -95,7 +95,8 @@
         "execution": "cpp",
         "ios": "cpp",
         "queue": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "span": "cpp"
     }
     
 }

@@ -152,12 +152,19 @@ int main(int argc, char * argv[])
         simulator.getBasisQRSVD();
         std::cout << "fin_calBasis" << std::endl;
         simulator.output_Basis();
+        simulator.output_Snapshot();
     }
-    else simulator.input_Basis();
+    else 
+    {
+        simulator.input_Basis();
+        simulator.input_Snapshot();
+    }
     simulator.getReducedLinearOperator();
     std::cout << "fin_operator_projection" << std::endl;
     simulator.subspace_execute();
     std::cout << "fin_subspace" << std::endl;
+    simulator.largeSamplingCubature(simulator.cubaturePointSet, err_threshold, w_threshold);
+    std::cout << "fin_cubature" << std::endl;
     system("./viewer");
     return 0;
 }

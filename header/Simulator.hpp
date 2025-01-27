@@ -14,6 +14,7 @@
 #include <sstream>
 #include <filesystem>
 #include <random>
+#include <unistd.h>
 
 #define G0 9.8f
 #define AMB_TEMPLATURE 90.0f
@@ -303,7 +304,9 @@ struct Simulator{
     void init_pressure(float init_pressure_value);
     void init_velocity(float init_pressure_value);
     float TriLinearInterporation(float x,float y,float z,Slab &val);
+    // float Simulator::TriLinearInterporation(Eigen::VectorXf &velocity, Eigen::VectorXf &val);
     float* get_currentTexture();
+    void face_advect_function(Eigen::VectorXf &val, Eigen::VectorXf &pos);
     void faceAdvect();
     void centerAdvect(Slab &val);
     void project();
@@ -341,7 +344,9 @@ struct Simulator{
     void inputTXT(std::string &InputFileName);
     void output_txt(unsigned int id);
     void output_Basis();
+    void output_Snapshot();
     void input_Basis();
+    void input_Snapshot();
     void all2xyz();
     void testCompute();
     void origin_project();
