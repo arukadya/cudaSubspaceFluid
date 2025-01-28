@@ -126,8 +126,8 @@ void Simulator::all2xyz()
 
 void Simulator::oneloop()
 {
-    init_density(TGT_DENSITY);
-    init_templature(TGT_TEMPLATURE);
+    // init_density(TGT_DENSITY);
+    // init_templature(TGT_TEMPLATURE);
     addForce();
     init_all_velocity();
     //U0
@@ -140,6 +140,7 @@ void Simulator::oneloop()
     // write_exact_solution(U1_all_frame, all_velocity);
     //U1
     //Diffusion
+    all_velocity = DiffusionMatrix * all_velocity;
     //U2
     write_snapshot(U2_SnapShot, all_velocity);
     // write_exact_solution(U2_all_frame, all_velocity);
@@ -187,6 +188,10 @@ float Simulator::TriLinearInterporation(float x,float y,float z,Slab &val)
         val.get_volume_value(i+1,j+1,k+1),
         val.get_volume_value(i,j+1,k+1)
     };
+    // for(int cnt = 0;cnt < 8;++cnt)
+    // {
+    //     if(isnan(f(cnt)))std::cout << "isnan" << std::endl;
+    // }
     Eigen::Vector<float ,8> c = 
     {
         (1-s)*(1-t)*(1-u),s*(1-t)*(1-u),s*t*(1-u),(1-s)*t*(1-u),
@@ -195,16 +200,38 @@ float Simulator::TriLinearInterporation(float x,float y,float z,Slab &val)
     return f.dot(c);
 }
 
-void Simulator::face_advect_function(Eigen::VectorXf &val, Eigen::VectorXf &pos)
-{
-    Eigen::VectorXf ret = val;
-    // float x = i*_dx;float y = (j+0.5)*_dx;float z = (k+0.5)*_dx;
-    float x = pos.x();float y = pos.y() + 0.5*_dx;float z = pos.z() + 0.5*_dx;
-    float adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
-    float adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
-    float adv_z = z - _dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx,z, z_velocity);
-    float value = TriLinearInterporation(adv_x, adv_y - 0.5*_dx, adv_z- 0.5*_dx, x_velocity);
-}
+// float Simulator::TriLinearInterporation(float x,float y,float z,unsigned int nx,unsigned int ny,unsigned int nz,Eigen::VectorXf &val)
+// {
+//     double fix_x = fmax(0.0, fmin(nx-1-1e-6,x/_dx));
+//     double fix_y = fmax(0.0, fmin(ny-1-1e-6,y/_dx));
+//     double fix_z = fmax(0.0, fmin(nz-1-1e-6,z/_dx));
+//     int i = fix_x;int j = fix_y;int k = fix_z;
+//     float s = fix_x-i;float t = fix_y-j;float u = fix_z-k;
+//     Eigen::Vector<float ,8> f = {
+//         val(resequence3to1(i,j,k)),
+//         val(resequence3to1(i+1,j,k)),
+//         val(resequence3to1(i+1,j+1,k)),
+//         val(resequence3to1(i,j+1,k)),
+//         val(resequence3to1(i,j,k+1)),
+//         val(resequence3to1(i+1,j,k+1)),
+//         val(resequence3to1(i+1,j+1,k+1)),
+//         val(resequence3to1(i,j+1,k+1))
+//         // val.get_volume_value(i,j,k),
+//         // val.get_volume_value(i+1,j,k),
+//         // val.get_volume_value(i+1,j+1,k),
+//         // val.get_volume_value(i,j+1,k),
+//         // val.get_volume_value(i,j,k+1),
+//         // val.get_volume_value(i+1,j,k+1),
+//         // val.get_volume_value(i+1,j+1,k+1),
+//         // val.get_volume_value(i,j+1,k+1)
+//     };
+//     Eigen::Vector<float ,8> c = 
+//     {
+//         (1-s)*(1-t)*(1-u),s*(1-t)*(1-u),s*t*(1-u),(1-s)*t*(1-u),
+//         (1-s)*(1-t)*u,s*(1-t)*u,s*t*u,(1-s)*t*u
+//     };
+//     return f.dot(c);
+// }
 
 void Simulator::faceAdvect(){
     for(unsigned int i=1;i<x_velocity._width-1;++i){
@@ -266,15 +293,15 @@ void Simulator::centerAdvect(Slab &val){
     val.swap_src_dst();
 }
 
-void Simulator::calPoissonMatrix()
+void Simulator::calPoissonMatrix(float dt)
 {
     std::vector<Triplet> triplets;
     // y_velocity.print_src();
     for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
-                // float scale = _dt/(_dx*_dx);
-                float scale = 1.0;
+                float scale = dt/(_dx*_dx);
+                // float scale = 1.0;
                 std::vector<int> F = {i<_texwidth-1,j<_texheight-1,i>0,j>0,k>0,k<_texdepth-1};
                 float sumP = 0;
                 for(int n=0;n<6;n++){
@@ -384,68 +411,101 @@ void Simulator::calVel2DivMatrix()//W
     Vel2DivMatrix.setFromTriplets(triplets.begin(), triplets.end());
 }
 
-void Simulator::calDiffusionMatrix()
+void Simulator::calDiffusionMatrix(float dt)
 {
     std::vector<Triplet> triplets;
     float size = (_texwidth + 1) * _texheight * _texdepth;
-    for(unsigned int i=0;i<_texwidth;i++){
-        for(unsigned int j=0;j<_texheight;j++){
-            for(unsigned int k=0;k<_texdepth;k++){
+    float scale = _nu * dt / (4 * _dx* _dx);
+    //x
+    for(unsigned int i=1;i<_texwidth;i++){
+        for(unsigned int j=1;j<_texheight-1;j++){
+            for(unsigned int k=1;k<_texdepth-1;k++){
                 // float D[6] = {1.0,1.0,-1.0,-1.0,-1.0,1.0};//周囲6方向に向かって働く、圧力の向き
-                float scale = _dt / (4 * _dx* _dx);
-                std::vector<int> F = {i<_texwidth-2,j<_texheight-2,i>1,j>1,k>1,k<_texdepth-2};
+                std::vector<int> F = {i<_texwidth,j<_texheight-1,i>0,j>0,k>0,k<_texdepth-1};
+                int cnt = 0;
                 //速度の境界値は0に設定しているので、境界成分に対応する係数は0でよい
-                if(F[0])
-                {
-                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+2+j*_texwidth+k*_texwidth*_texheight, scale);//x
-                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+2+j*_texwidth+k*_texwidth*_texheight, scale);//y
-                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+2+j*_texwidth+k*_texwidth*_texheight, scale);//z
-                }
-                if(F[1])
-                {
-                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+(j+2)*_texwidth+k*_texwidth*_texheight, scale);
-                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+(j+2)*_texwidth+k*_texwidth*_texheight, scale);
-                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+(j+2)*_texwidth+k*_texwidth*_texheight, scale);
-                }
-                // if(F[0] && F[1])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, -2 * scale);
-                if(F[2])
-                {
-                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i-2+j*_texwidth+k*_texwidth*_texheight, scale);
-                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i-2+j*_texwidth+k*_texwidth*_texheight, scale);
-                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i-2+j*_texwidth+k*_texwidth*_texheight, scale);
-                }
-                if(F[3])
-                {
-                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+(j-2)*_texwidth+k*_texwidth*_texheight, scale);
-                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+(j-2)*_texwidth+k*_texwidth*_texheight, scale);
-                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+(j-2)*_texwidth+k*_texwidth*_texheight, scale);
-                }
-                // if(F[2] && F[3])triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, -2 * scale);
-                if(F[4])
-                {
-                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+(k-2)*_texwidth*_texheight, scale);
-                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+j*_texwidth+(k-2)*_texwidth*_texheight, scale);
-                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k-2)*_texwidth*_texheight, scale);
-                }
-                if(F[5])
-                {
-                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
-                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
-                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
-                }
-                if(F[0] && F[1] && F[2] && F[3] && F[4] && F[5])
-                {
-                    triplets.emplace_back(i+j*_texwidth+k*_texwidth*_texheight, i+j*_texwidth+k*_texwidth*_texheight, 1 - 6 * scale);
-                    triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+j*_texwidth+k*_texwidth*_texheight, 1 - 6 * scale);
-                    triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+k*_texwidth*_texheight, 1 - 6 * scale);
-                }
+                unsigned int center_id = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
+                unsigned int x_pre_id  = resequence3to1(i-1,j,k,_texwidth+1,_texheight,_texdepth);
+                unsigned int x_post_id = resequence3to1(i+1,j,k,_texwidth+1,_texheight,_texdepth);
+                unsigned int y_pre_id  = resequence3to1(i,j-1,k,_texwidth+1,_texheight,_texdepth);
+                unsigned int y_post_id = resequence3to1(i,j+1,k,_texwidth+1,_texheight,_texdepth);
+                unsigned int z_pre_id  = resequence3to1(i,j,k-1,_texwidth+1,_texheight,_texdepth);
+                unsigned int z_post_id = resequence3to1(i,j,k+1,_texwidth+1,_texheight,_texdepth);
+
+                if(F[0])triplets.emplace_back(center_id, x_post_id, scale);
+                if(F[1])triplets.emplace_back(center_id, y_post_id, scale);
+                if(F[2])triplets.emplace_back(center_id, x_pre_id,  scale);
+                if(F[3])triplets.emplace_back(center_id, y_pre_id,  scale);
+                if(F[4])triplets.emplace_back(center_id, z_pre_id,  scale);
+                if(F[5])triplets.emplace_back(center_id, z_post_id, scale);
+                triplets.emplace_back(center_id,center_id, 1-6.0*scale);
+                    // triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
+                    // triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
+            }
+        }
+    }
+
+    //y
+    for(unsigned int i=1;i<_texwidth-1;i++){
+        for(unsigned int j=1;j<_texheight;j++){
+            for(unsigned int k=1;k<_texdepth-1;k++){
+                // float D[6] = {1.0,1.0,-1.0,-1.0,-1.0,1.0};//周囲6方向に向かって働く、圧力の向き
+                std::vector<int> F = {i<_texwidth-1,j<_texheight,i>0,j>0,k>0,k<_texdepth-1};
+                int cnt = 0;
+                //速度の境界値は0に設定しているので、境界成分に対応する係数は0でよい
+                unsigned int center_id = size + resequence3to1(i,  j,k,_texwidth,_texheight+1,_texdepth);
+                unsigned int x_pre_id  = size + resequence3to1(i-1,j,k,_texwidth,_texheight+1,_texdepth);
+                unsigned int x_post_id = size + resequence3to1(i+1,j,k,_texwidth,_texheight+1,_texdepth);
+                unsigned int y_pre_id  = size + resequence3to1(i,j-1,k,_texwidth,_texheight+1,_texdepth);
+                unsigned int y_post_id = size + resequence3to1(i,j+1,k,_texwidth,_texheight+1,_texdepth);
+                unsigned int z_pre_id  = size + resequence3to1(i,j,k-1,_texwidth,_texheight+1,_texdepth);
+                unsigned int z_post_id = size + resequence3to1(i,j,k+1,_texwidth,_texheight+1,_texdepth);
+
+                if(F[0])triplets.emplace_back(center_id, x_post_id, scale);
+                if(F[1])triplets.emplace_back(center_id, y_post_id, scale);
+                if(F[2])triplets.emplace_back(center_id, x_pre_id,  scale);
+                if(F[3])triplets.emplace_back(center_id, y_pre_id,  scale);
+                if(F[4])triplets.emplace_back(center_id, z_pre_id,  scale);
+                if(F[5])triplets.emplace_back(center_id, z_post_id, scale);
+                triplets.emplace_back(center_id,center_id, 1-6.0*scale);
+                    // triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
+                    // triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
+            }
+        }
+    }
+
+    //z
+    for(unsigned int i=1;i<_texwidth-1;i++){
+        for(unsigned int j=1;j<_texheight-1;j++){
+            for(unsigned int k=1;k<_texdepth;k++){
+                // float D[6] = {1.0,1.0,-1.0,-1.0,-1.0,1.0};//周囲6方向に向かって働く、圧力の向き
+                std::vector<int> F = {i<_texwidth-1,j<_texheight-1,i>0,j>0,k>0,k<_texdepth};
+                int cnt = 0;
+                //速度の境界値は0に設定しているので、境界成分に対応する係数は0でよい
+                unsigned int center_id = 2*size + resequence3to1(i,  j,k,_texwidth,_texheight,_texdepth+1);
+                unsigned int x_pre_id  = 2*size + resequence3to1(i-1,j,k,_texwidth,_texheight,_texdepth+1);
+                unsigned int x_post_id = 2*size + resequence3to1(i+1,j,k,_texwidth,_texheight,_texdepth+1);
+                unsigned int y_pre_id  = 2*size + resequence3to1(i,j-1,k,_texwidth,_texheight,_texdepth+1);
+                unsigned int y_post_id = 2*size + resequence3to1(i,j+1,k,_texwidth,_texheight,_texdepth+1);
+                unsigned int z_pre_id  = 2*size + resequence3to1(i,j,k-1,_texwidth,_texheight,_texdepth+1);
+                unsigned int z_post_id = 2*size + resequence3to1(i,j,k+1,_texwidth,_texheight,_texdepth+1);
+
+                if(F[0])triplets.emplace_back(center_id, x_post_id, scale);
+                if(F[1])triplets.emplace_back(center_id, y_post_id, scale);
+                if(F[2])triplets.emplace_back(center_id, x_pre_id,  scale);
+                if(F[3])triplets.emplace_back(center_id, y_pre_id,  scale);
+                if(F[4])triplets.emplace_back(center_id, z_pre_id,  scale);
+                if(F[5])triplets.emplace_back(center_id, z_post_id, scale);
+                triplets.emplace_back(center_id,center_id, 1-6.0*scale);
+                    // triplets.emplace_back(size + i+j*_texwidth+k*_texwidth*_texheight, size + i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
+                    // triplets.emplace_back(2*size + i+j*_texwidth+k*_texwidth*_texheight, 2*size + i+j*_texwidth+(k+2)*_texwidth*_texheight, scale);
             }
         }
     }
     DiffusionMatrix.setFromTriplets(triplets.begin(), triplets.end());
 }
 
-void Simulator::calPressure2VelocityMatrix()
+void Simulator::calPressure2VelocityMatrix(float dt)
 {
     std::vector<Triplet> triplets;
     float size = (_texwidth + 1) * _texheight * _texdepth;
@@ -615,10 +675,10 @@ void Simulator::project(){
     // solver.setMaxIterations(20);//設定すると精度が足りないかも
     b = Vel2DivMatrix * DirichletBoundaryMatrix * all_velocity;
     write_exact_solution(b_all_frame,b);
-    solver.compute(_dt/(_dx*_dx) * PoissonMatrix);
+    solver.compute(PoissonMatrix);
     px = solver.solveWithGuess(b,px);
     // px = solver.solve(b);
-    all_velocity = DirichletBoundaryMatrix * all_velocity - _dt/(_dx)*Pressure2VelocityMatrix * px;
+    all_velocity = DirichletBoundaryMatrix * all_velocity - Pressure2VelocityMatrix * px;
     all2xyz();
 }
 
@@ -763,7 +823,7 @@ void Simulator::getReducedLinearOperator()
 {
     reduced_Vel2DivMatrix = P.transpose() * _sub_dt/(_dx)*Vel2DivMatrix * U2;
     reduced_PoissonMatrix = P.transpose() * _sub_dt/(_dx*_dx) * PoissonMatrix * P;
-    reduced_Pressure2VelocityMatrix = U3.transpose() * Pressure2VelocityMatrix * P;
+    reduced_Pressure2VelocityMatrix = U3.transpose() * _dt/(_dx) * Pressure2VelocityMatrix * P;
     reduced_DirichletBoundaryMatrix = U2.transpose() * DirichletBoundaryMatrix * U2;
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> ES(reduced_PoissonMatrix);
     Eigen::VectorXf reduced_Poisson_eigenval = ES.eigenvalues();
@@ -936,6 +996,8 @@ void Simulator::subspace_execute()
     density_tgt = Slab(_texwidth,_texheight,_texdepth,0.0f);
     density_amb = Slab(_texwidth,_texheight,_texdepth,AMB_DENSITY);
     templature = Slab(_texwidth,_texheight,_texdepth,AMB_TEMPLATURE);
+    init_density(TGT_DENSITY);
+    init_templature(TGT_TEMPLATURE);
     init_all_velocity();
     for(_timestamp = 0; _timestamp< (_dt/_sub_dt) * _flame_num; ++_timestamp)
     {
@@ -946,17 +1008,19 @@ void Simulator::subspace_execute()
 
 void Simulator::subspace_oneloop()
 {
-    init_density(TGT_DENSITY);
-    init_templature(TGT_TEMPLATURE);
+    // init_density(TGT_DENSITY);
+    // init_templature(TGT_TEMPLATURE);
     //nonlinear
     // std::cout << "sub_calForce" << std::endl;
     addForce();
-    // std::cout << "U0 snap norm = " << all_velocity.norm() << std::endl;
-    //U0
-    // std::cout << "U0 snap norm = " << U0_SnapShot.row(_timestamp).norm() << std::endl;
-    faceAdvect();
-    //linear
     init_all_velocity();
+    reduced_all_velocity = U0.transpose() * all_velocity;
+    faceAdvect();
+    init_all_velocity();
+    // subspace_advect();
+    //linear
+
+    //Diffuce作らないと性質が悪い可能性あるか？
 
     //U1
     //Diffusion
@@ -964,14 +1028,16 @@ void Simulator::subspace_oneloop()
     // std::cout << "exact, reduce : " << U2_all_frame.col(_timestamp).norm() << "," <<  (U2 * reduced_all_velocity).norm() << std::endl;
     // if(_timestamp < _discard_flame)
     // std::cout << "U2 restore error = " << (all_velocity - U2 * (U2.transpose() * all_velocity)).norm() / all_velocity.norm() << std::endl;
-    reduced_all_velocity = U2.transpose() * all_velocity;
+    // reduced_all_velocity = U2.transpose() * all_velocity;
     subspace_project();
-    std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
+    // std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
     // std::cout << "exact, reduce : " << U3_all_frame.col(_timestamp).norm() << "," <<  (U3 * reduced_all_velocity).norm() << std::endl;
     // std::cout << "P  : " << ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm() << std::endl;
     // std::cout << "exact, reduce : " << P_all_frame.col(_timestamp).norm() << "," <<  (P * reduced_px).norm() << std::endl;
     //nonlinear
     //U3
+    all_velocity = U3 * reduced_all_velocity;
+    all2xyz();
     centerAdvect(templature);
     centerAdvect(density_tgt);
     centerAdvect(density_amb);
@@ -986,8 +1052,202 @@ void Simulator::subspace_project(){
     solver.compute(reduced_PoissonMatrix);
     reduced_px = solver.solveWithGuess(b, reduced_px);
     reduced_all_velocity = reduced_DirichletBoundaryMatrix * reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
-    all_velocity = U3 * reduced_all_velocity;
+}
+
+Eigen::Vector3f Simulator::face_advect_function(Eigen::Vector3i &pos)
+{
+    Eigen::Vector3f ret;
+    // float x = i*_dx;float y = (j+0.5)*_dx;float z = (k+0.5)*_dx;
+    std::cout << "pos : " << pos.transpose() << std::endl;
+    std::cout << "x" << std::endl;
+    float x = pos.x()*_dx;float y = (pos.y() + 0.5)*_dx;float z = (pos.z() + 0.5)*_dx;
+    std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
+    float adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
+    float adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
+    float adv_z = z - _dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx,z, z_velocity);
+    std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
+    ret.x() = TriLinearInterporation(adv_x, adv_y - 0.5*_dx, adv_z- 0.5*_dx, x_velocity);
+
+    std::cout << "y" << std::endl;
+    x = (pos.x() + 0.5)*_dx; y = pos.y()*_dx; z = (pos.z() + 0.5)*_dx;
+    std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
+    adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
+    adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
+    adv_z = z - _dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx, z, z_velocity);
+    std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
+    ret.y() = TriLinearInterporation(adv_x - 0.5*_dx, adv_y, adv_z- 0.5*_dx, y_velocity);
+
+    std::cout << "z" << std::endl;
+    x = (pos.x() + 0.5)*_dx; y = (pos.y() + 0.5)*_dx; z = pos.z() * _dx;
+    std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
+    adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
+    adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
+    adv_z = z - _dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx, z, z_velocity);
+    std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
+    ret.z() = TriLinearInterporation(adv_x - 0.5*_dx, adv_y- 0.5*_dx, adv_z, z_velocity);
+    return ret;
+}
+
+void Simulator::subspace_advect()
+{
     all2xyz();
+    Eigen::VectorXf updated_reduced_velocity = Eigen::VectorXf::Zero(reduced_all_velocity.size());
+    auto itr = cubaturePointSet.begin();
+    int weight_id = 0;
+    while(itr != cubaturePointSet.end())
+    {
+        unsigned int point_id = *(itr);
+        unsigned int p_x;unsigned int p_y;unsigned int p_z;
+        resequence1to3(point_id,p_x,p_y,p_z,_texwidth,_texheight,_texdepth);
+        Eigen::Vector3i pre_advected_id_pos = {p_x,p_y,p_z};
+        std::cout << "point_pos" << std::endl << pre_advected_id_pos.transpose() << std::endl;
+        Eigen::MatrixXf subU0 = getRowsCorrespondPoint(U0,p_x,p_y,p_z);
+        Eigen::MatrixXf subU1 = getRowsCorrespondPoint(U1,p_x,p_y,p_z);
+        Eigen::Vector3f unreduced_point_velocity = subU0 * reduced_all_velocity;
+        std::cout << "unreduced_point_vel" << std::endl << unreduced_point_velocity.transpose() << std::endl;
+        updated_reduced_velocity += cubatureWeightVector(weight_id) * subU1 * face_advect_function(pre_advected_id_pos);
+        ++itr;
+        ++weight_id;
+    }
+    reduced_all_velocity = updated_reduced_velocity;
+}
+
+Eigen::MatrixXf Simulator::getRowsCorrespondPoint(Eigen::MatrixXf &Mat, unsigned int x,unsigned int y, unsigned int z)
+{
+    unsigned int size = Mat.rows() / 3;
+    Eigen::MatrixXf ret(3,Mat.cols());
+    ret.row(0) = Mat.row(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth));
+    ret.row(1) = Mat.row(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth));
+    ret.row(2) = Mat.row(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1));
+    return ret;
+}
+
+Eigen::Vector3f Simulator::getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,unsigned int x,unsigned int y,unsigned int z,unsigned int T)
+{
+    unsigned int size = Snapshot.rows();
+    Eigen::Vector3f ret;
+    ret.x() = (Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T) + Snapshot(resequence3to1(x+1,y,z,_texwidth+1,_texheight,_texdepth),T))/2;
+    ret.y() = (Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T) + Snapshot(size + resequence3to1(x,y+1,z,_texwidth,_texheight+1,_texdepth),T))/2;
+    ret.z() = (Snapshot(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1),T) + Snapshot(2*size + resequence3to1(x,y,z+1,_texwidth,_texheight,_texdepth+1),T))/2;
+    return ret;
+}
+
+void Simulator::largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,float error_thresold,float weight_threshold)
+{
+    Eigen::MatrixXf A;
+    Eigen::VectorXf b = getSubspaceAdvect_b(U1_SnapShot,U1);
+    // std::cout << "b" << std::endl << b.transpose() << std::endl;
+    Eigen::VectorXf w;
+    Eigen::VectorXf residual = b;
+    float err_real_value = (residual.norm())*residual.norm() * error_thresold;
+    Eigen::NNLS<Eigen::MatrixXf> nnls_solver;
+    int space_resolution = _texwidth * _texheight * _texdepth;
+    std::uniform_int_distribution uid(0,space_resolution-1);
+    std::uniform_real_distribution<float> urd(0,1);
+    std::mt19937_64 mt_point(0);
+    std::mt19937_64 mt_probablity(0);
+    CubaturePointSet.clear();
+    while(residual.norm() * residual.norm() > err_real_value)
+    {
+        // std::cout << "point set num = " << CubaturePointSet.size() << std::endl;
+        unsigned int point_id = uid(mt_point);
+        // std::cout << "point id = " << point_id << std::endl;
+        if(CubaturePointSet.find(point_id) != CubaturePointSet.end())
+        {
+            // std::cout << "already added cubature point set" << std::endl;
+            continue;
+        }
+        Eigen::VectorXf Acol = getColACoresspondCubaturePoint(point_id,U1_SnapShot,U1);
+        std::cout << "Acol" << std::endl;
+        unsigned int restPoint_num = space_resolution - CubaturePointSet.size();
+        float probablity = restPoint_num * ( std::fabs(Acol.dot(residual)) / (residual.dot(residual)));
+        if(probablity < urd(mt_probablity))continue;
+        std::cout << "probablity = " << probablity << std::endl;
+        CubaturePointSet.insert(point_id);
+        A = getSubspaceAdvect_A(CubaturePointSet,U1_SnapShot,U1);
+        std::cout << "fin calA" << std::endl;
+        nnls_solver.compute(A);
+        w = nnls_solver.solve(b);
+        std::cout << "solve" << std::endl;
+        auto itr = CubaturePointSet.begin();
+        // std::cout << "A.rows, A.cols, b.size(), w.size() = " << A.rows() << ", " << A.cols() << ", " << b.size() << ", " << w.size() << std::endl;
+        residual = b - A*w;
+        // std::cout << "err % = " << residual.norm() * residual.norm() / err_real_value << std::endl;
+        // std::cout << "Cubature point set num, residual.norm()^2 = " 
+        // << CubaturePointSet.size() << ", " << residual.norm() * residual.norm() << std::endl; 
+        std::set<unsigned int>culledPointSet;
+        for(int i=0;i<w.size();++i)
+        {
+            // if(w(i) > weight_threshold)residual(i) = b(i) - (A*w)(i);//ここの添字みす
+            // else CubaturePointSet.erase(itr);
+            // std::cout << "point " << *(itr) << ", w = " << w(i) << std::endl;
+            if(w(i) > weight_threshold)
+            {
+                // CubaturePointSet.erase(itr);
+                culledPointSet.insert(*(itr));
+            }
+
+            ++itr;
+        }
+        CubaturePointSet = culledPointSet;
+        // std::cout << "fin cubature oneloop" << std::endl;
+        // int microsecond = 0.5 * 1000000;
+        // usleep(microsecond);
+    }
+    cubatureWeightVector = w;
+    std::cout << "cubature point num = " << CubaturePointSet.size() << std::endl;
+}
+
+Eigen::VectorXf Simulator::getColACoresspondCubaturePoint(unsigned int point_id,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
+{
+    unsigned int r = Basis.cols();
+    Eigen::VectorXf ret(r*_snap_num);
+    unsigned int p_x;unsigned int p_y;unsigned int p_z;
+    resequence1to3(point_id,p_x,p_y,p_z,_texwidth,_texheight,_texdepth);
+    // std::cout << "px,py,pz = " << p_x << "," << p_y << "," << p_z << std::endl;
+    // std::cout << point_id << "," << resequence3to1(p_x,p_y,p_z,_texwidth,_texheight,_texdepth) << std::endl;
+    Eigen::MatrixXf subBasis = getRowsCorrespondPoint(Basis,p_x,p_y,p_z);
+    // std::cout << "subBasis" << std::endl << subBasis << std::endl; 
+    for(int snap=0; snap<_snap_num; ++snap)
+    {
+        Eigen::Vector3f pointVelocity = getVelocityFromSnapshot(Snapshot,p_x,p_y,p_z,snap);
+        // std::cout << "snap point velocity = " << pointVelocity.transpose() << std::endl;
+        Eigen::VectorXf projectedPointVelocity = subBasis.transpose() * pointVelocity;
+        // std::cout << "projected point velocity = " <<projectedPointVelocity.transpose() << std::endl;
+        for(int i = 0; i < r;++i)ret(r * snap + i) = projectedPointVelocity(i);
+    }
+    return ret;
+}
+
+Eigen::MatrixXf Simulator::getSubspaceAdvect_A(std::set<unsigned int> &CubaturePointSet,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
+{
+    unsigned int P = CubaturePointSet.size();
+    unsigned int r = Basis.cols();
+    Eigen::MatrixXf ret(r * _snap_num, P);
+    int col = 0;
+    for(auto p:CubaturePointSet)
+    {
+        Eigen::VectorXf Acol = getColACoresspondCubaturePoint(p,Snapshot,Basis);
+        ret.col(col) = Acol;
+        ++col;
+    }
+    return ret;
+}
+
+Eigen::VectorXf Simulator::getSubspaceAdvect_b(Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
+{
+    unsigned int r = Basis.cols();
+    Eigen::VectorXf ret(r * _snap_num);
+    for(unsigned int snap = 0; snap < _snap_num; ++snap)
+    {
+        Eigen::VectorXf projected_vector = Basis.transpose() * Snapshot.col(snap);
+        // std::cout << "projected_vector[" << snap << "]" << std::endl << projected_vector.transpose() << std::endl;
+        for(unsigned int i=0;i<r;++i)
+        {
+            ret(r * snap + i) = projected_vector(i);
+        }
+    }
+    return ret;
 }
 
 void Simulator::devided_subspace_execute()
@@ -1105,141 +1365,4 @@ void Simulator::getDevidedReducedLinearOperator()
         devided_reduced_Pressure2VelocityMatrix.push_back(tmp_reduced_Pressure2VelocityMatrix);//Y
         devided_reduced_DirichletBoundaryMatrix.push_back(tmp_reduced_DirichletBoundaryMatrix);//D
     }
-}
-
-Eigen::MatrixXf Simulator::getRowsCorrespondPoint(Eigen::MatrixXf &Mat, unsigned int x,unsigned int y, unsigned int z)
-{
-    unsigned int size = Mat.rows() / 3;
-    Eigen::MatrixXf ret(3,Mat.cols());
-    ret.row(0) = Mat.row(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth));
-    ret.row(1) = Mat.row(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth));
-    ret.row(2) = Mat.row(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1));
-    return ret;
-}
-
-Eigen::Vector3f Simulator::getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,unsigned int x,unsigned int y,unsigned int z,unsigned int T)
-{
-    unsigned int size = Snapshot.rows();
-    Eigen::Vector3f ret;
-    ret.x() = Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T);
-    ret.y() = Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T);
-    ret.z() = Snapshot(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1),T);
-    return ret;
-}
-
-void Simulator::largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,float error_thresold,float weight_threshold)
-{
-    Eigen::MatrixXf A;
-    Eigen::VectorXf b = getSubspaceAdvect_b(U1_SnapShot,U1);
-    // std::cout << "b" << std::endl << b.transpose() << std::endl;
-    Eigen::VectorXf w;
-    Eigen::VectorXf residual = b;
-    float err_real_value = (residual.norm())*residual.norm() * error_thresold;
-    Eigen::NNLS<Eigen::MatrixXf> nnls_solver;
-    int space_resolution = _texwidth * _texheight * _texdepth;
-    std::uniform_int_distribution uid(0,space_resolution-1);
-    std::uniform_real_distribution<float> urd(0,1);
-    std::mt19937_64 mt_point(0);
-    std::mt19937_64 mt_probablity(0);
-    CubaturePointSet.clear();
-    while(residual.norm() * residual.norm() > err_real_value)
-    {
-        // std::cout << "point set num = " << CubaturePointSet.size() << std::endl;
-        unsigned int point_id = uid(mt_point);
-        // std::cout << "point id = " << point_id << std::endl;
-        if(CubaturePointSet.find(point_id) != CubaturePointSet.end())
-        {
-            // std::cout << "already added cubature point set" << std::endl;
-            continue;
-        }
-        Eigen::VectorXf Acol = getColACoresspondCubaturePoint(point_id,U1_SnapShot,U1);
-        // std::cout << "Acol" << std::endl << Acol.transpose() << std::endl;
-        unsigned int restPoint_num = space_resolution - CubaturePointSet.size();
-        float probablity = restPoint_num * ( std::fabs(Acol.dot(residual)) / (residual.dot(residual)));
-        // std::cout << "probablity = " << probablity << std::endl;
-        if(probablity < urd(mt_probablity))continue;
-        CubaturePointSet.insert(point_id);
-        A = getSubspaceAdvect_A(CubaturePointSet,U1_SnapShot,U1);
-        // std::cout << "fin calA" << std::endl << A << std::endl;
-        // std::cout << "fin calA" << std::endl;
-        nnls_solver.compute(A);
-        w = nnls_solver.solve(b);
-        // std::cout << "solve" << std::endl;
-        auto itr = CubaturePointSet.begin();
-        // std::cout << "A.rows, A.cols, b.size(), w.size() = " << A.rows() << ", " << A.cols() << ", " << b.size() << ", " << w.size() << std::endl;
-        residual = b - A*w;
-        // std::cout << "Cubature point set num, residual.norm()^2 = " 
-        // << CubaturePointSet.size() << ", " << residual.norm() * residual.norm() << std::endl; 
-        std::set<unsigned int>culledPointSet;
-        for(int i=0;i<w.size();++i)
-        {
-            // if(w(i) > weight_threshold)residual(i) = b(i) - (A*w)(i);//ここの添字みす
-            // else CubaturePointSet.erase(itr);
-            // std::cout << "point " << *(itr) << ", w = " << w(i) << std::endl;
-            if(w(i) > weight_threshold)
-            {
-                // CubaturePointSet.erase(itr);
-                culledPointSet.insert(*(itr));
-            }
-
-            ++itr;
-        }
-        CubaturePointSet = culledPointSet;
-        // std::cout << "fin cubature oneloop" << std::endl;
-        // int microsecond = 0.5 * 1000000;
-        // usleep(microsecond);
-    }
-    // std::cout << "cubature point num = " << CubaturePointSet.size() << std::endl;
-}
-
-Eigen::VectorXf Simulator::getColACoresspondCubaturePoint(unsigned int point_id,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
-{
-    unsigned int r = Basis.cols();
-    Eigen::VectorXf ret(r*_snap_num);
-    unsigned int p_x;unsigned int p_y;unsigned int p_z;
-    resequence1to3(point_id,p_x,p_y,p_z,_texwidth,_texheight,_texdepth);
-    // std::cout << "px,py,pz = " << p_x << "," << p_y << "," << p_z << std::endl;
-    // std::cout << point_id << "," << resequence3to1(p_x,p_y,p_z,_texwidth,_texheight,_texdepth) << std::endl;
-    Eigen::MatrixXf subBasis = getRowsCorrespondPoint(Basis,p_x,p_y,p_z);
-    // std::cout << "subBasis" << std::endl << subBasis << std::endl; 
-    for(int snap=0; snap<_snap_num; ++snap)
-    {
-        Eigen::Vector3f pointVelocity = getVelocityFromSnapshot(Snapshot,p_x,p_y,p_z,snap);
-        // std::cout << "snap point velocity = " << pointVelocity.transpose() << std::endl;
-        Eigen::VectorXf projectedPointVelocity = subBasis.transpose() * pointVelocity;
-        // std::cout << "projected point velocity = " <<projectedPointVelocity.transpose() << std::endl;
-        for(int i = 0; i < r;++i)ret(r * snap + i) = projectedPointVelocity(i);
-    }
-    return ret;
-}
-
-Eigen::MatrixXf Simulator::getSubspaceAdvect_A(std::set<unsigned int> &CubaturePointSet,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
-{
-    unsigned int P = CubaturePointSet.size();
-    unsigned int r = Basis.cols();
-    Eigen::MatrixXf ret(r * _snap_num, P);
-    int col = 0;
-    for(auto p:CubaturePointSet)
-    {
-        Eigen::VectorXf Acol = getColACoresspondCubaturePoint(p,Snapshot,Basis);
-        ret.col(col) = Acol;
-        ++col;
-    }
-    return ret;
-}
-
-Eigen::VectorXf Simulator::getSubspaceAdvect_b(Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
-{
-    unsigned int r = Basis.cols();
-    Eigen::VectorXf ret(r * _snap_num);
-    for(unsigned int snap = 0; snap < _snap_num; ++snap)
-    {
-        Eigen::VectorXf projected_vector = Basis.transpose() * Snapshot.col(snap);
-        // std::cout << "projected_vector[" << snap << "]" << std::endl << projected_vector.transpose() << std::endl;
-        for(unsigned int i=0;i<r;++i)
-        {
-            ret(r * snap + i) = projected_vector(i);
-        }
-    }
-    return ret;
 }

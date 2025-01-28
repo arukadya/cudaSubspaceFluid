@@ -26,7 +26,7 @@ struct Timer{
     void startWithMessage(const char* s);
     double end();
 };
-int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta,
+int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, float &nu,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
     unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame,float &threshold);
 

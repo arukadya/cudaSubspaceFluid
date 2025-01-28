@@ -1,6 +1,7 @@
 dx 0.64
 dt 0.00015625
-beta 1000
+beta 100
+nu 0.02
 texwidth 64
 texheight 64
 texdepth 64

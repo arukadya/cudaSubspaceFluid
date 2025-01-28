@@ -44,9 +44,9 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
     // unsigned int range_x = 1;
     // unsigned int range_y = 1;
     // unsigned int range_z = 1;
-    unsigned int range_x = Ni/32;
-    // unsigned int range_y = Nj/16;
-    unsigned int range_z = Nk/32;
+    unsigned int range_x = Ni/16;
+    unsigned int range_y = Nj/16;
+    unsigned int range_z = Nk/16;
     for(unsigned int i=0;i<Ni;++i)
     {
         for(unsigned int j=0;j<Nj;++j)
@@ -56,8 +56,9 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
                 if
                 (
                     Ni / 2 - range_x < i && i < Ni / 2 + range_x &&
-                    // j < 3 &&
-                    j > Nj - 3 &&
+                    // j > Nj - range_y &&
+                    3 * Nj / 4 - range_y < j && j < 3 * Nj / 4 + range_y &&
+                    // j > Nj - 3 &&
                     Nk / 2 - range_z < k && k < Nk / 2 + range_z
                 )init_index_list.push_back({i,j,k});
             }
@@ -73,7 +74,7 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
     }
     return ret;
 }
-int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta,
+int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, float &nu,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
     unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame ,float &threshold){
     std::ifstream Inputfile(InputFileName);
@@ -105,6 +106,12 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta,
         {
             while(getline(ss_nums,word,' ')){
                 beta = std::stof(word);
+            };
+        }
+        else if(word == "nu")
+        {
+            while(getline(ss_nums,word,' ')){
+                nu = std::stof(word);
             };
         }
         else if(word == "texwidth")

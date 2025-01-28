@@ -163,7 +163,7 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_diment
 
 struct Simulator{
     //FluidVariables
-    const float _dx; const float _dt;const float _beta;
+    const float _dx; const float _dt;const float _beta;const float _nu;
     const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
     const unsigned int _flame_num;const unsigned int _snap_num; const unsigned int _discard_flame; const float _threshold;
     unsigned int _timestamp;
@@ -232,10 +232,10 @@ struct Simulator{
 
     // CalForceEncoder calForceEncoder;
     std::string density_floder_name;
-    Simulator(float dx,float dt,float beta,
+    Simulator(float dx,float dt,float beta,float nu,
     unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
     unsigned int flame_num, unsigned int snap_num, unsigned int discard_flame,float threshold) 
-    : _dx(dx/texwidth),_dt(dt * texwidth),_beta(beta),
+    : _dx(dx/texwidth),_dt(dt * texwidth),_beta(beta),_nu(nu),
     _texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),
     _flame_num(flame_num),_snap_num(snap_num),_discard_flame(discard_flame),_threshold(threshold)
     {
@@ -244,7 +244,7 @@ struct Simulator{
         _snap_devide_num = _snap_num / 3;
         _sub_dt = _dt;
         if(_flame_num % _snap_num != 0)std::cout << " Warning : _flame_num % _snap_num != 0" << std::endl;
-        std::cout << "dx,dt,beta = " << _dx << "," << _dt << "," << _beta << std::endl;
+        std::cout << "dx,dt,beta,nu = " << _dx << "," << _dt << "," << _beta << "," << _nu << std::endl;
         std::cout << "width,height,depth = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
         std::cout << "flame_num,snap_num,threshold = " << _flame_num << "," << _snap_num << "," << threshold << std::endl;
         std::cout << "discard_flame = " << _discard_flame << std::endl; 
@@ -259,12 +259,14 @@ struct Simulator{
         density_amb = Slab(_texwidth,_texheight,_texdepth,AMB_DENSITY);
         templature = Slab(_texwidth,_texheight,_texdepth,AMB_TEMPLATURE);
         test = Slab(_texwidth,_texheight,1,0.0f);
+        init_density(TGT_DENSITY);
+        init_templature(TGT_TEMPLATURE);
         // calForceEncoder = CalForceEncoder("../shader/calForce.comp");
         density_floder_name = "density_txt";
         std::filesystem::create_directories(density_floder_name);
         PoissonMatrix = SparseMatrix(_texwidth*_texheight*_texdepth,texwidth*_texheight*_texdepth);
         Vel2DivMatrix = SparseMatrix(_texwidth*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
-        // DiffusionMatrix = SparseMatrix(3*_texwidth*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
+        DiffusionMatrix = SparseMatrix(3*(_texwidth + 1)*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
         DirichletBoundaryMatrix = SparseMatrix(3*(texwidth + 1)*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
         Pressure2VelocityMatrix = SparseMatrix(3*(_texwidth + 1)*_texheight*_texdepth, texwidth*_texheight*_texdepth);
         all_velocity = Eigen::VectorXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth);
@@ -281,21 +283,23 @@ struct Simulator{
         U3_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         P_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         b_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
-        calPoissonMatrix();
+        calPoissonMatrix(_dt);
         std::cout << "Poison" << std::endl;
+        calDiffusionMatrix(_dt);
+        std::cout << "Diffusion" << std::endl;
         calVel2DivMatrix();
         std::cout << "V2D" << std::endl;
-        calPressure2VelocityMatrix();
+        calPressure2VelocityMatrix(_dt);
         std::cout << "P2V" << std::endl;
         calDirichletBoundaryMatrix();
         std::cout << "DB" << std::endl;
     };
     //full simulator
     void oneloop();
-    void calDiffusionMatrix();
-    void calPoissonMatrix();
+    void calDiffusionMatrix(float dt);
+    void calPoissonMatrix(float dt);
     void calVel2DivMatrix();
-    void calPressure2VelocityMatrix();
+    void calPressure2VelocityMatrix(float dt);
     void calDirichletBoundaryMatrix();
     void init_all_velocity();
     void init_velocity();
@@ -304,9 +308,9 @@ struct Simulator{
     void init_pressure(float init_pressure_value);
     void init_velocity(float init_pressure_value);
     float TriLinearInterporation(float x,float y,float z,Slab &val);
-    // float Simulator::TriLinearInterporation(Eigen::VectorXf &velocity, Eigen::VectorXf &val);
+    // float TriLinearInterporation(float x,float y,float z,unsigned int nx,unsigned int ny,unsigned int nz,Eigen::VectorXf &val);
     float* get_currentTexture();
-    void face_advect_function(Eigen::VectorXf &val, Eigen::VectorXf &pos);
+    Eigen::Vector3f face_advect_function(Eigen::Vector3i &pos);
     void faceAdvect();
     void centerAdvect(Slab &val);
     void project();
@@ -335,6 +339,7 @@ struct Simulator{
     void subspace_oneloop();
     void subspace_project();
     void subspace_advect();
+    Eigen::Vector3f getCenterVelocity(unsigned int x,unsigned int y,unsigned int z);
 
     void devided_subspace_execute();
     void devided_subspace_oneloop();

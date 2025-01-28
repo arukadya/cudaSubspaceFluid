@@ -36,16 +36,16 @@ int main(int argc, char * argv[])
     }
     std::string command0(argv[1]);
     bool is_simulate = (command0 == "pre_compute");
-    float dx;float dt;float beta;
+    float dx;float dt;float beta;float nu;
     unsigned int texwidth;unsigned int texheight;unsigned int texdepth;unsigned int slice_num;
     unsigned int flame_num;unsigned int snap_num;unsigned int discard_flame;float threshold;
     unsigned int id = 0;
     std::string paramatorsFileName = "../src/paramators.txt";
-    inputParamator(paramatorsFileName,dx,dt,beta,
+    inputParamator(paramatorsFileName,dx,dt,beta,nu,
     texwidth,texheight,texdepth,slice_num,
     flame_num,snap_num,discard_flame,threshold);
 
-    Simulator simulator(dx,dt,beta,
+    Simulator simulator(dx,dt,beta,nu,
     texwidth,texheight,texdepth,
     flame_num,snap_num,discard_flame,threshold);
     std::cout << "success init simulator" << std::endl;
@@ -161,10 +161,10 @@ int main(int argc, char * argv[])
     }
     simulator.getReducedLinearOperator();
     std::cout << "fin_operator_projection" << std::endl;
-    simulator.subspace_execute();
-    std::cout << "fin_subspace" << std::endl;
     simulator.largeSamplingCubature(simulator.cubaturePointSet, err_threshold, w_threshold);
     std::cout << "fin_cubature" << std::endl;
+    simulator.subspace_execute();
+    std::cout << "fin_subspace" << std::endl;
     system("./viewer");
     return 0;
 }
