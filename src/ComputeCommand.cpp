@@ -7,6 +7,56 @@
 
 #include "ComputeCommand.hpp"
 
+Eigen::VectorXf staggerd_to_colocate(Eigen::VectorXf &staggerd_velocity,unsigned int nx,unsigned int ny,unsigned int nz)
+{
+    unsigned int staggerd_size = (nx+1)*ny*nz;
+    unsigned int colocate_size = nx*ny*nz;
+    Eigen::VectorXf colocate_vector(colocate_size);
+    //x
+    for(unsigned int i = 0; i < nx; ++i)
+    {
+        for(unsigned int j = 0; j < ny; ++j)
+        {
+            for(unsigned int k = 0; k < nz; ++k)
+            {
+                unsigned int colocate_id = resequence3to1(i,j,k,nx,ny,nz);
+                unsigned int staggerd_pre = resequence3to1(i,j,k,nx+1,ny,nz);
+                unsigned int staggerd_post = resequence3to1(i+1,j,k,nx+1,ny,nz);
+                colocate_vector(colocate_id) = (staggerd_velocity(staggerd_pre) + staggerd_velocity(staggerd_post))/2;
+            }
+        }
+    }
+    //y
+    for(unsigned int i = 0; i < nx; ++i)
+    {
+        for(unsigned int j = 0; j < ny; ++j)
+        {
+            for(unsigned int k = 0; k < nz; ++k)
+            {
+                unsigned int colocate_id = colocate_size + (i,j,k,nx,ny,nz);
+                unsigned int staggerd_pre = staggerd_size + (i,j,k,nx,ny+1,nz);
+                unsigned int staggerd_post = staggerd_size + (i,j+1,k,nx,ny+1,nz);
+                colocate_vector(colocate_id) = (staggerd_velocity(staggerd_pre) + staggerd_velocity(staggerd_post))/2;
+            }
+        }
+    }
+    //z
+    for(unsigned int i = 0; i < nx; ++i)
+    {
+        for(unsigned int j = 0; j < ny; ++j)
+        {
+            for(unsigned int k = 0; k < nz; ++k)
+            {
+                unsigned int colocate_id = 2*colocate_size + resequence3to1(i,j,k,nx,ny,nz);
+                unsigned int staggerd_pre = 2*staggerd_size + resequence3to1(i,j,k,nx,ny,nz+1);
+                unsigned int staggerd_post =2*staggerd_size + resequence3to1(i,j,k+1,nx,ny,nz+1);
+                colocate_vector(colocate_id) = (staggerd_velocity(staggerd_pre) + staggerd_velocity(staggerd_post))/2;
+            }
+        }
+    }
+    return colocate_vector;
+}
+
 unsigned int resequence3to1(unsigned int i,unsigned int j,unsigned int k,unsigned int Ni,unsigned int Nj,unsigned int Nk)
 {
     unsigned int value = k * Ni*Nj + j * Ni + i;

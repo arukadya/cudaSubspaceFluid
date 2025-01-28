@@ -128,7 +128,7 @@ void Simulator::oneloop()
 {
     // init_density(TGT_DENSITY);
     // init_templature(TGT_TEMPLATURE);
-    addForce();
+    addForce(_dt);
     init_all_velocity();
     //U0
     write_snapshot(U0_SnapShot, all_velocity);
@@ -140,7 +140,7 @@ void Simulator::oneloop()
     // write_exact_solution(U1_all_frame, all_velocity);
     //U1
     //Diffusion
-    all_velocity = DiffusionMatrix * all_velocity;
+    // all_velocity = DiffusionMatrix * all_velocity;
     //U2
     write_snapshot(U2_SnapShot, all_velocity);
     // write_exact_solution(U2_all_frame, all_velocity);
@@ -422,7 +422,6 @@ void Simulator::calDiffusionMatrix(float dt)
             for(unsigned int k=1;k<_texdepth-1;k++){
                 // float D[6] = {1.0,1.0,-1.0,-1.0,-1.0,1.0};//周囲6方向に向かって働く、圧力の向き
                 std::vector<int> F = {i<_texwidth,j<_texheight-1,i>0,j>0,k>0,k<_texdepth-1};
-                int cnt = 0;
                 //速度の境界値は0に設定しているので、境界成分に対応する係数は0でよい
                 unsigned int center_id = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
                 unsigned int x_pre_id  = resequence3to1(i-1,j,k,_texwidth+1,_texheight,_texdepth);
@@ -451,7 +450,6 @@ void Simulator::calDiffusionMatrix(float dt)
             for(unsigned int k=1;k<_texdepth-1;k++){
                 // float D[6] = {1.0,1.0,-1.0,-1.0,-1.0,1.0};//周囲6方向に向かって働く、圧力の向き
                 std::vector<int> F = {i<_texwidth-1,j<_texheight,i>0,j>0,k>0,k<_texdepth-1};
-                int cnt = 0;
                 //速度の境界値は0に設定しているので、境界成分に対応する係数は0でよい
                 unsigned int center_id = size + resequence3to1(i,  j,k,_texwidth,_texheight+1,_texdepth);
                 unsigned int x_pre_id  = size + resequence3to1(i-1,j,k,_texwidth,_texheight+1,_texdepth);
@@ -480,7 +478,6 @@ void Simulator::calDiffusionMatrix(float dt)
             for(unsigned int k=1;k<_texdepth;k++){
                 // float D[6] = {1.0,1.0,-1.0,-1.0,-1.0,1.0};//周囲6方向に向かって働く、圧力の向き
                 std::vector<int> F = {i<_texwidth-1,j<_texheight-1,i>0,j>0,k>0,k<_texdepth};
-                int cnt = 0;
                 //速度の境界値は0に設定しているので、境界成分に対応する係数は0でよい
                 unsigned int center_id = 2*size + resequence3to1(i,  j,k,_texwidth,_texheight,_texdepth+1);
                 unsigned int x_pre_id  = 2*size + resequence3to1(i-1,j,k,_texwidth,_texheight,_texdepth+1);
@@ -564,7 +561,7 @@ void Simulator::origin_project()
     for(int i=0;i<_texwidth;i++){
         for(int j=0;j<_texheight;j++){
             for(int k=0;k<_texdepth;k++){
-                unsigned int grid_id = resequence3to1(i,j,k,_texdepth,_texheight,_texdepth);
+                // unsigned int grid_id = resequence3to1(i,j,k,_texdepth,_texheight,_texdepth);
                  // px[i+j*_texwidth+k*_texwidth*_texheight] = p.value[i][j][k];
                 // double scale = _dt/((rho_tgt.value[i][j][k] + rho_amb.value[i][j][k])*_dx*_dx);
                 float scale = _dt/(_dx*_dx);
@@ -682,7 +679,7 @@ void Simulator::project(){
     all2xyz();
 }
 
-void Simulator::addForce(){
+void Simulator::addForce(float dt){
 
     // setCenterRot();
     for(unsigned int i=0;i<_texwidth;i++){
@@ -710,7 +707,7 @@ void Simulator::addForce(){
             for(unsigned int k=0;k<_texdepth;k++){
                 // u.value[i][j][k] += dt*(f.value[i-1][j][k].x() + f.value[i][j][k].x())/2;
                 float value =  x_velocity.get_volume_value(i,j,k);
-                value += _dt * ( x_force.get_volume_value(i-1,j,k) + x_force.get_volume_value(i,j,k) )/2;
+                value += dt * ( x_force.get_volume_value(i-1,j,k) + x_force.get_volume_value(i,j,k) )/2;
                 x_velocity.set_volume_value(i,j,k,value);
             }
         }
@@ -721,7 +718,7 @@ void Simulator::addForce(){
             for(unsigned int k=0;k<_texdepth;k++){
                 // v.value[i][j][k] += dt*(f.value[i][j-1][k].y() + f.value[i][j][k].y())/2;
                 float value =  y_velocity.get_volume_value(i,j,k);
-                value += _dt * ( y_force.get_volume_value(i,j-1,k) + y_force.get_volume_value(i,j,k) )/2;
+                value += dt * ( y_force.get_volume_value(i,j-1,k) + y_force.get_volume_value(i,j,k) )/2;
                 y_velocity.set_volume_value(i,j,k,value);
             }
         }
@@ -732,7 +729,7 @@ void Simulator::addForce(){
             for(unsigned int k=1;k<_texdepth;k++){
                 // w.value[i][j][k] += dt*(f.value[i][j][k-1].z() + f.value[i][j][k].z())/2;
                 float value =  z_velocity.get_volume_value(i,j,k);
-                value += _dt * ( z_force.get_volume_value(i,j,k-1) + z_force.get_volume_value(i,j,k) )/2;
+                value += dt * ( z_force.get_volume_value(i,j,k-1) + z_force.get_volume_value(i,j,k) )/2;
                 z_velocity.set_volume_value(i,j,k,value);
             }
         }
@@ -796,6 +793,8 @@ void Simulator::getBasisQRSVD()
     // (U0.transpose() * U0 - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
     std::cout << "U1" << std::endl;
     U1 = cal_Basis(U1_SnapShot,_reduce_dimention,_threshold);
+    std::cout << "orthogonomality : " << 
+    (U1.transpose() * U1 - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
     std::cout << "U2" << std::endl;
     U2 = cal_Basis(U2_SnapShot,_reduce_dimention,_threshold);
     // U2 = cal_PODBasis(U2_SnapShot);
@@ -821,9 +820,13 @@ void Simulator::getBasisQRSVD()
 
 void Simulator::getReducedLinearOperator()
 {
-    reduced_Vel2DivMatrix = P.transpose() * _sub_dt/(_dx)*Vel2DivMatrix * U2;
-    reduced_PoissonMatrix = P.transpose() * _sub_dt/(_dx*_dx) * PoissonMatrix * P;
-    reduced_Pressure2VelocityMatrix = U3.transpose() * _dt/(_dx) * Pressure2VelocityMatrix * P;
+    calPoissonMatrix(_sub_dt);
+    calDiffusionMatrix(_sub_dt);
+    calPressure2VelocityMatrix(_sub_dt);
+    reduced_DiffusionMatrix = U2.transpose() * DiffusionMatrix * U1;
+    reduced_Vel2DivMatrix = P.transpose() * Vel2DivMatrix * U2;
+    reduced_PoissonMatrix = P.transpose() * PoissonMatrix * P;
+    reduced_Pressure2VelocityMatrix = U3.transpose() * Pressure2VelocityMatrix * P;
     reduced_DirichletBoundaryMatrix = U2.transpose() * DirichletBoundaryMatrix * U2;
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> ES(reduced_PoissonMatrix);
     Eigen::VectorXf reduced_Poisson_eigenval = ES.eigenvalues();
@@ -843,21 +846,6 @@ void Simulator::getReducedLinearOperator()
     }
     if(!is_symmetric)std::cout << "non symmetric matrix" << std::endl;
     if(is_positive_definite && is_symmetric)std::cout << "reduced_X is symmetric positive definite matrix" << std::endl;
-    // std::cout << "reduced_X" << std::endl << reduced_PoissonMatrix << std::endl;
-    // std::cout << "(X - P X' P**T) = " << (PoissonMatrix - P * reduced_PoissonMatrix * P.transpose()) << std::endl;
-    // std::cout << "(P^T X P)^-1.det = " << reduced_PoissonMatrix.determinant() << std::endl;
-    // std::cout << "(P^T X P)^-1 = " << std::endl << reduced_PoissonMatrix.inverse() << std::endl;
-    // std::cout << "((P^T X P) * (P^T X P)^-1 - I).norm() = " << std::endl <<
-    // (reduced_PoissonMatrix * reduced_PoissonMatrix.inverse() - Eigen::MatrixXf::Identity(reduced_PoissonMatrix.rows(),reduced_PoissonMatrix.cols())).norm() << std::endl;
-    // std::cout << "reduced_W size" << std::endl << 
-    // "rows,cols = " << reduced_Vel2DivMatrix.rows() << "," << reduced_Vel2DivMatrix.cols() << std::endl;
-    // std::cout << "reduced_X size" << std::endl << 
-    // "rows,cols = " << reduced_PoissonMatrix.rows() << "," << reduced_PoissonMatrix.cols() << std::endl;
-    // std::cout << "reduced_Y size" << std::endl << 
-    // "rows,cols = " << reduced_Pressure2VelocityMatrix.rows() << "," << reduced_Pressure2VelocityMatrix.cols() << std::endl;
-    // std::cout << "reduced_D size" << std::endl << 
-    // "rows,cols = " << reduced_DirichletBoundaryMatrix.rows() << "," << reduced_DirichletBoundaryMatrix.cols() << std::endl;
-    // std::cout << "reduced_D" << std::endl << reduced_DirichletBoundaryMatrix << std::endl;
 }
 
 void Simulator::output_Snapshot()
@@ -1012,16 +1000,16 @@ void Simulator::subspace_oneloop()
     // init_templature(TGT_TEMPLATURE);
     //nonlinear
     // std::cout << "sub_calForce" << std::endl;
-    addForce();
+    addForce(_sub_dt);
     init_all_velocity();
     reduced_all_velocity = U0.transpose() * all_velocity;
-    faceAdvect();
-    init_all_velocity();
-    // subspace_advect();
+    // faceAdvect();
+    // init_all_velocity();
+    subspace_advect();
     //linear
 
     //Diffuce作らないと性質が悪い可能性あるか？
-
+    // reduced_all_velocity = reduced_DiffusionMatrix * reduced_all_velocity;
     //U1
     //Diffusion
     //U2
@@ -1054,36 +1042,36 @@ void Simulator::subspace_project(){
     reduced_all_velocity = reduced_DirichletBoundaryMatrix * reduced_all_velocity - reduced_Pressure2VelocityMatrix * reduced_px;
 }
 
-Eigen::Vector3f Simulator::face_advect_function(Eigen::Vector3i &pos)
+Eigen::Vector3f Simulator::face_advect_function(Eigen::Vector3i &pos,float dt)
 {
     Eigen::Vector3f ret;
     // float x = i*_dx;float y = (j+0.5)*_dx;float z = (k+0.5)*_dx;
-    std::cout << "pos : " << pos.transpose() << std::endl;
-    std::cout << "x" << std::endl;
+    // std::cout << "pos : " << pos.transpose() << std::endl;
+    // std::cout << "x" << std::endl;
     float x = pos.x()*_dx;float y = (pos.y() + 0.5)*_dx;float z = (pos.z() + 0.5)*_dx;
-    std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
-    float adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
-    float adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
-    float adv_z = z - _dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx,z, z_velocity);
-    std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
+    // std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
+    float adv_x = x - dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
+    float adv_y = y - dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
+    float adv_z = z - dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx,z, z_velocity);
+    // std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
     ret.x() = TriLinearInterporation(adv_x, adv_y - 0.5*_dx, adv_z- 0.5*_dx, x_velocity);
 
-    std::cout << "y" << std::endl;
+    // std::cout << "y" << std::endl;
     x = (pos.x() + 0.5)*_dx; y = pos.y()*_dx; z = (pos.z() + 0.5)*_dx;
-    std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
-    adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
-    adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
-    adv_z = z - _dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx, z, z_velocity);
-    std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
+    // std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
+    adv_x = x - dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
+    adv_y = y - dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
+    adv_z = z - dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx, z, z_velocity);
+    // std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
     ret.y() = TriLinearInterporation(adv_x - 0.5*_dx, adv_y, adv_z- 0.5*_dx, y_velocity);
 
-    std::cout << "z" << std::endl;
+    // std::cout << "z" << std::endl;
     x = (pos.x() + 0.5)*_dx; y = (pos.y() + 0.5)*_dx; z = pos.z() * _dx;
-    std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
-    adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
-    adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
-    adv_z = z - _dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx, z, z_velocity);
-    std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
+    // std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
+    adv_x = x - dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
+    adv_y = y - dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
+    adv_z = z - dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx, z, z_velocity);
+    // std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
     ret.z() = TriLinearInterporation(adv_x - 0.5*_dx, adv_y- 0.5*_dx, adv_z, z_velocity);
     return ret;
 }
@@ -1105,7 +1093,7 @@ void Simulator::subspace_advect()
         Eigen::MatrixXf subU1 = getRowsCorrespondPoint(U1,p_x,p_y,p_z);
         Eigen::Vector3f unreduced_point_velocity = subU0 * reduced_all_velocity;
         std::cout << "unreduced_point_vel" << std::endl << unreduced_point_velocity.transpose() << std::endl;
-        updated_reduced_velocity += cubatureWeightVector(weight_id) * subU1 * face_advect_function(pre_advected_id_pos);
+        updated_reduced_velocity += cubatureWeightVector(weight_id) * subU1 * face_advect_function(pre_advected_id_pos, _sub_dt);
         ++itr;
         ++weight_id;
     }
@@ -1126,9 +1114,12 @@ Eigen::Vector3f Simulator::getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,uns
 {
     unsigned int size = Snapshot.rows();
     Eigen::Vector3f ret;
-    ret.x() = (Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T) + Snapshot(resequence3to1(x+1,y,z,_texwidth+1,_texheight,_texdepth),T))/2;
-    ret.y() = (Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T) + Snapshot(size + resequence3to1(x,y+1,z,_texwidth,_texheight+1,_texdepth),T))/2;
-    ret.z() = (Snapshot(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1),T) + Snapshot(2*size + resequence3to1(x,y,z+1,_texwidth,_texheight,_texdepth+1),T))/2;
+    // ret.x() = (Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T) + Snapshot(resequence3to1(x+1,y,z,_texwidth+1,_texheight,_texdepth),T))/2;
+    // ret.y() = (Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T) + Snapshot(size + resequence3to1(x,y+1,z,_texwidth,_texheight+1,_texdepth),T))/2;
+    // ret.z() = (Snapshot(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1),T) + Snapshot(2*size + resequence3to1(x,y,z+1,_texwidth,_texheight,_texdepth+1),T))/2;
+    ret.x() = Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T);
+    ret.y() = Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T);
+    ret.z() = Snapshot(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1),T);
     return ret;
 }
 
@@ -1147,16 +1138,22 @@ void Simulator::largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,f
     std::mt19937_64 mt_point(0);
     std::mt19937_64 mt_probablity(0);
     CubaturePointSet.clear();
+    std::cout << "fin cubature init" << std::endl;
     while(residual.norm() * residual.norm() > err_real_value)
     {
         // std::cout << "point set num = " << CubaturePointSet.size() << std::endl;
         unsigned int point_id = uid(mt_point);
+        // point_id = 121918;
         // std::cout << "point id = " << point_id << std::endl;
         if(CubaturePointSet.find(point_id) != CubaturePointSet.end())
         {
             // std::cout << "already added cubature point set" << std::endl;
             continue;
         }
+        unsigned int p_x;unsigned int p_y;unsigned int p_z;
+        resequence1to3(point_id,p_x,p_y,p_z,_texwidth,_texheight,_texdepth);
+        std::cout << "p_id = " << point_id << std::endl;
+        std::cout << "px,py,pz = " << p_x << "," << p_y << "," << p_z << std::endl;
         Eigen::VectorXf Acol = getColACoresspondCubaturePoint(point_id,U1_SnapShot,U1);
         std::cout << "Acol" << std::endl;
         unsigned int restPoint_num = space_resolution - CubaturePointSet.size();
@@ -1186,15 +1183,16 @@ void Simulator::largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,f
                 // CubaturePointSet.erase(itr);
                 culledPointSet.insert(*(itr));
             }
-
             ++itr;
         }
         CubaturePointSet = culledPointSet;
+        std::cout << "update cubature point set" << std::endl;
         // std::cout << "fin cubature oneloop" << std::endl;
         // int microsecond = 0.5 * 1000000;
         // usleep(microsecond);
     }
     cubatureWeightVector = w;
+    // std::cout << w.transpose() << std::endl;
     std::cout << "cubature point num = " << CubaturePointSet.size() << std::endl;
 }
 
@@ -1275,7 +1273,7 @@ void Simulator::devided_subspace_oneloop()
     init_templature(TGT_TEMPLATURE);
     //nonlinear
     // std::cout << "sub_calForce" << std::endl;
-    addForce();
+    addForce(_sub_dt);
     std::cout << "dev_sub_addForce" << std::endl;
     init_all_velocity();
     std::cout << "dev_sub_init_all_velocity" << std::endl;

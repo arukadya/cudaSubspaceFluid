@@ -204,6 +204,7 @@ struct Simulator{
     SparseMatrix Pressure2VelocityMatrix;//Y
     SparseMatrix DirichletBoundaryMatrix;//D
 
+    Eigen::MatrixXf reduced_DiffusionMatrix;
     Eigen::MatrixXf reduced_Vel2DivMatrix;//W
     Eigen::MatrixXf reduced_PoissonMatrix;//X　???こいつが正定値対称行列になるのすごい　要確認
     Eigen::MatrixXf reduced_Pressure2VelocityMatrix;//Y
@@ -310,12 +311,11 @@ struct Simulator{
     float TriLinearInterporation(float x,float y,float z,Slab &val);
     // float TriLinearInterporation(float x,float y,float z,unsigned int nx,unsigned int ny,unsigned int nz,Eigen::VectorXf &val);
     float* get_currentTexture();
-    Eigen::Vector3f face_advect_function(Eigen::Vector3i &pos);
+    Eigen::Vector3f face_advect_function(Eigen::Vector3i &pos,float dt);
     void faceAdvect();
     void centerAdvect(Slab &val);
     void project();
-    void diffusion();
-    void addForce();
+    void addForce(float dt);
     Eigen::Vector3d getBuoyanacy(int i,int j, int k);
 
     //construct basis
