@@ -21,7 +21,7 @@
 #define AMB_DENSITY 100.0f
 #define TGT_TEMPLATURE 100.0f
 #define TGT_DENSITY 100.0f
-#define err_threshold 0.01
+#define err_threshold 0.005
 #define w_threshold 0.01
 
 using ScalarType = float;
@@ -159,13 +159,14 @@ struct CalForceEncoder : Encoder{
     );
 };
 
-Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &SnapShot, unsigned int &reduce_dimention,float threshold);
+Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &Snapshot, unsigned int &reduce_dimention,float threshold);
 
 struct Simulator{
     //FluidVariables
     const float _dx; const float _dt;const float _beta;const float _nu;
     const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
     const unsigned int _flame_num;const unsigned int _snap_num; const unsigned int _discard_flame; const float _threshold;
+    const unsigned int _devide_num;
     unsigned int _timestamp;
     unsigned int _delta_snap;
     unsigned int _reduce_dimention;
@@ -187,11 +188,11 @@ struct Simulator{
     Eigen::VectorXf px;
     Eigen::VectorXf b;
     Eigen::VectorXf origin_b;
-    Eigen::MatrixXf U0_SnapShot;
-    Eigen::MatrixXf U1_SnapShot;
-    Eigen::MatrixXf U2_SnapShot;
-    Eigen::MatrixXf U3_SnapShot;
-    Eigen::MatrixXf P_SnapShot;
+    Eigen::MatrixXf U0_Snapshot;
+    Eigen::MatrixXf U1_Snapshot;
+    Eigen::MatrixXf U2_Snapshot;
+    Eigen::MatrixXf U3_Snapshot;
+    Eigen::MatrixXf P_Snapshot;
     Eigen::MatrixXf U0_all_frame;
     Eigen::MatrixXf U1_all_frame;
     Eigen::MatrixXf U2_all_frame;
@@ -210,10 +211,11 @@ struct Simulator{
     Eigen::MatrixXf reduced_Pressure2VelocityMatrix;//Y
     Eigen::MatrixXf reduced_DirichletBoundaryMatrix;//D
 
-    std::vector<Eigen::MatrixXf> devided_reduced_Vel2DivMatrix;//W
-    std::vector<Eigen::MatrixXf> devided_reduced_PoissonMatrix;//X
-    std::vector<Eigen::MatrixXf> devided_reduced_Pressure2VelocityMatrix;//Y
-    std::vector<Eigen::MatrixXf> devided_reduced_DirichletBoundaryMatrix;//D
+    std::vector<Eigen::MatrixXf> devided_DiffusionMatrix_List;//V
+    std::vector<Eigen::MatrixXf> devided_Vel2DivMatrix_List;//W
+    std::vector<Eigen::MatrixXf> devided_PoissonMatrix_List;//X
+    std::vector<Eigen::MatrixXf> devided_Pressure2VelocityMatrix_List;//Y
+    std::vector<Eigen::MatrixXf> devided_DirichletBoundaryMatrix_List;//D
 
     Eigen::MatrixXf U0;
     Eigen::MatrixXf U1;
@@ -223,11 +225,11 @@ struct Simulator{
     Eigen::MatrixXf cubatureAdvectMatrix;
     Eigen::VectorXf cubatureWeightVector;
     std::set<unsigned int>cubaturePointSet;
-    std::vector<Eigen::MatrixXf> devided_U0;
-    std::vector<Eigen::MatrixXf> devided_U1;
-    std::vector<Eigen::MatrixXf> devided_U2;
-    std::vector<Eigen::MatrixXf> devided_U3;
-    std::vector<Eigen::MatrixXf> devided_P;
+    std::vector<Eigen::MatrixXf> devided_U0_List;
+    std::vector<Eigen::MatrixXf> devided_U1_List;
+    std::vector<Eigen::MatrixXf> devided_U2_List;
+    std::vector<Eigen::MatrixXf> devided_U3_List;
+    std::vector<Eigen::MatrixXf> devided_P_List;
     Eigen::VectorXf reduced_all_velocity;
     Eigen::VectorXf reduced_px;
 
@@ -235,20 +237,22 @@ struct Simulator{
     std::string density_floder_name;
     Simulator(float dx,float dt,float beta,float nu,
     unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
-    unsigned int flame_num, unsigned int snap_num, unsigned int discard_flame,float threshold) 
+    unsigned int flame_num, unsigned int snap_num, unsigned int discard_flame,float threshold,
+    unsigned int devide_num) 
     : _dx(dx/texwidth),_dt(dt * texwidth),_beta(beta),_nu(nu),
     _texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),
-    _flame_num(flame_num),_snap_num(snap_num),_discard_flame(discard_flame),_threshold(threshold)
+    _flame_num(flame_num),_snap_num(snap_num),_discard_flame(discard_flame),_threshold(threshold),
+    _devide_num(devide_num)
     {
         _timestamp = 0;
         _delta_snap = _flame_num / _snap_num;
-        _snap_devide_num = _snap_num / 3;
+        // _snap_devide_num = _snap_num / 3;
         _sub_dt = _dt;
         if(_flame_num % _snap_num != 0)std::cout << " Warning : _flame_num % _snap_num != 0" << std::endl;
         std::cout << "dx,dt,beta,nu = " << _dx << "," << _dt << "," << _beta << "," << _nu << std::endl;
         std::cout << "width,height,depth = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
         std::cout << "flame_num,snap_num,threshold = " << _flame_num << "," << _snap_num << "," << threshold << std::endl;
-        std::cout << "discard_flame = " << _discard_flame << std::endl; 
+        std::cout << "discard_flame, devide_num = " << _discard_flame << "," << devide_num << std::endl; 
         x_velocity = Slab(_texwidth+1,_texheight,_texdepth,0.0f);
         y_velocity = Slab(_texwidth,_texheight+1,_texdepth,0.0f);
         z_velocity = Slab(_texwidth,_texheight,_texdepth+1,0.0f);
@@ -273,11 +277,11 @@ struct Simulator{
         all_velocity = Eigen::VectorXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth);
         px = Eigen::VectorXf::Zero(_texwidth *_texheight*_texdepth);
         b = Eigen::VectorXf::Zero(_texwidth *_texheight*_texdepth);
-        U0_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
-        U1_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
-        U2_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
-        U3_SnapShot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
-        P_SnapShot = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _snap_num);
+        U0_Snapshot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
+        U1_Snapshot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
+        U2_Snapshot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
+        U3_Snapshot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
+        P_Snapshot = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _snap_num);
         U0_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         U1_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         U2_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
@@ -311,7 +315,6 @@ struct Simulator{
     float TriLinearInterporation(float x,float y,float z,Slab &val);
     // float TriLinearInterporation(float x,float y,float z,unsigned int nx,unsigned int ny,unsigned int nz,Eigen::VectorXf &val);
     float* get_currentTexture();
-    Eigen::Vector3f face_advect_function(Eigen::Vector3i &pos,float dt);
     void faceAdvect();
     void centerAdvect(Slab &val);
     void project();
@@ -322,10 +325,25 @@ struct Simulator{
     
     void write_snapshot(Eigen::MatrixXf &mat, Eigen::VectorXf &snap);
     void write_exact_solution(Eigen::MatrixXf &mat, Eigen::VectorXf &snap);
-    void getBasisQRSVD();
-    void getReducedLinearOperator();
-    void getDevidedBasis();
-    void getDevidedReducedLinearOperator();
+    void getBasisQRSVD(
+        Eigen::MatrixXf &devided_U0_Snapshot,
+        Eigen::MatrixXf &devided_U1_Snapshot,
+        Eigen::MatrixXf &devided_U2_Snapshot,
+        Eigen::MatrixXf &devided_U3_Snapshot,
+        Eigen::MatrixXf &devided_P_Snapshot,
+        Eigen::MatrixXf &devided_U0,
+        Eigen::MatrixXf &devided_U1,
+        Eigen::MatrixXf &devided_U2,
+        Eigen::MatrixXf &devided_U3,
+        Eigen::MatrixXf &devided_P
+    );
+    void getReducedLinearOperator(
+        Eigen::MatrixXf &devided_U0,
+        Eigen::MatrixXf &devided_U1,
+        Eigen::MatrixXf &devided_U2,
+        Eigen::MatrixXf &devided_U3,
+        Eigen::MatrixXf &devided_P
+    );
 
     //subspace
     Eigen::MatrixXf getRowsCorrespondPoint(Eigen::MatrixXf &Mat, unsigned int x,unsigned int y, unsigned int z);//Basis
@@ -336,22 +354,41 @@ struct Simulator{
     void largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,float error_thresold,float weight_threshold);
     Eigen::VectorXf getSubspaceAdvect_b(Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis);
     void subspace_execute();
-    void subspace_oneloop();
-    void subspace_project();
+    void subspace_oneloop(
+        Eigen::MatrixXf &devided_U0,
+        Eigen::MatrixXf &devided_U1,
+        Eigen::MatrixXf &devided_U2,
+        Eigen::MatrixXf &devided_U3,
+        Eigen::MatrixXf &devided_P,
+        Eigen::MatrixXf &devided_DiffusionMatrix,
+        Eigen::MatrixXf &devided_DirichletBoundaryMatrix,
+        Eigen::MatrixXf &devided_Vel2DivMatrix,
+        Eigen::MatrixXf &devided_PoissonMatrix,
+        Eigen::MatrixXf &devided_Pressure2VelocityMatrix);
+    void subspace_project(
+        Eigen::MatrixXf &devided_DirichletBoundaryMatrix,
+        Eigen::MatrixXf &devided_Vel2DivMatrix,
+        Eigen::MatrixXf &devided_PoissonMatrix,
+        Eigen::MatrixXf &devided_Pressure2VelocityMatrix);
     void subspace_advect();
-    Eigen::Vector3f getCenterVelocity(unsigned int x,unsigned int y,unsigned int z);
+    Eigen::Vector3f face_advect_function(Eigen::Vector3i &pos,Eigen::VectorXf &velocity,float dt);
 
-    void devided_subspace_execute();
-    void devided_subspace_oneloop();
-    void devided_subspace_project();
-    
+    //devideSnapshot
+    void calDevidedBasisList();
+    void calDevidedOperatorList();
+    void getDevidedBasis(unsigned int start_snap_id,unsigned int end_snap_id,
+        Eigen::MatrixXf &devided_U0,
+        Eigen::MatrixXf &devided_U1,
+        Eigen::MatrixXf &devided_U2,
+        Eigen::MatrixXf &devided_U3,
+        Eigen::MatrixXf &devided_P);
     //test
     void inputTXT(std::string &InputFileName);
     void output_txt(unsigned int id);
-    void output_Basis();
-    void output_Snapshot();
-    void input_Basis();
-    void input_Snapshot();
+    void output_Basis(unsigned int devided_id);
+    void output_Snapshot(unsigned int devided_id);
+    void input_Basis(unsigned int devided_id);
+    void input_Snapshot(unsigned int devided_id);
     void all2xyz();
     void testCompute();
     void origin_project();

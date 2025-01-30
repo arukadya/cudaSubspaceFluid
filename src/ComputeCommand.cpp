@@ -33,9 +33,9 @@ Eigen::VectorXf staggerd_to_colocate(Eigen::VectorXf &staggerd_velocity,unsigned
         {
             for(unsigned int k = 0; k < nz; ++k)
             {
-                unsigned int colocate_id = colocate_size + (i,j,k,nx,ny,nz);
-                unsigned int staggerd_pre = staggerd_size + (i,j,k,nx,ny+1,nz);
-                unsigned int staggerd_post = staggerd_size + (i,j+1,k,nx,ny+1,nz);
+                unsigned int colocate_id = colocate_size + resequence3to1(i,j,k,nx,ny,nz);
+                unsigned int staggerd_pre = staggerd_size + resequence3to1(i,j,k,nx,ny+1,nz);
+                unsigned int staggerd_post = staggerd_size + resequence3to1(i,j+1,k,nx,ny+1,nz);
                 colocate_vector(colocate_id) = (staggerd_velocity(staggerd_pre) + staggerd_velocity(staggerd_post))/2;
             }
         }
@@ -106,8 +106,8 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
                 if
                 (
                     Ni / 2 - range_x < i && i < Ni / 2 + range_x &&
-                    // j > Nj - range_y &&
-                    3 * Nj / 4 - range_y < j && j < 3 * Nj / 4 + range_y &&
+                    j > Nj - range_y &&
+                    // 3 * Nj / 4 - range_y < j && j < 3 * Nj / 4 + range_y &&
                     // j > Nj - 3 &&
                     Nk / 2 - range_z < k && k < Nk / 2 + range_z
                 )init_index_list.push_back({i,j,k});
@@ -126,7 +126,8 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
 }
 int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, float &nu,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
-    unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame ,float &threshold){
+    unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame ,float &threshold,
+    unsigned int &devide_num){
     std::ifstream Inputfile(InputFileName);
     if (!Inputfile.is_open()) {
         std::cerr << "Could not open the file - '"
@@ -210,6 +211,12 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, fl
         {
             while(getline(ss_nums,word,' ')){
                 discard_flame = std::stof(word);
+            };
+        }
+        else if(word == "devide_num")
+        {
+            while(getline(ss_nums,word,' ')){
+                devide_num = std::stof(word);
             };
         }
     };

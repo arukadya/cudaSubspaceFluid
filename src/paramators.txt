@@ -1,12 +1,13 @@
 dx 0.64
 dt 0.00015625
-beta 1000
-nu 0.01
+beta 100
+nu 0.002
 texwidth 64
 texheight 64
 texdepth 64
 slice_num 64
-flame_num 30
-snap_num 10
+flame_num 64
+snap_num 64
 discard_flame 0
 threshold 0.001
+devide_num 1

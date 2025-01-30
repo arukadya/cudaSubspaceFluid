@@ -30,7 +30,8 @@ struct Timer{
 };
 int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, float &nu,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
-    unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame,float &threshold);
+    unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame,float &threshold,
+    unsigned int &devide_num);
 
 void outputMatrix(std::string OutputFileName, Eigen::MatrixXf &mat);
 void inputMatrix(std::string InputFileName, Eigen::MatrixXf &mat);

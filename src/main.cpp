@@ -39,15 +39,18 @@ int main(int argc, char * argv[])
     float dx;float dt;float beta;float nu;
     unsigned int texwidth;unsigned int texheight;unsigned int texdepth;unsigned int slice_num;
     unsigned int flame_num;unsigned int snap_num;unsigned int discard_flame;float threshold;
+    unsigned int devide_num;
     unsigned int id = 0;
     std::string paramatorsFileName = "../src/paramators.txt";
     inputParamator(paramatorsFileName,dx,dt,beta,nu,
     texwidth,texheight,texdepth,slice_num,
-    flame_num,snap_num,discard_flame,threshold);
+    flame_num,snap_num,discard_flame,threshold,
+    devide_num);
 
     Simulator simulator(dx,dt,beta,nu,
     texwidth,texheight,texdepth,
-    flame_num,snap_num,discard_flame,threshold);
+    flame_num,snap_num,discard_flame,threshold,
+    devide_num);
     std::cout << "success init simulator" << std::endl;
     if(argc == 2 && !is_simulate)
     {
@@ -149,20 +152,39 @@ int main(int argc, char * argv[])
         {
             simulator.oneloop();
         }
-        simulator.getBasisQRSVD();
-        std::cout << "fin_calBasis" << std::endl;
-        simulator.output_Basis();
-        simulator.output_Snapshot();
+        // simulator.getBasisQRSVD(
+        //     simulator.U0_Snapshot,
+        //     simulator.U1_Snapshot,
+        //     simulator.U2_Snapshot,
+        //     simulator.U3_Snapshot,
+        //     simulator.P_Snapshot,
+        //     simulator.U0,
+        //     simulator.U1,
+        //     simulator.U2,
+        //     simulator.U3,
+        //     simulator.P
+        //     );
+        // std::cout << "fin_calBasis" << std::endl;
+        // simulator.output_Basis(0);
+        // simulator.output_Snapshot(0);
+        simulator.calDevidedBasisList();
     }
     else 
     {
-        simulator.input_Basis();
-        simulator.input_Snapshot();
+        simulator.input_Basis(0);
+        // simulator.input_Snapshot(0);
     }
-    simulator.getReducedLinearOperator();
+    simulator.calDevidedOperatorList();
+    // simulator.getReducedLinearOperator(
+    //     simulator.U0,
+    //     simulator.U1,
+    //     simulator.U2,
+    //     simulator.U3,
+    //     simulator.P
+    // );
     std::cout << "fin_operator_projection" << std::endl;
-    simulator.largeSamplingCubature(simulator.cubaturePointSet, err_threshold, w_threshold);
-    std::cout << "fin_cubature" << std::endl;
+    // simulator.largeSamplingCubature(simulator.cubaturePointSet, err_threshold, w_threshold);
+    // std::cout << "fin_cubature" << std::endl;
     simulator.subspace_execute();
     std::cout << "fin_subspace" << std::endl;
     system("./viewer");
