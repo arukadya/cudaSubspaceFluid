@@ -152,39 +152,17 @@ int main(int argc, char * argv[])
         {
             simulator.oneloop();
         }
-        // simulator.getBasisQRSVD(
-        //     simulator.U0_Snapshot,
-        //     simulator.U1_Snapshot,
-        //     simulator.U2_Snapshot,
-        //     simulator.U3_Snapshot,
-        //     simulator.P_Snapshot,
-        //     simulator.U0,
-        //     simulator.U1,
-        //     simulator.U2,
-        //     simulator.U3,
-        //     simulator.P
-        //     );
-        // std::cout << "fin_calBasis" << std::endl;
-        // simulator.output_Basis(0);
-        // simulator.output_Snapshot(0);
-        simulator.calDevidedBasisList();
+        simulator.calDevidedList();
     }
     else 
     {
-        simulator.input_Basis(0);
-        // simulator.input_Snapshot(0);
+        for(int i=0;i<simulator._devide_num;++i)simulator.input_Basis(i);
+        for(int i=0;i<simulator._devide_num;++i)simulator.input_Snapshot(i);
     }
     simulator.calDevidedOperatorList();
-    // simulator.getReducedLinearOperator(
-    //     simulator.U0,
-    //     simulator.U1,
-    //     simulator.U2,
-    //     simulator.U3,
-    //     simulator.P
-    // );
     std::cout << "fin_operator_projection" << std::endl;
-    // simulator.largeSamplingCubature(simulator.cubaturePointSet, err_threshold, w_threshold);
-    // std::cout << "fin_cubature" << std::endl;
+    simulator.calCubatureList();
+    std::cout << "fin_cubature" << std::endl;
     simulator.subspace_execute();
     std::cout << "fin_subspace" << std::endl;
     system("./viewer");

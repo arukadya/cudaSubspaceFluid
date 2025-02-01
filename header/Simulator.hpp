@@ -21,7 +21,7 @@
 #define AMB_DENSITY 100.0f
 #define TGT_TEMPLATURE 100.0f
 #define TGT_DENSITY 100.0f
-#define err_threshold 0.005
+// #define err_threshold 0.005
 #define w_threshold 0.01
 
 using ScalarType = float;
@@ -168,6 +168,7 @@ struct Simulator{
     const unsigned int _flame_num;const unsigned int _snap_num; const unsigned int _discard_flame; const float _threshold;
     const unsigned int _devide_num;
     unsigned int _timestamp;
+    float err_threshold;
     unsigned int _delta_snap;
     unsigned int _reduce_dimention;
     unsigned int _snap_devide_num;
@@ -193,17 +194,29 @@ struct Simulator{
     Eigen::MatrixXf U2_Snapshot;
     Eigen::MatrixXf U3_Snapshot;
     Eigen::MatrixXf P_Snapshot;
-    Eigen::MatrixXf U0_all_frame;
-    Eigen::MatrixXf U1_all_frame;
-    Eigen::MatrixXf U2_all_frame;
-    Eigen::MatrixXf U3_all_frame;
-    Eigen::MatrixXf P_all_frame;
-    Eigen::MatrixXf b_all_frame;
+    // Eigen::MatrixXf U0_all_frame;
+    // Eigen::MatrixXf U1_all_frame;
+    // Eigen::MatrixXf U2_all_frame;
+    // Eigen::MatrixXf U3_all_frame;
+    // Eigen::MatrixXf P_all_frame;
+    // Eigen::MatrixXf b_all_frame;
     SparseMatrix DiffusionMatrix;//V
     SparseMatrix Vel2DivMatrix;//W
     SparseMatrix PoissonMatrix;//X
     SparseMatrix Pressure2VelocityMatrix;//Y
     SparseMatrix DirichletBoundaryMatrix;//D
+
+    //subspace
+    Eigen::MatrixXf U0;
+    Eigen::MatrixXf U1;
+    Eigen::MatrixXf U2;
+    Eigen::MatrixXf U3;
+    Eigen::MatrixXf P;
+    // Eigen::MatrixXf cubatureAdvectMatrix;
+    Eigen::VectorXf cubatureWeightVector;
+    std::set<unsigned int>cubaturePointSet;
+    Eigen::VectorXf reduced_all_velocity;
+    Eigen::VectorXf reduced_px;
 
     Eigen::MatrixXf reduced_DiffusionMatrix;
     Eigen::MatrixXf reduced_Vel2DivMatrix;//W
@@ -211,27 +224,22 @@ struct Simulator{
     Eigen::MatrixXf reduced_Pressure2VelocityMatrix;//Y
     Eigen::MatrixXf reduced_DirichletBoundaryMatrix;//D
 
+    //devide
     std::vector<Eigen::MatrixXf> devided_DiffusionMatrix_List;//V
     std::vector<Eigen::MatrixXf> devided_Vel2DivMatrix_List;//W
     std::vector<Eigen::MatrixXf> devided_PoissonMatrix_List;//X
     std::vector<Eigen::MatrixXf> devided_Pressure2VelocityMatrix_List;//Y
     std::vector<Eigen::MatrixXf> devided_DirichletBoundaryMatrix_List;//D
 
-    Eigen::MatrixXf U0;
-    Eigen::MatrixXf U1;
-    Eigen::MatrixXf U2;
-    Eigen::MatrixXf U3;
-    Eigen::MatrixXf P;
-    Eigen::MatrixXf cubatureAdvectMatrix;
-    Eigen::VectorXf cubatureWeightVector;
-    std::set<unsigned int>cubaturePointSet;
     std::vector<Eigen::MatrixXf> devided_U0_List;
     std::vector<Eigen::MatrixXf> devided_U1_List;
     std::vector<Eigen::MatrixXf> devided_U2_List;
     std::vector<Eigen::MatrixXf> devided_U3_List;
     std::vector<Eigen::MatrixXf> devided_P_List;
-    Eigen::VectorXf reduced_all_velocity;
-    Eigen::VectorXf reduced_px;
+    std::vector<Eigen::MatrixXf> devided_U1_Snapshot_List;
+    std::vector<Eigen::VectorXf> devided_cubatureWeightVectorList;
+    std::vector<std::set<unsigned int>>devided_cubaturePointSetList;
+
 
     // CalForceEncoder calForceEncoder;
     std::string density_floder_name;
@@ -247,6 +255,7 @@ struct Simulator{
         _timestamp = 0;
         _delta_snap = _flame_num / _snap_num;
         // _snap_devide_num = _snap_num / 3;
+        err_threshold = threshold;
         _sub_dt = _dt;
         if(_flame_num % _snap_num != 0)std::cout << " Warning : _flame_num % _snap_num != 0" << std::endl;
         std::cout << "dx,dt,beta,nu = " << _dx << "," << _dt << "," << _beta << "," << _nu << std::endl;
@@ -282,12 +291,12 @@ struct Simulator{
         U2_Snapshot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
         U3_Snapshot = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _snap_num);
         P_Snapshot = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _snap_num);
-        U0_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
-        U1_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
-        U2_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
-        U3_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
-        P_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
-        b_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
+        // U0_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
+        // U1_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
+        // U2_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
+        // U3_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
+        // P_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
+        // b_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         calPoissonMatrix(_dt);
         std::cout << "Poison" << std::endl;
         calDiffusionMatrix(_dt);
@@ -351,7 +360,12 @@ struct Simulator{
     Eigen::MatrixXf getSubspaceAdvect_A(std::set<unsigned int> &CubaturePointSet,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis);
     Eigen::VectorXf getColACoresspondCubaturePoint(unsigned int point_id,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis);
     float probablity_distribution_function(unsigned int point_id,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis,unsigned int restPoints_num,Eigen::VectorXf &residual);
-    void largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,float error_thresold,float weight_threshold);
+    void largeSamplingCubature(
+        std::set<unsigned int> &CubaturePointSet,
+        Eigen::VectorXf &weight_vector,
+        Eigen::MatrixXf &devided_U1_Snapshot,
+        Eigen::MatrixXf &devided_U1,
+        float error_threshold,float weight_threshold);
     Eigen::VectorXf getSubspaceAdvect_b(Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis);
     void subspace_execute();
     void subspace_oneloop(
@@ -364,18 +378,25 @@ struct Simulator{
         Eigen::MatrixXf &devided_DirichletBoundaryMatrix,
         Eigen::MatrixXf &devided_Vel2DivMatrix,
         Eigen::MatrixXf &devided_PoissonMatrix,
-        Eigen::MatrixXf &devided_Pressure2VelocityMatrix);
+        Eigen::MatrixXf &devided_Pressure2VelocityMatrix,
+        std::set<unsigned int> &CubaturePointSet,
+        Eigen::VectorXf &weight_vector);
     void subspace_project(
         Eigen::MatrixXf &devided_DirichletBoundaryMatrix,
         Eigen::MatrixXf &devided_Vel2DivMatrix,
         Eigen::MatrixXf &devided_PoissonMatrix,
         Eigen::MatrixXf &devided_Pressure2VelocityMatrix);
-    void subspace_advect();
+    void subspace_advect(
+        std::set<unsigned int> &CubaturePointSet,
+        Eigen::VectorXf &weight_vector,
+        Eigen::MatrixXf &devided_U0,
+        Eigen::MatrixXf &devided_U1);
     Eigen::Vector3f face_advect_function(Eigen::Vector3i &pos,Eigen::VectorXf &velocity,float dt);
 
     //devideSnapshot
-    void calDevidedBasisList();
+    void calDevidedList();
     void calDevidedOperatorList();
+    void calCubatureList();
     void getDevidedBasis(unsigned int start_snap_id,unsigned int end_snap_id,
         Eigen::MatrixXf &devided_U0,
         Eigen::MatrixXf &devided_U1,
@@ -386,7 +407,7 @@ struct Simulator{
     void inputTXT(std::string &InputFileName);
     void output_txt(unsigned int id);
     void output_Basis(unsigned int devided_id);
-    void output_Snapshot(unsigned int devided_id);
+    void output_Snapshot(unsigned int devided_id,Eigen::MatrixXf &devided_Snapshot);
     void input_Basis(unsigned int devided_id);
     void input_Snapshot(unsigned int devided_id);
     void all2xyz();

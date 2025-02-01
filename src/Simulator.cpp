@@ -671,7 +671,6 @@ void Simulator::project(){
     solver.setTolerance(1e-6);//下限は1e-6
     // solver.setMaxIterations(20);//設定すると精度が足りないかも
     b = Vel2DivMatrix * DirichletBoundaryMatrix * all_velocity;
-    write_exact_solution(b_all_frame,b);
     solver.compute(PoissonMatrix);
     px = solver.solveWithGuess(b,px);
     // px = solver.solve(b);
@@ -846,7 +845,7 @@ void Simulator::getReducedLinearOperator
     reduced_Vel2DivMatrix = devided_P.transpose() * Vel2DivMatrix * devided_U2;
     reduced_PoissonMatrix = devided_P.transpose() * PoissonMatrix * devided_P;
     reduced_Pressure2VelocityMatrix = devided_U3.transpose() * Pressure2VelocityMatrix * devided_P;
-    reduced_DirichletBoundaryMatrix = devided_U2.transpose() * DirichletBoundaryMatrix * devided_U2;
+    reduced_DirichletBoundaryMatrix = devided_U1.transpose() * DirichletBoundaryMatrix * devided_U1;
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> ES(reduced_PoissonMatrix);
     Eigen::VectorXf reduced_Poisson_eigenval = ES.eigenvalues();
     bool is_positive_definite = true;
@@ -868,16 +867,18 @@ void Simulator::getReducedLinearOperator
     timer.end();
 }
 
-void Simulator::output_Snapshot(unsigned int devided_id)
+void Simulator::output_Snapshot(unsigned int devided_id,Eigen::MatrixXf &devided_Snapshot)
 {
     std::filesystem::create_directories("snapshot");
     int n = _texdepth * _texheight * _texdepth;
-    std::string snap_foldername = "snapshot/n" + std::to_string(n) + "T" + std::to_string(_snap_num) + "id" + std::to_string(devided_id); 
+    std::string snap_foldername = 
+    "snapshot/n" + std::to_string(n) + "T" + std::to_string(_snap_num) + 
+    "dev" + std::to_string(_devide_num) + "id" + std::to_string(devided_id); 
     std::cout << "outputsnap" << std::endl;
     std::cout << snap_foldername << std::endl;
     std::filesystem::create_directories(snap_foldername);
     std::string U1snapFileName = snap_foldername + "/U1snap.txt";
-    outputMatrix(U1snapFileName,U1_Snapshot);
+    outputMatrix(U1snapFileName,devided_Snapshot);
 }
 
 void Simulator::output_Basis(unsigned int devided_id)
@@ -886,7 +887,9 @@ void Simulator::output_Basis(unsigned int devided_id)
     int n = _texdepth * _texheight * _texdepth;
     // int r = _reduce_dimention;
     int r = _snap_num;
-    std::string basis_foldername = "basis/n" + std::to_string(n) + "r" + std::to_string(r) + "id" + std::to_string(devided_id); 
+    std::string basis_foldername =
+    "basis/n" + std::to_string(n) + "r" + std::to_string(r) + 
+    "dev" + std::to_string(_devide_num) +"id" + std::to_string(devided_id); 
     std::cout << "outputbasis" << std::endl;
     std::cout << basis_foldername << std::endl;
     std::filesystem::create_directories(basis_foldername);
@@ -905,24 +908,32 @@ void Simulator::output_Basis(unsigned int devided_id)
 void Simulator::input_Snapshot(unsigned int devided_id)
 {
     int n = _texdepth * _texheight * _texdepth;
-    std::string snap_foldername = "snapshot/n" + std::to_string(n) + "T" + std::to_string(_snap_num) + "id" + std::to_string(devided_id); 
+    std::string snap_foldername = 
+    "snapshot/n" + std::to_string(n) + "T" + std::to_string(_snap_num) + 
+    "dev" + std::to_string(_devide_num) + "id" + std::to_string(devided_id); 
     std::string U1snapFileName = snap_foldername + "/U1snap.txt";
-    inputMatrix(U1snapFileName,U1_Snapshot);
+    n = (_texdepth + 1)* _texheight * _texdepth;
+    unsigned int r = _reduce_dimention / _devide_num;
+    Eigen::MatrixXf devided_U1_Snapshot = Eigen::MatrixXf(3*n,r);
+    inputMatrix(U1snapFileName,devided_U1_Snapshot);
+    devided_U1_Snapshot_List.push_back(devided_U1_Snapshot);
 }
 
 void Simulator::input_Basis(unsigned int devided_id)
 {
     // std::filesystem::create_directories("basis");
     int n = _texdepth * _texheight * _texdepth;
-    // int r = _reduce_dimention;
-    int r = _snap_num;
-    std::string basis_foldername = "basis/n" + std::to_string(n) + "r" + std::to_string(r) + "id" + std::to_string(devided_id); 
+    int r = _reduce_dimention;
+    std::string basis_foldername = 
+    "basis/n" + std::to_string(n) + "r" + std::to_string(r) + 
+    "dev" + std::to_string(_devide_num) +"id" + std::to_string(devided_id); 
     std::string U0FileName = basis_foldername + "/U0.txt";
     std::string U1FileName = basis_foldername + "/U1.txt";
     std::string U2FileName = basis_foldername + "/U2.txt";
     std::string U3FileName = basis_foldername + "/U3.txt";
     std::string PFileName  = basis_foldername +  "/P.txt";
     n = (_texdepth + 1)* _texheight * _texdepth;
+    r = _reduce_dimention / _devide_num;
     U0 = Eigen::MatrixXf(3*n,r);
     U1 = Eigen::MatrixXf(3*n,r);
     U2 = Eigen::MatrixXf(3*n,r);
@@ -942,7 +953,7 @@ void Simulator::input_Basis(unsigned int devided_id)
 
 Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &Snapshot, unsigned int &reduce_dimention,float threshold)
 {
-    float singularity_threshold = 1e-3;
+    float singularity_threshold = threshold;
     Eigen::HouseholderQR<Eigen::MatrixXf> QRSolver(Snapshot);
     int m = Snapshot.rows();
     int n = Snapshot.cols();
@@ -985,13 +996,11 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &Snapshot, unsigned int &reduce_diment
     // std::cout << "max,min : " << *singular_values.begin() << "," << *(singular_values.end() - 1) << std::endl;
     // Eigen::MatrixXf Basis = HhQR.matrixQ()*svd.matrixU();
     Eigen::MatrixXf Basis(m,n);
-
     // Eigen::MatrixXf Basis(m,reduce_dimention);
     Basis = HhQR.householderQ()*svd.matrixU(); //m * n
     // Basis = HhQR.householderQ()*svd.matrixU()*singular_value_matrix; //m * n
     std::cout << "Basis size : " << Basis.rows() << "," << Basis.cols() << std::endl;
     // std::cout << "m , n : " << m << "," << n << std::endl;
-
     // std::cout << "Basis is orthonomality check : " << (Basis.transpose() * Basis - Eigen::MatrixXf::Identity(n,n)).norm() << std::endl;
     return Basis;
 }
@@ -1012,13 +1021,24 @@ void Simulator::subspace_execute()
     init_density(TGT_DENSITY);
     init_templature(TGT_TEMPLATURE);
     init_all_velocity();
-    
+    // std::cout << "reduced_Diff" << std::endl << devided_DiffusionMatrix_List[0] << std::endl;
+    // std::cout << "reduced_V2D" << std::endl << devided_Vel2DivMatrix_List[0] << std::endl;
+    // std::cout << "reduced_Po" << std::endl << devided_PoissonMatrix_List[0] << std::endl;
+    // std::cout << "reduced_P2V" << std::endl << devided_Pressure2VelocityMatrix_List[0] << std::endl;
+    // std::cout << "reduced_Dirich" << std::endl << devided_DirichletBoundaryMatrix_List[0]  << std::endl;
     unsigned int subspace_flame_num = (_dt/_sub_dt) * _flame_num;
     for(_timestamp = 0; _timestamp < subspace_flame_num; ++_timestamp)
     {
         
         unsigned int devided_id = _timestamp / (subspace_flame_num / _devide_num);
-        subspace_oneloop(
+        if(_timestamp * (_dt/_sub_dt) < _discard_flame )
+        {
+            oneloop();
+            output_txt(_timestamp);
+        }
+        else 
+        {
+            subspace_oneloop(
             devided_U0_List[devided_id],
             devided_U1_List[devided_id],
             devided_U2_List[devided_id],
@@ -1028,7 +1048,11 @@ void Simulator::subspace_execute()
             devided_DirichletBoundaryMatrix_List[devided_id],
             devided_Vel2DivMatrix_List[devided_id],
             devided_PoissonMatrix_List[devided_id],
-            devided_Pressure2VelocityMatrix_List[devided_id]);
+            devided_Pressure2VelocityMatrix_List[devided_id],
+            devided_cubaturePointSetList[devided_id],
+            devided_cubatureWeightVectorList[devided_id]);
+            output_txt(_timestamp);
+        }
     }
     std::cout << std::endl;
 }
@@ -1043,22 +1067,32 @@ void Simulator::subspace_oneloop(
     Eigen::MatrixXf &devided_DirichletBoundaryMatrix,
     Eigen::MatrixXf &devided_Vel2DivMatrix,
     Eigen::MatrixXf &devided_PoissonMatrix,
-    Eigen::MatrixXf &devided_Pressure2VelocityMatrix
+    Eigen::MatrixXf &devided_Pressure2VelocityMatrix,
+    std::set<unsigned int> &CubaturePointSet,
+    Eigen::VectorXf &weight_vector
     )
 {
-    // init_density(TGT_DENSITY);
-    // init_templature(TGT_TEMPLATURE);
+    // std::cout << "devided_U0.size() = " << devided_U0.rows() << "," << devided_U0.cols() << std::endl;
+    // std::cout << "devided_U1.size() = " << devided_U1.rows() << "," << devided_U1.cols() << std::endl;
+    // std::cout << "devided_U2.size() = " << devided_U2.rows() << "," << devided_U2.cols() << std::endl;
+    // std::cout << "devided_U3.size() = " << devided_U3.rows() << "," << devided_U3.cols() << std::endl;
+    // std::cout << "devided_P.size() = " << devided_P.rows() << "," << devided_P.cols() << std::endl;
     //nonlinear
     std::cout << "sub_addForce" << std::endl;
     addForce(_sub_dt);
     init_all_velocity();
     reduced_all_velocity = devided_U0.transpose() * all_velocity;
     //U1
-    // subspace_advect();
+    subspace_advect(
+        CubaturePointSet,
+        weight_vector,
+        devided_U0,
+        devided_U1
+        );
     std::cout << "sub_advect" << std::endl;
-    faceAdvect();
-    init_all_velocity();
-    reduced_all_velocity = devided_U1.transpose() * all_velocity;
+    // faceAdvect();
+    // init_all_velocity();
+    // reduced_all_velocity = devided_U1.transpose() * all_velocity;
     //U2
     //Diffusion
     std::cout << "sub_diffusion" << std::endl;
@@ -1084,7 +1118,6 @@ void Simulator::subspace_oneloop(
     centerAdvect(templature);
     centerAdvect(density_tgt);
     centerAdvect(density_amb);
-    output_txt(_timestamp);
 }
 
 void Simulator::subspace_project(
@@ -1102,7 +1135,6 @@ void Simulator::subspace_project(
     reduced_all_velocity = devided_DirichletBoundaryMatrix * reduced_all_velocity - devided_Pressure2VelocityMatrix * reduced_px;
 }
 
-//引数をvelocityとBasisにして作り変え得るべき→全速度をBasisで復元できるため不要になる．
 Eigen::Vector3f Simulator::face_advect_function(Eigen::Vector3i &pos,Eigen::VectorXf &velocity,float dt)
 {
     Eigen::Vector3f ret;
@@ -1137,7 +1169,11 @@ Eigen::Vector3f Simulator::face_advect_function(Eigen::Vector3i &pos,Eigen::Vect
     return ret;
 }
 
-void Simulator::subspace_advect()
+void Simulator::subspace_advect(
+    std::set<unsigned int> &CubaturePointSet,
+    Eigen::VectorXf &weight_vector,
+    Eigen::MatrixXf &devided_U0,
+    Eigen::MatrixXf &devided_U1)
 {
     all2xyz();
     Eigen::VectorXf updated_reduced_velocity = Eigen::VectorXf::Zero(reduced_all_velocity.size());
@@ -1180,21 +1216,6 @@ Eigen::MatrixXf Simulator::getRowsCorrespondPoint(Eigen::MatrixXf &Mat, unsigned
     ret.row(0) = Mat.row(x_id);
     ret.row(1) = Mat.row(y_id);
     ret.row(2) = Mat.row(z_id);
-    // unsigned int x_pre_id  = resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth);
-    // unsigned int x_post_id = resequence3to1(x+1,y,z,_texwidth+1,_texheight,_texdepth);
-    // unsigned int y_pre_id  = size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth);
-    // unsigned int y_post_id = size + resequence3to1(x,y+1,z,_texwidth,_texheight+1,_texdepth);
-    // unsigned int z_pre_id  = 2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1);
-    // unsigned int z_post_id = 2*size + resequence3to1(x,y+1,z,_texwidth,_texheight,_texdepth+1);
-    // ret.row(0) = (Mat.row(x_pre_id) + Mat.row(x_post_id))/2;
-    // ret.row(1) = (Mat.row(y_pre_id) + Mat.row(y_post_id))/2;
-    // ret.row(2) = (Mat.row(z_pre_id) + Mat.row(_post_id))/2;
-    // ret.row(0) = Mat.row(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth));
-    // ret.row(1) = Mat.row(resequence3to1(x+1,y,z,_texwidth+1,_texheight,_texdepth));
-    // ret.row(2) = Mat.row(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth));
-    // ret.row(3) = Mat.row(size + resequence3to1(x,y+1,z,_texwidth,_texheight+1,_texdepth));
-    // ret.row(4) = Mat.row(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1));
-    // ret.row(5) = Mat.row(2*size + resequence3to1(x,y,z+1,_texwidth,_texheight,_texdepth+1));
     return ret;
 }
 
@@ -1211,16 +1232,23 @@ Eigen::Vector3f Simulator::getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,uns
     return ret;
 }
 
-void Simulator::largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,float error_thresold,float weight_threshold)
+void Simulator::largeSamplingCubature(
+    std::set<unsigned int> &CubaturePointSet,
+    Eigen::VectorXf &weight_vector,
+    Eigen::MatrixXf &devided_U1_Snapshot,
+    Eigen::MatrixXf &devided_U1,
+    float error_threshold,float weight_threshold)
 {
     Timer timer;
     timer.startWithMessage("largeSamplingCubature");
     Eigen::MatrixXf A;
-    Eigen::VectorXf b = getSubspaceAdvect_b(U1_Snapshot,U1);
+    // std::cout << "snap.cols, basis.cols = " << devided_U1_Snapshot.cols() << "," << devided_U1.cols() << std::endl;
+    Eigen::VectorXf b = getSubspaceAdvect_b(devided_U1_Snapshot,devided_U1);
     // std::cout << "b" << std::endl << b.transpose() << std::endl;
     Eigen::VectorXf w;
     Eigen::VectorXf residual = b;
-    float err_real_value = (residual.norm())*residual.norm() * error_thresold;
+    float err_real_value = (residual.norm())*residual.norm() * error_threshold;
+    // std::cout << "err_real_value : " << err_real_value << std::endl; 
     Eigen::NNLS<Eigen::MatrixXf> nnls_solver;
     int space_resolution = _texwidth * _texheight * _texdepth;
     std::uniform_int_distribution uid(0,space_resolution-1);
@@ -1233,6 +1261,7 @@ void Simulator::largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,f
     {
         // std::cout << "point set num = " << CubaturePointSet.size() << std::endl;
         unsigned int point_id = uid(mt_point);
+        // point_id = 188719;
         // point_id = 121918;
         // std::cout << "point id = " << point_id << std::endl;
         if(CubaturePointSet.find(point_id) != CubaturePointSet.end())
@@ -1242,23 +1271,25 @@ void Simulator::largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,f
         }
         unsigned int p_x;unsigned int p_y;unsigned int p_z;
         resequence1to3(point_id,p_x,p_y,p_z,_texwidth,_texheight,_texdepth);
-        // std::cout << "p_id = " << point_id << std::endl;
-        // std::cout << "px,py,pz = " << p_x << "," << p_y << "," << p_z << std::endl;
-        Eigen::VectorXf Acol = getColACoresspondCubaturePoint(point_id,U1_Snapshot,U1);
+        Eigen::VectorXf Acol = getColACoresspondCubaturePoint(point_id,devided_U1_Snapshot,devided_U1);
         // std::cout << "Acol" << std::endl;
         unsigned int restPoint_num = space_resolution - CubaturePointSet.size();
         float probablity = restPoint_num * ( std::fabs(Acol.dot(residual)) / (residual.dot(residual)));
         if(probablity < urd(mt_probablity))continue;
+        // std::cout << "p_id = " << point_id << std::endl;
+        // std::cout << "px,py,pz = " << p_x << "," << p_y << "," << p_z << std::endl;
         // std::cout << "probablity = " << probablity << std::endl;
         CubaturePointSet.insert(point_id);
-        A = getSubspaceAdvect_A(CubaturePointSet,U1_Snapshot,U1);
+        A = getSubspaceAdvect_A(CubaturePointSet,devided_U1_Snapshot,devided_U1);
         // std::cout << "fin calA" << std::endl;
         nnls_solver.compute(A);
         w = nnls_solver.solve(b);
+        // std::cout << "w" << std::endl << w.transpose() << std::endl;
         // std::cout << "solve" << std::endl;
         auto itr = CubaturePointSet.begin();
         // std::cout << "A.rows, A.cols, b.size(), w.size() = " << A.rows() << ", " << A.cols() << ", " << b.size() << ", " << w.size() << std::endl;
         residual = b - A*w;
+        // std::cout << "residual" << std::endl << residual.transpose() << std::endl;
         // std::cout << "err % = " << residual.norm() * residual.norm() / err_real_value << std::endl;
         // std::cout << "Cubature point set num, residual.norm()^2 = " 
         // << CubaturePointSet.size() << ", " << residual.norm() * residual.norm() << std::endl; 
@@ -1278,21 +1309,21 @@ void Simulator::largeSamplingCubature(std::set<unsigned int> &CubaturePointSet,f
         CubaturePointSet = culledPointSet;
         // std::cout << "update cubature point set" << std::endl;
         // std::cout << "fin cubature oneloop" << std::endl;
-        // int microsecond = 0.5 * 1000000;
+        int microsecond = 0.3 * 1000000;
         // usleep(microsecond);
     }
-    cubatureWeightVector = w;
+    weight_vector = w;
     // std::cout << w.transpose() << std::endl;
     std::cout << "cubature point num = " << CubaturePointSet.size() << std::endl;
     timer.end();
 }
-
 //Up * ¥tilde{x} = xpではなく，ちゃんと計算するとSnapshotが不要になる．基底の次元とxpの次元が合ってない弊害出てそう
 
 Eigen::VectorXf Simulator::getColACoresspondCubaturePoint(unsigned int point_id,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
 {
+    unsigned int snap_num = _snap_num / _devide_num;
     unsigned int r = Basis.cols();
-    Eigen::VectorXf ret(r*_snap_num);
+    Eigen::VectorXf ret(r*snap_num);
     unsigned int p_x;unsigned int p_y;unsigned int p_z;
     resequence1to3(point_id,p_x,p_y,p_z,_texwidth,_texheight,_texdepth);
     // std::cout << "px,py,pz = " << p_x << "," << p_y << "," << p_z << std::endl;
@@ -1300,7 +1331,7 @@ Eigen::VectorXf Simulator::getColACoresspondCubaturePoint(unsigned int point_id,
     Eigen::MatrixXf subBasis_pre = getRowsCorrespondPoint(Basis,p_x,p_y,p_z);
     Eigen::MatrixXf subBasis_post = getRowsCorrespondPoint(Basis,p_x+1,p_y+1,p_z+1);
     // std::cout << "subBasis" << std::endl;
-    for(int snap=0; snap<_snap_num; ++snap)
+    for(int snap=0; snap<snap_num; ++snap)
     {
         Eigen::Vector3f pointVelocity_pre = getVelocityFromSnapshot(Snapshot,p_x,p_y,p_z,snap);
         Eigen::Vector3f pointVelocity_post = getVelocityFromSnapshot(Snapshot,p_x+1,p_y+1,p_z+1,snap);
@@ -1322,6 +1353,7 @@ Eigen::VectorXf Simulator::getColACoresspondCubaturePoint(unsigned int point_id,
 
 Eigen::MatrixXf Simulator::getSubspaceAdvect_A(std::set<unsigned int> &CubaturePointSet,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
 {
+    unsigned int snap_num = _snap_num / _devide_num;
     unsigned int P = CubaturePointSet.size();
     unsigned int r = Basis.cols();
     Eigen::MatrixXf ret(r * _snap_num, P);
@@ -1337,6 +1369,7 @@ Eigen::MatrixXf Simulator::getSubspaceAdvect_A(std::set<unsigned int> &CubatureP
 
 Eigen::VectorXf Simulator::getSubspaceAdvect_b(Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis)
 {
+    unsigned int snap_num = _snap_num / _devide_num;
     unsigned int r = Basis.cols();
     Eigen::VectorXf ret(r * _snap_num);
     for(unsigned int snap = 0; snap < _snap_num; ++snap)
@@ -1349,6 +1382,19 @@ Eigen::VectorXf Simulator::getSubspaceAdvect_b(Eigen::MatrixXf &Snapshot,Eigen::
         }
     }
     return ret;
+}
+
+void getDevidedSnapshot(
+    unsigned int start_snap_id,unsigned int end_snap_id,
+    Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &devided_Snapshot)
+{
+    unsigned int devided_dimention = end_snap_id - start_snap_id + 1;
+    devided_Snapshot = Eigen::MatrixXf(Snapshot.rows(),devided_dimention);
+    for(unsigned int i = start_snap_id;i<end_snap_id;++i)
+    {
+        devided_Snapshot.col(i - start_snap_id) = Snapshot.col(i);
+        // devided_Snapshot.col(i - start_snap_id) = Snapshot.col(i - start_snap_id);
+    }
 }
 
 void Simulator::getDevidedBasis(
@@ -1389,20 +1435,24 @@ void Simulator::getDevidedBasis(
         devided_P);
 }
 
-void Simulator::calDevidedBasisList()
+void Simulator::calDevidedList()
 {
     unsigned int devide_snap_num = _snap_num / _devide_num;
     for(int i=0;i<_devide_num;++i)
     {
         unsigned int start_snap_id = i * devide_snap_num;
         unsigned int end_snap_id = start_snap_id + devide_snap_num - 1;
+        Eigen::MatrixXf devided_U1_snap;
         getDevidedBasis(start_snap_id,end_snap_id,U0,U1,U2,U3,P);
+        getDevidedSnapshot(start_snap_id,end_snap_id,U1_Snapshot,devided_U1_snap);
         devided_U0_List.push_back(U0);
         devided_U1_List.push_back(U1);
         devided_U2_List.push_back(U2);
         devided_U3_List.push_back(U3);
         devided_P_List.push_back(P);
+        devided_U1_Snapshot_List.push_back(devided_U1_snap);
         output_Basis(i);
+        output_Snapshot(i,devided_U1_snap);
     }
 }
 
@@ -1423,5 +1473,23 @@ void Simulator::calDevidedOperatorList()
         devided_PoissonMatrix_List.push_back(reduced_PoissonMatrix);
         devided_Pressure2VelocityMatrix_List.push_back(reduced_Pressure2VelocityMatrix);
         devided_DirichletBoundaryMatrix_List.push_back(reduced_DirichletBoundaryMatrix);
+    }
+}
+
+void Simulator::calCubatureList()
+{
+    for(int i=0;i<_devide_num;++i)
+    {
+        largeSamplingCubature(
+            cubaturePointSet,
+            cubatureWeightVector,
+            devided_U1_Snapshot_List[i],
+            devided_U1_List[i],
+            err_threshold,
+            w_threshold
+        );
+        std::cout << "devide" << i << std::endl;
+        devided_cubaturePointSetList.push_back(cubaturePointSet);
+        devided_cubatureWeightVectorList.push_back(cubatureWeightVector);
     }
 }
