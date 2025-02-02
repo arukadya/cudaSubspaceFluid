@@ -140,7 +140,7 @@ void Simulator::oneloop()
     // write_exact_solution(U1_all_frame, all_velocity);
     //U1
     //Diffusion
-    all_velocity = DiffusionMatrix * all_velocity;
+    all_velocity = DiffusionMatrix * DirichletBoundaryMatrix * all_velocity;
     //U2
     write_snapshot(U2_Snapshot, all_velocity);
     // write_exact_solution(U2_all_frame, all_velocity);
@@ -670,11 +670,11 @@ void Simulator::project(){
     Eigen::ConjugateGradient<SparseMatrix> solver;
     solver.setTolerance(1e-6);//下限は1e-6
     // solver.setMaxIterations(20);//設定すると精度が足りないかも
-    b = Vel2DivMatrix * DirichletBoundaryMatrix * all_velocity;
+    b = Vel2DivMatrix * all_velocity;
     solver.compute(PoissonMatrix);
     px = solver.solveWithGuess(b,px);
     // px = solver.solve(b);
-    all_velocity = DirichletBoundaryMatrix * all_velocity - Pressure2VelocityMatrix * px;
+    all_velocity = all_velocity - Pressure2VelocityMatrix * px;
     all2xyz();
 }
 
@@ -1083,20 +1083,15 @@ void Simulator::subspace_oneloop(
     init_all_velocity();
     reduced_all_velocity = devided_U0.transpose() * all_velocity;
     //U1
-    subspace_advect(
-        CubaturePointSet,
-        weight_vector,
-        devided_U0,
-        devided_U1
-        );
+    // subspace_advect(CubaturePointSet,weight_vector,devided_U0,devided_U1);
     std::cout << "sub_advect" << std::endl;
-    // faceAdvect();
-    // init_all_velocity();
-    // reduced_all_velocity = devided_U1.transpose() * all_velocity;
+    faceAdvect();
+    init_all_velocity();
+    reduced_all_velocity = devided_U1.transpose() * all_velocity;
     //U2
     //Diffusion
     std::cout << "sub_diffusion" << std::endl;
-    reduced_all_velocity = devided_DiffusionMatrix * reduced_all_velocity;
+    reduced_all_velocity = devided_DiffusionMatrix * devided_DirichletBoundaryMatrix * reduced_all_velocity;
     // std::cout << "exact, reduce : " << U2_all_frame.col(_timestamp).norm() << "," <<  (U2 * reduced_all_velocity).norm() << std::endl;
     // if(_timestamp < _discard_flame)
     // std::cout << "U2 restore error = " << (all_velocity - U2 * (U2.transpose() * all_velocity)).norm() / all_velocity.norm() << std::endl;
@@ -1129,7 +1124,7 @@ void Simulator::subspace_project(
     Eigen::VectorXf b;
     Eigen::ConjugateGradient<Eigen::MatrixXf> solver;
     solver.setTolerance(1e-6);
-    b = devided_Vel2DivMatrix * devided_DirichletBoundaryMatrix * reduced_all_velocity;
+    b = devided_Vel2DivMatrix * reduced_all_velocity;
     solver.compute(devided_PoissonMatrix);
     reduced_px = solver.solveWithGuess(b, reduced_px);
     reduced_all_velocity = devided_DirichletBoundaryMatrix * reduced_all_velocity - devided_Pressure2VelocityMatrix * reduced_px;
@@ -1211,8 +1206,8 @@ Eigen::MatrixXf Simulator::getRowsCorrespondPoint(Eigen::MatrixXf &Mat, unsigned
     unsigned int size = Mat.rows() / 3;
     Eigen::MatrixXf ret(3,Mat.cols());
     unsigned int x_id  = resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth);
-    unsigned int y_id  = resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth);
-    unsigned int z_id  = resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1);
+    unsigned int y_id  = size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth);
+    unsigned int z_id  = 2 * size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1);
     ret.row(0) = Mat.row(x_id);
     ret.row(1) = Mat.row(y_id);
     ret.row(2) = Mat.row(z_id);
@@ -1221,7 +1216,7 @@ Eigen::MatrixXf Simulator::getRowsCorrespondPoint(Eigen::MatrixXf &Mat, unsigned
 
 Eigen::Vector3f Simulator::getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,unsigned int x,unsigned int y,unsigned int z,unsigned int T)
 {
-    unsigned int size = Snapshot.rows();
+    unsigned int size = Snapshot.rows() / 3;
     Eigen::Vector3f ret;
     // ret.x() = (Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T) + Snapshot(resequence3to1(x+1,y,z,_texwidth+1,_texheight,_texdepth),T))/2;
     // ret.y() = (Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T) + Snapshot(size + resequence3to1(x,y+1,z,_texwidth,_texheight+1,_texdepth),T))/2;
@@ -1242,13 +1237,13 @@ void Simulator::largeSamplingCubature(
     Timer timer;
     timer.startWithMessage("largeSamplingCubature");
     Eigen::MatrixXf A;
-    // std::cout << "snap.cols, basis.cols = " << devided_U1_Snapshot.cols() << "," << devided_U1.cols() << std::endl;
+    std::cout << "snap.cols, basis.cols = " << devided_U1_Snapshot.cols() << "," << devided_U1.cols() << std::endl;
     Eigen::VectorXf b = getSubspaceAdvect_b(devided_U1_Snapshot,devided_U1);
-    // std::cout << "b" << std::endl << b.transpose() << std::endl;
+    std::cout << "b" << std::endl << b.transpose() << std::endl;
     Eigen::VectorXf w;
     Eigen::VectorXf residual = b;
     float err_real_value = (residual.norm())*residual.norm() * error_threshold;
-    // std::cout << "err_real_value : " << err_real_value << std::endl; 
+    std::cout << "err_real_value : " << err_real_value << std::endl; 
     Eigen::NNLS<Eigen::MatrixXf> nnls_solver;
     int space_resolution = _texwidth * _texheight * _texdepth;
     std::uniform_int_distribution uid(0,space_resolution-1);
@@ -1480,6 +1475,7 @@ void Simulator::calCubatureList()
 {
     for(int i=0;i<_devide_num;++i)
     {
+        std::cout << "devide" << i << std::endl;
         largeSamplingCubature(
             cubaturePointSet,
             cubatureWeightVector,
@@ -1488,7 +1484,6 @@ void Simulator::calCubatureList()
             err_threshold,
             w_threshold
         );
-        std::cout << "devide" << i << std::endl;
         devided_cubaturePointSetList.push_back(cubaturePointSet);
         devided_cubatureWeightVectorList.push_back(cubatureWeightVector);
     }
