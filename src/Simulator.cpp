@@ -1130,9 +1130,10 @@ void Simulator::subspace_project(
     reduced_all_velocity = devided_DirichletBoundaryMatrix * reduced_all_velocity - devided_Pressure2VelocityMatrix * reduced_px;
 }
 
-Eigen::Vector3f Simulator::face_advect_function(Eigen::Vector3i &pos,Eigen::VectorXf &velocity,float dt)
+Eigen::VectorXf Simulator::face_advect_function(Eigen::Vector3i &pos,Eigen::VectorXf &velocity,float dt)
 {
-    Eigen::Vector3f ret;
+    // Eigen::Vector3f ret;
+    Eigen::VectorXf ret(6);
     // float x = i*_dx;float y = (j+0.5)*_dx;float z = (k+0.5)*_dx;
     // std::cout << "pos : " << pos.transpose() << std::endl;
     // std::cout << "x" << std::endl;
@@ -1142,7 +1143,8 @@ Eigen::Vector3f Simulator::face_advect_function(Eigen::Vector3i &pos,Eigen::Vect
     float adv_y = y - dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
     float adv_z = z - dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx,z, z_velocity);
     // std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
-    ret.x() = TriLinearInterporation(adv_x, adv_y - 0.5*_dx, adv_z- 0.5*_dx, x_velocity);
+    // ret.x() = TriLinearInterporation(adv_x, adv_y - 0.5*_dx, adv_z- 0.5*_dx, x_velocity);
+    ret(0) = TriLinearInterporation(adv_x, adv_y - 0.5*_dx, adv_z- 0.5*_dx, x_velocity);
 
     // std::cout << "y" << std::endl;
     x = (pos.x() + 0.5)*_dx; y = pos.y()*_dx; z = (pos.z() + 0.5)*_dx;
@@ -1151,7 +1153,8 @@ Eigen::Vector3f Simulator::face_advect_function(Eigen::Vector3i &pos,Eigen::Vect
     adv_y = y - dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
     adv_z = z - dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx, z, z_velocity);
     // std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
-    ret.y() = TriLinearInterporation(adv_x - 0.5*_dx, adv_y, adv_z- 0.5*_dx, y_velocity);
+    // ret.y() = TriLinearInterporation(adv_x - 0.5*_dx, adv_y, adv_z- 0.5*_dx, y_velocity);
+    ret(1) = TriLinearInterporation(adv_x - 0.5*_dx, adv_y, adv_z- 0.5*_dx, y_velocity);
 
     // std::cout << "z" << std::endl;
     x = (pos.x() + 0.5)*_dx; y = (pos.y() + 0.5)*_dx; z = pos.z() * _dx;
@@ -1160,7 +1163,37 @@ Eigen::Vector3f Simulator::face_advect_function(Eigen::Vector3i &pos,Eigen::Vect
     adv_y = y - dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
     adv_z = z - dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx, z, z_velocity);
     // std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
-    ret.z() = TriLinearInterporation(adv_x - 0.5*_dx, adv_y- 0.5*_dx, adv_z, z_velocity);
+    // ret.z() = TriLinearInterporation(adv_x - 0.5*_dx, adv_y- 0.5*_dx, adv_z, z_velocity);
+    ret(2) = TriLinearInterporation(adv_x - 0.5*_dx, adv_y- 0.5*_dx, adv_z, z_velocity);
+
+    x = (pos.x() + 1)*_dx;y = (pos.y() + 0.5)*_dx;z = (pos.z() + 0.5)*_dx;
+    // std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
+    adv_x = x - dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
+    adv_y = y - dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
+    adv_z = z - dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx,z, z_velocity);
+    // std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
+    // ret.x() = TriLinearInterporation(adv_x, adv_y - 0.5*_dx, adv_z- 0.5*_dx, x_velocity);
+    ret(3) = TriLinearInterporation(adv_x, adv_y - 0.5*_dx, adv_z- 0.5*_dx, x_velocity);
+
+    // std::cout << "y" << std::endl;
+    x = (pos.x() + 0.5)*_dx; y = (pos.y() + 1)*_dx; z = (pos.z() + 0.5)*_dx;
+    // std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
+    adv_x = x - dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
+    adv_y = y - dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
+    adv_z = z - dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx, z, z_velocity);
+    // std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
+    // ret.y() = TriLinearInterporation(adv_x - 0.5*_dx, adv_y, adv_z- 0.5*_dx, y_velocity);
+    ret(4) = TriLinearInterporation(adv_x - 0.5*_dx, adv_y, adv_z- 0.5*_dx, y_velocity);
+
+    // std::cout << "z" << std::endl;
+    x = (pos.x() + 0.5)*_dx; y = (pos.y() + 0.5)*_dx; z = (pos.z() + 1) * _dx;
+    // std::cout << "x, y, z = " << x << "," << y << "," << z << std::endl;
+    adv_x = x - dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
+    adv_y = y - dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
+    adv_z = z - dt*TriLinearInterporation(x-0.5*_dx, y-0.5*_dx, z, z_velocity);
+    // std::cout << "ax, ay, az = " << adv_x << "," << adv_y << "," << adv_z << std::endl;
+    // ret.z() = TriLinearInterporation(adv_x - 0.5*_dx, adv_y- 0.5*_dx, adv_z, z_velocity);
+    ret(5) = TriLinearInterporation(adv_x - 0.5*_dx, adv_y- 0.5*_dx, adv_z, z_velocity);
     return ret;
 }
 
@@ -1182,19 +1215,24 @@ void Simulator::subspace_advect(
         Eigen::Vector3i pre_advected_id_pos = {p_x,p_y,p_z};
         Eigen::Vector3i post_advected_id_pos = {p_x+1,p_y+1,p_z+1};
         // std::cout << "point_pos" << std::endl << pre_advected_id_pos.transpose() << std::endl;
-        Eigen::MatrixXf subU0_pre = getRowsCorrespondPoint(U0,p_x,p_y,p_z);
-        Eigen::MatrixXf subU0_post = getRowsCorrespondPoint(U0,p_x+1,p_y+1,p_z+1);
+        // Eigen::MatrixXf subU0_pre = getRowsCorrespondPoint(U0,p_x,p_y,p_z);
+        // Eigen::MatrixXf subU0_post = getRowsCorrespondPoint(U0,p_x+1,p_y+1,p_z+1);
+        Eigen::MatrixXf subU0 = getRowsCorrespondPoint(U0,p_x,p_y,p_z);
         // std::cout << "subU0" << std::endl;
-        Eigen::MatrixXf subU1_pre = getRowsCorrespondPoint(U1,p_x,p_y,p_z);
-        Eigen::MatrixXf subU1_post = getRowsCorrespondPoint(U1,p_x+1,p_y+1,p_z+1);
+        // Eigen::MatrixXf subU1_pre = getRowsCorrespondPoint(U1,p_x,p_y,p_z);
+        // Eigen::MatrixXf subU1_post = getRowsCorrespondPoint(U1,p_x+1,p_y+1,p_z+1);
+        Eigen::MatrixXf subU1 = getRowsCorrespondPoint(U1,p_x,p_y,p_z);
         // std::cout << "subU1" << std::endl;
-        Eigen::Vector3f unreduced_point_velocity_pre = subU0_pre * reduced_all_velocity;
-        Eigen::Vector3f unreduced_point_velocity_post = subU0_post * reduced_all_velocity;
+        // Eigen::Vector3f unreduced_point_velocity_pre = subU0_pre * reduced_all_velocity;
+        // Eigen::Vector3f unreduced_point_velocity_post = subU0_post * reduced_all_velocity;
+        Eigen::VectorXf unreduced_point_velocity = subU0 * reduced_all_velocity;
         // std::cout << "unreduced_point_vel" << std::endl << unreduced_point_velocity.transpose() << std::endl;
         Eigen::VectorXf all_v = U0 * reduced_all_velocity;
-        updated_reduced_velocity += cubatureWeightVector(weight_id) * 
-        (subU1_pre  * face_advect_function(pre_advected_id_pos, all_v ,_sub_dt)
-        +subU1_post * face_advect_function(post_advected_id_pos,all_v ,_sub_dt)) / 2;
+        // updated_reduced_velocity += cubatureWeightVector(weight_id) * 
+        // (subU1_pre  * face_advect_function(pre_advected_id_pos, all_v ,_sub_dt)
+        // +subU1_post * face_advect_function(post_advected_id_pos,all_v ,_sub_dt)) / 2;
+        // std::cout << (cubatureWeightVector(weight_id) * subU1.transpose() * face_advect_function(pre_advected_id_pos,all_v ,_sub_dt)).transpose() << std::endl;
+        updated_reduced_velocity += cubatureWeightVector(weight_id) * subU1.transpose() * face_advect_function(pre_advected_id_pos,all_v ,_sub_dt);;
         ++itr;
         ++weight_id;
     }
@@ -1204,26 +1242,44 @@ void Simulator::subspace_advect(
 Eigen::MatrixXf Simulator::getRowsCorrespondPoint(Eigen::MatrixXf &Mat, unsigned int x,unsigned int y, unsigned int z)
 {
     unsigned int size = Mat.rows() / 3;
-    Eigen::MatrixXf ret(3,Mat.cols());
-    unsigned int x_id  = resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth);
-    unsigned int y_id  = size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth);
-    unsigned int z_id  = 2 * size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1);
-    ret.row(0) = Mat.row(x_id);
-    ret.row(1) = Mat.row(y_id);
-    ret.row(2) = Mat.row(z_id);
+    // Eigen::MatrixXf ret(3,Mat.cols());
+    // unsigned int x_id  = resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth);
+    // unsigned int y_id  = size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth);
+    // unsigned int z_id  = 2 * size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1);
+    // ret.row(0) = Mat.row(x_id);
+    // ret.row(1) = Mat.row(y_id);
+    // ret.row(2) = Mat.row(z_id);
+    // return ret;
+    Eigen::MatrixXf ret(6,Mat.cols());
+    unsigned int x_id_pre   = resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth);
+    unsigned int x_id_post  = resequence3to1(x+1,y,z,_texwidth+1,_texheight,_texdepth);
+    unsigned int y_id_pre   = size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth);
+    unsigned int y_id_post  = size + resequence3to1(x,y+1,z,_texwidth,_texheight+1,_texdepth);
+    unsigned int z_id_pre   = 2 * size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1);
+    unsigned int z_id_post  = 2 * size + resequence3to1(x,y,z+1,_texwidth,_texheight,_texdepth+1);
+    ret.row(0) = Mat.row(x_id_pre);
+    ret.row(1) = Mat.row(x_id_post);
+    ret.row(2) = Mat.row(y_id_pre);
+    ret.row(3) = Mat.row(y_id_post);
+    ret.row(4) = Mat.row(z_id_pre);
+    ret.row(5) = Mat.row(z_id_post);
     return ret;
 }
 
-Eigen::Vector3f Simulator::getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,unsigned int x,unsigned int y,unsigned int z,unsigned int T)
+Eigen::VectorXf Simulator::getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,unsigned int x,unsigned int y,unsigned int z,unsigned int T)
 {
     unsigned int size = Snapshot.rows() / 3;
-    Eigen::Vector3f ret;
-    // ret.x() = (Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T) + Snapshot(resequence3to1(x+1,y,z,_texwidth+1,_texheight,_texdepth),T))/2;
-    // ret.y() = (Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T) + Snapshot(size + resequence3to1(x,y+1,z,_texwidth,_texheight+1,_texdepth),T))/2;
-    // ret.z() = (Snapshot(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1),T) + Snapshot(2*size + resequence3to1(x,y,z+1,_texwidth,_texheight,_texdepth+1),T))/2;
-    ret.x() = Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T);
-    ret.y() = Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T);
-    ret.z() = Snapshot(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1),T);
+    // Eigen::Vector3f ret;
+    // ret.x() = Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T);
+    // ret.y() = Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T);
+    // ret.z() = Snapshot(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1),T);
+    Eigen::VectorXf ret(6);
+    ret(0) = Snapshot(resequence3to1(x,y,z,_texwidth+1,_texheight,_texdepth),T);
+    ret(1) = Snapshot(resequence3to1(x+1,y,z,_texwidth+1,_texheight,_texdepth),T);
+    ret(2) = Snapshot(size + resequence3to1(x,y,z,_texwidth,_texheight+1,_texdepth),T);
+    ret(3) = Snapshot(size + resequence3to1(x,y+1,z,_texwidth,_texheight+1,_texdepth),T);
+    ret(4) = Snapshot(2*size + resequence3to1(x,y,z,_texwidth,_texheight,_texdepth+1),T);
+    ret(5) = Snapshot(2*size + resequence3to1(x,y,z+1,_texwidth,_texheight,_texdepth+1),T);
     return ret;
 }
 
@@ -1237,13 +1293,13 @@ void Simulator::largeSamplingCubature(
     Timer timer;
     timer.startWithMessage("largeSamplingCubature");
     Eigen::MatrixXf A;
-    std::cout << "snap.cols, basis.cols = " << devided_U1_Snapshot.cols() << "," << devided_U1.cols() << std::endl;
+    // std::cout << "snap.cols, basis.cols = " << devided_U1_Snapshot.cols() << "," << devided_U1.cols() << std::endl;
     Eigen::VectorXf b = getSubspaceAdvect_b(devided_U1_Snapshot,devided_U1);
-    std::cout << "b" << std::endl << b.transpose() << std::endl;
+    // std::cout << "b" << std::endl << b.transpose() << std::endl;
     Eigen::VectorXf w;
     Eigen::VectorXf residual = b;
     float err_real_value = (residual.norm())*residual.norm() * error_threshold;
-    std::cout << "err_real_value : " << err_real_value << std::endl; 
+    // std::cout << "err_real_value : " << err_real_value << std::endl; 
     Eigen::NNLS<Eigen::MatrixXf> nnls_solver;
     int space_resolution = _texwidth * _texheight * _texdepth;
     std::uniform_int_distribution uid(0,space_resolution-1);
@@ -1323,18 +1379,21 @@ Eigen::VectorXf Simulator::getColACoresspondCubaturePoint(unsigned int point_id,
     resequence1to3(point_id,p_x,p_y,p_z,_texwidth,_texheight,_texdepth);
     // std::cout << "px,py,pz = " << p_x << "," << p_y << "," << p_z << std::endl;
     // std::cout << point_id << "," << resequence3to1(p_x,p_y,p_z,_texwidth,_texheight,_texdepth) << std::endl;
-    Eigen::MatrixXf subBasis_pre = getRowsCorrespondPoint(Basis,p_x,p_y,p_z);
-    Eigen::MatrixXf subBasis_post = getRowsCorrespondPoint(Basis,p_x+1,p_y+1,p_z+1);
+    // Eigen::MatrixXf subBasis_pre = getRowsCorrespondPoint(Basis,p_x,p_y,p_z);
+    // Eigen::MatrixXf subBasis_post = getRowsCorrespondPoint(Basis,p_x+1,p_y+1,p_z+1);
+    Eigen::MatrixXf subBasis = getRowsCorrespondPoint(Basis,p_x,p_y,p_z);
     // std::cout << "subBasis" << std::endl;
     for(int snap=0; snap<snap_num; ++snap)
     {
-        Eigen::Vector3f pointVelocity_pre = getVelocityFromSnapshot(Snapshot,p_x,p_y,p_z,snap);
-        Eigen::Vector3f pointVelocity_post = getVelocityFromSnapshot(Snapshot,p_x+1,p_y+1,p_z+1,snap);
+        // Eigen::Vector3f pointVelocity_pre = getVelocityFromSnapshot(Snapshot,p_x,p_y,p_z,snap);
+        // Eigen::Vector3f pointVelocity_post = getVelocityFromSnapshot(Snapshot,p_x+1,p_y+1,p_z+1,snap);
+        Eigen::VectorXf pointVelocity = getVelocityFromSnapshot(Snapshot,p_x,p_y,p_z,snap);
         // std::cout << "snap point velocity = " << pointVelocity.transpose() << std::endl;
         // std::cout << "snap point velocity" << std::endl;
-        Eigen::VectorXf projectedPointVelocity_pre = subBasis_pre.transpose() * pointVelocity_pre;
-        Eigen::VectorXf projectedPointVelocity_post = subBasis_post.transpose() * pointVelocity_post;
-        Eigen::VectorXf projectedPointVelocity = (projectedPointVelocity_post + projectedPointVelocity_pre) / 2;
+        // Eigen::VectorXf projectedPointVelocity_pre = subBasis_pre.transpose() * pointVelocity_pre;
+        // Eigen::VectorXf projectedPointVelocity_post = subBasis_post.transpose() * pointVelocity_post;
+        // Eigen::VectorXf projectedPointVelocity = (projectedPointVelocity_post + projectedPointVelocity_pre) / 2;
+        Eigen::VectorXf projectedPointVelocity = subBasis.transpose() * pointVelocity;
         // std::cout << "projected point velocity = " <<projectedPointVelocity.transpose() << std::endl;
         // std::cout << "projected point velocity" << std::endl;
         for(int i = 0; i < r;++i)

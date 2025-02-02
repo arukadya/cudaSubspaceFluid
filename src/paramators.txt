@@ -6,8 +6,8 @@ texwidth 64
 texheight 64
 texdepth 64
 slice_num 64
-flame_num 32
+flame_num 64
 snap_num 32
 discard_flame 0
 threshold 0.05
-devide_num 2
+devide_num 1

@@ -356,7 +356,8 @@ struct Simulator{
 
     //subspace
     Eigen::MatrixXf getRowsCorrespondPoint(Eigen::MatrixXf &Mat, unsigned int x,unsigned int y, unsigned int z);//Basis
-    Eigen::Vector3f getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,unsigned int x,unsigned int y,unsigned int z,unsigned int T);
+    // Eigen::Vector3f getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,unsigned int x,unsigned int y,unsigned int z,unsigned int T);
+    Eigen::VectorXf getVelocityFromSnapshot(Eigen::MatrixXf &Snapshot,unsigned int x,unsigned int y,unsigned int z,unsigned int T);
     Eigen::MatrixXf getSubspaceAdvect_A(std::set<unsigned int> &CubaturePointSet,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis);
     Eigen::VectorXf getColACoresspondCubaturePoint(unsigned int point_id,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis);
     float probablity_distribution_function(unsigned int point_id,Eigen::MatrixXf &Snapshot,Eigen::MatrixXf &Basis,unsigned int restPoints_num,Eigen::VectorXf &residual);
@@ -391,7 +392,8 @@ struct Simulator{
         Eigen::VectorXf &weight_vector,
         Eigen::MatrixXf &devided_U0,
         Eigen::MatrixXf &devided_U1);
-    Eigen::Vector3f face_advect_function(Eigen::Vector3i &pos,Eigen::VectorXf &velocity,float dt);
+    // Eigen::Vector3f face_advect_function(Eigen::Vector3i &pos,Eigen::VectorXf &velocity,float dt);
+    Eigen::VectorXf face_advect_function(Eigen::Vector3i &pos,Eigen::VectorXf &velocity,float dt);
 
     //devideSnapshot
     void calDevidedList();
