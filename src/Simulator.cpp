@@ -147,11 +147,10 @@ void Simulator::oneloop()
     project();
     write_snapshot(U3_Snapshot, all_velocity);
     write_snapshot(P_Snapshot, px);
-    // write_exact_solution(U3_all_frame, all_velocity);
+    write_exact_solution(U3_all_frame, all_velocity);
     // std::cout << "U3 norm = " << U3_all_frame.row(_timestamp).norm() << std::endl;
     // write_exact_solution(P_all_frame, px);
     // std::cout << "P norm = " << P_all_frame.row(_timestamp).norm() << std::endl;
-
     //nonlinear
     //U3
     // times.push_back(TD.endTimer());
@@ -161,10 +160,11 @@ void Simulator::oneloop()
     centerAdvect(density_tgt);
     centerAdvect(density_amb);
     // std::cout << "centerAdvectRho" << std::endl;
+    output_txt(origin_density_floder_name ,_timestamp);
     ++_timestamp;
 }
 
-void Simulator::output_txt(unsigned int id)
+void Simulator::output_txt(std::string &density_floder_name ,unsigned int id)
 {
     std::string density_outputFileName = density_floder_name + "/output" + std::to_string(id) + ".txt";
     // density_tgt.print_src();
@@ -668,8 +668,8 @@ void Simulator::origin_project()
 void Simulator::project(){
     Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
     Eigen::ConjugateGradient<SparseMatrix> solver;
-    solver.setTolerance(1e-6);//下限は1e-6
-    solver.setMaxIterations(100);//設定すると精度が足りないかも
+    solver.setTolerance(1e-4);//下限は1e-6
+    // solver.setMaxIterations(100);//設定すると精度が足りないかも
     b = Vel2DivMatrix * all_velocity;
     solver.compute(PoissonMatrix);
     px = solver.solveWithGuess(b,px);
@@ -1035,7 +1035,6 @@ void Simulator::subspace_execute()
         if(_timestamp * (_dt/_sub_dt) < _discard_flame )
         {
             oneloop();
-            output_txt(_timestamp);
         }
         else 
         {
@@ -1052,8 +1051,9 @@ void Simulator::subspace_execute()
             devided_Pressure2VelocityMatrix_List[devided_id],
             devided_cubaturePointSetList[devided_id],
             devided_cubatureWeightVectorList[devided_id]);
-            output_txt(_timestamp);
         }
+        if(_devide_num > 1)output_txt(devided_density_floder_name ,_timestamp);
+        else output_txt(subspace_density_floder_name ,_timestamp);
     }
     std::cout << std::endl;
 }

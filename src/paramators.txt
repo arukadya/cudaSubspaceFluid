@@ -10,4 +10,4 @@ flame_num 64
 snap_num 32
 discard_flame 0
 threshold 0.05
-devide_num 4
+devide_num 1

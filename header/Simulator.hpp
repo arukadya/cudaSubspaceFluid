@@ -197,7 +197,7 @@ struct Simulator{
     // Eigen::MatrixXf U0_all_frame;
     // Eigen::MatrixXf U1_all_frame;
     // Eigen::MatrixXf U2_all_frame;
-    // Eigen::MatrixXf U3_all_frame;
+    Eigen::MatrixXf U3_all_frame;
     // Eigen::MatrixXf P_all_frame;
     // Eigen::MatrixXf b_all_frame;
     SparseMatrix DiffusionMatrix;//V
@@ -242,7 +242,10 @@ struct Simulator{
 
 
     // CalForceEncoder calForceEncoder;
-    std::string density_floder_name;
+    std::string origin_exact_folder_name;
+    std::string origin_density_floder_name;
+    std::string subspace_density_floder_name;
+    std::string devided_density_floder_name;
     Simulator(float dx,float dt,float beta,float nu,
     unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
     unsigned int flame_num, unsigned int snap_num, unsigned int discard_flame,float threshold,
@@ -278,8 +281,14 @@ struct Simulator{
         init_density(TGT_DENSITY);
         init_templature(TGT_TEMPLATURE);
         // calForceEncoder = CalForceEncoder("../shader/calForce.comp");
-        density_floder_name = "density_txt";
-        std::filesystem::create_directories(density_floder_name);
+        origin_exact_folder_name = "origin_exact_txt";
+        origin_density_floder_name = "origin_density_txt";
+        subspace_density_floder_name = "subspace_density_txt";
+        devided_density_floder_name = "devided_density_txt";
+        std::filesystem::create_directories(origin_exact_folder_name);
+        std::filesystem::create_directories(origin_density_floder_name);
+        std::filesystem::create_directories(subspace_density_floder_name);
+        std::filesystem::create_directories(devided_density_floder_name);
         PoissonMatrix = SparseMatrix(_texwidth*_texheight*_texdepth,texwidth*_texheight*_texdepth);
         Vel2DivMatrix = SparseMatrix(_texwidth*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
         DiffusionMatrix = SparseMatrix(3*(_texwidth + 1)*_texheight*_texdepth, 3*(texwidth + 1)*_texheight*_texdepth);
@@ -296,7 +305,7 @@ struct Simulator{
         // U0_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         // U1_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         // U2_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
-        // U3_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
+        U3_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         // P_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         // b_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         calPoissonMatrix(_dt);
@@ -409,7 +418,7 @@ struct Simulator{
         Eigen::MatrixXf &devided_P);
     //test
     void inputTXT(std::string &InputFileName);
-    void output_txt(unsigned int id);
+    void output_txt(std::string &density_floder_name,unsigned int id);
     void output_Basis(unsigned int devided_id);
     void output_Snapshot(unsigned int devided_id,Eigen::MatrixXf &devided_Snapshot);
     void input_Basis(unsigned int devided_id);
