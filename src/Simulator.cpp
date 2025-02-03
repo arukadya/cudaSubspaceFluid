@@ -669,10 +669,11 @@ void Simulator::project(){
     Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
     Eigen::ConjugateGradient<SparseMatrix> solver;
     solver.setTolerance(1e-6);//下限は1e-6
-    // solver.setMaxIterations(20);//設定すると精度が足りないかも
+    solver.setMaxIterations(100);//設定すると精度が足りないかも
     b = Vel2DivMatrix * all_velocity;
     solver.compute(PoissonMatrix);
     px = solver.solveWithGuess(b,px);
+    std::cout << "iteration = " << solver.iterations() << std::endl;
     // px = solver.solve(b);
     all_velocity = all_velocity - Pressure2VelocityMatrix * px;
     all2xyz();
@@ -1124,6 +1125,7 @@ void Simulator::subspace_project(
     Eigen::VectorXf b;
     Eigen::ConjugateGradient<Eigen::MatrixXf> solver;
     solver.setTolerance(1e-6);
+    // solver.setMaxIterations(20);
     b = devided_Vel2DivMatrix * reduced_all_velocity;
     solver.compute(devided_PoissonMatrix);
     reduced_px = solver.solveWithGuess(b, reduced_px);

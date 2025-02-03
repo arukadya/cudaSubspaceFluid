@@ -247,7 +247,9 @@ struct Simulator{
     unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
     unsigned int flame_num, unsigned int snap_num, unsigned int discard_flame,float threshold,
     unsigned int devide_num) 
-    : _dx(dx/texwidth),_dt(dt * texwidth),_beta(beta),_nu(nu),
+    // : _dx(dx/texwidth),_dt(dt * texwidth),
+    : _dx(dx),_dt(dt),
+    _beta(beta),_nu(nu),
     _texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),
     _flame_num(flame_num),_snap_num(snap_num),_discard_flame(discard_flame),_threshold(threshold),
     _devide_num(devide_num)

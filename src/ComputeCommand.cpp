@@ -91,9 +91,9 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
 {
     std::vector<unsigned int>ret;
     std::vector<std::vector<unsigned int>>init_index_list;
-    // unsigned int range_x = 1;
-    // unsigned int range_y = 1;
-    // unsigned int range_z = 1;
+    // unsigned int range_x = 4;
+    // unsigned int range_y = 4;
+    // unsigned int range_z = 4;
     unsigned int range_x = Ni/16;
     unsigned int range_y = Nj/16;
     unsigned int range_z = Nk/16;
