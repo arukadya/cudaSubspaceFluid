@@ -668,7 +668,7 @@ void Simulator::origin_project()
 void Simulator::project(){
     Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
     Eigen::ConjugateGradient<SparseMatrix> solver;
-    solver.setTolerance(1e-4);//下限は1e-6
+    solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
     // solver.setMaxIterations(100);//設定すると精度が足りないかも
     b = Vel2DivMatrix * all_velocity;
     solver.compute(PoissonMatrix);
@@ -765,7 +765,7 @@ Eigen::Vector3d Simulator::getBuoyanacy(int i,int j, int k){
     float rho_amb = density_amb.get_volume_value(i,j,k);
     float temp = templature.get_volume_value(i,j,k);
     // float value = -(-G0*(rho +rho_amb) + BETA*(temp - AMB_TEMPLATURE));
-    return -(-G0*_dx*(rho +rho_amb) + _beta*(temp - AMB_TEMPLATURE))*dir_gravity;
+    return -_dx*(-G0*(rho +rho_amb) + _beta*(temp - AMB_TEMPLATURE))*dir_gravity;
 }
 
 Eigen::MatrixXf cal_PODBasis(Eigen::MatrixXf &Snapshot)
@@ -918,6 +918,7 @@ void Simulator::input_Snapshot(unsigned int devided_id)
     Eigen::MatrixXf devided_U1_Snapshot = Eigen::MatrixXf(3*n,r);
     inputMatrix(U1snapFileName,devided_U1_Snapshot);
     devided_U1_Snapshot_List.push_back(devided_U1_Snapshot);
+    std::cout << "U1snap :" << devided_U1_Snapshot.rows() << "," << devided_U1_Snapshot.cols() << "," << devided_U1_Snapshot.norm() << std::endl;
 }
 
 void Simulator::input_Basis(unsigned int devided_id)
@@ -945,6 +946,13 @@ void Simulator::input_Basis(unsigned int devided_id)
     inputMatrix(U2FileName,U2);
     inputMatrix(U3FileName,U3);
     inputMatrix(PFileName,P);
+    std::cout << "input check" << std::endl;
+    std::cout << "U0:" << (U0.transpose() * U0 - Eigen::MatrixXf::Identity(U0.cols(),U0.cols())).norm() << std::endl;
+    std::cout << "U1:" << (U1.transpose() * U1 - Eigen::MatrixXf::Identity(U1.cols(),U1.cols())).norm() << std::endl;
+    std::cout << "U2:" << (U2.transpose() * U2 - Eigen::MatrixXf::Identity(U2.cols(),U2.cols())).norm() << std::endl;
+    std::cout << "U3:" << (U3.transpose() * U3 - Eigen::MatrixXf::Identity(U3.cols(),U3.cols())).norm() << std::endl;
+    std::cout << "P :" << ( P.transpose() * P  - Eigen::MatrixXf::Identity( P.cols(), P.cols())).norm() << std::endl;
+
     devided_U0_List.push_back(U0);
     devided_U1_List.push_back(U1);
     devided_U2_List.push_back(U2);
@@ -1084,10 +1092,10 @@ void Simulator::subspace_oneloop(
     init_all_velocity();
     reduced_all_velocity = devided_U0.transpose() * all_velocity;
     //U1
-    // subspace_advect(CubaturePointSet,weight_vector,devided_U0,devided_U1);
+    subspace_advect(CubaturePointSet,weight_vector,devided_U0,devided_U1);
     std::cout << "sub_advect" << std::endl;
-    faceAdvect();
-    init_all_velocity();
+    // faceAdvect();
+    // init_all_velocity();
     reduced_all_velocity = devided_U1.transpose() * all_velocity;
     //U2
     //Diffusion
@@ -1509,6 +1517,13 @@ void Simulator::calDevidedList()
         devided_U1_Snapshot_List.push_back(devided_U1_snap);
         output_Basis(i);
         output_Snapshot(i,devided_U1_snap);
+        std::cout << "output check" << std::endl;
+        std::cout << "U0:" << (U0.transpose() * U0 - Eigen::MatrixXf::Identity(U0.cols(),U0.cols())).norm() << std::endl;
+        std::cout << "U1:" << (U1.transpose() * U1 - Eigen::MatrixXf::Identity(U1.cols(),U1.cols())).norm() << std::endl;
+        std::cout << "U2:" << (U2.transpose() * U2 - Eigen::MatrixXf::Identity(U2.cols(),U2.cols())).norm() << std::endl;
+        std::cout << "U3:" << (U3.transpose() * U3 - Eigen::MatrixXf::Identity(U3.cols(),U3.cols())).norm() << std::endl;
+        std::cout << "P :" << ( P.transpose() * P  - Eigen::MatrixXf::Identity( P.cols(), P.cols())).norm() << std::endl;
+        std::cout << "U1snap :" << devided_U1_snap.rows() << "," << devided_U1_snap.cols() << "," << devided_U1_snap.norm() << std::endl;
     }
 }
 
@@ -1549,3 +1564,5 @@ void Simulator::calCubatureList()
         devided_cubatureWeightVectorList.push_back(cubatureWeightVector);
     }
 }
+
+//元データ計算時は成功し，読み込むと失敗する．かつ線形項は成功→Snapshotミス

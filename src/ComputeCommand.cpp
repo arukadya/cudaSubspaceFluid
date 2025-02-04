@@ -95,7 +95,7 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
     // unsigned int range_y = 4;
     // unsigned int range_z = 4;
     unsigned int range_x = Ni/16;
-    unsigned int range_y = Nj/16;
+    unsigned int range_y = Nj/8;
     unsigned int range_z = Nk/16;
     for(unsigned int i=0;i<Ni;++i)
     {
