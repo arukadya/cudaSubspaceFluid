@@ -244,9 +244,11 @@ int main(int argc, char * argv[])
         if(is_simulate)simulator.calDevidedList();
         simulator.calDevidedOperatorList();
         std::cout << "fin_operator_projection" << std::endl;
-        simulator.calCubatureList();
-        std::cout << "fin_cubature" << std::endl;
-        simulator.subspace_execute();
+        // if(devide_num == 1){
+        //     simulator.calCubatureList();
+        //     std::cout << "fin_cubature" << std::endl;
+        // }
+        simulator.subspace_execute();//
         std::cout << "fin_subspace" << std::endl;
     }
     // system("./main viewer");

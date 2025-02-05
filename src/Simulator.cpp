@@ -1092,11 +1092,17 @@ void Simulator::subspace_oneloop(
     init_all_velocity();
     reduced_all_velocity = devided_U0.transpose() * all_velocity;
     //U1
-    subspace_advect(CubaturePointSet,weight_vector,devided_U0,devided_U1);
-    std::cout << "sub_advect" << std::endl;
-    // faceAdvect();
-    // init_all_velocity();
-    reduced_all_velocity = devided_U1.transpose() * all_velocity;
+    // if(_devide_num == 1)
+    // {
+    //     subspace_advect(CubaturePointSet,weight_vector,devided_U0,devided_U1);
+    //     std::cout << "sub_advect" << std::endl;
+    // }
+    // else
+    // {
+        faceAdvect();
+        init_all_velocity();
+        reduced_all_velocity = devided_U1.transpose() * all_velocity;
+    // }
     //U2
     //Diffusion
     std::cout << "sub_diffusion" << std::endl;
@@ -1303,9 +1309,9 @@ void Simulator::largeSamplingCubature(
     Timer timer;
     timer.startWithMessage("largeSamplingCubature");
     Eigen::MatrixXf A;
-    // std::cout << "snap.cols, basis.cols = " << devided_U1_Snapshot.cols() << "," << devided_U1.cols() << std::endl;
+    std::cout << "snap.cols, basis.cols = " << devided_U1_Snapshot.cols() << "," << devided_U1.cols() << std::endl;
     Eigen::VectorXf b = getSubspaceAdvect_b(devided_U1_Snapshot,devided_U1);
-    // std::cout << "b" << std::endl << b.transpose() << std::endl;
+    std::cout << "b : " << b.size() << std::endl << b.transpose() << std::endl;
     Eigen::VectorXf w;
     Eigen::VectorXf residual = b;
     float err_real_value = (residual.norm())*residual.norm() * error_threshold;
@@ -1332,6 +1338,7 @@ void Simulator::largeSamplingCubature(
         }
         unsigned int p_x;unsigned int p_y;unsigned int p_z;
         resequence1to3(point_id,p_x,p_y,p_z,_texwidth,_texheight,_texdepth);
+        if(p_x == 0 || p_y == 0 || p_z == 0)continue;
         Eigen::VectorXf Acol = getColACoresspondCubaturePoint(point_id,devided_U1_Snapshot,devided_U1);
         // std::cout << "Acol" << std::endl;
         unsigned int restPoint_num = space_resolution - CubaturePointSet.size();
@@ -1397,6 +1404,7 @@ Eigen::VectorXf Simulator::getColACoresspondCubaturePoint(unsigned int point_id,
     {
         // Eigen::Vector3f pointVelocity_pre = getVelocityFromSnapshot(Snapshot,p_x,p_y,p_z,snap);
         // Eigen::Vector3f pointVelocity_post = getVelocityFromSnapshot(Snapshot,p_x+1,p_y+1,p_z+1,snap);
+        // Eigen::VectorXf pointVelocity = getVelocityFromSnapshot(Snapshot,p_x,p_y,p_z,snap);
         Eigen::VectorXf pointVelocity = getVelocityFromSnapshot(Snapshot,p_x,p_y,p_z,snap);
         // std::cout << "snap point velocity = " << pointVelocity.transpose() << std::endl;
         // std::cout << "snap point velocity" << std::endl;
@@ -1506,6 +1514,7 @@ void Simulator::calDevidedList()
     {
         unsigned int start_snap_id = i * devide_snap_num;
         unsigned int end_snap_id = start_snap_id + devide_snap_num - 1;
+        // std::cout << "start,end" << start_snap_id << "," << end_snap_id << std::endl;
         Eigen::MatrixXf devided_U1_snap;
         getDevidedBasis(start_snap_id,end_snap_id,U0,U1,U2,U3,P);
         getDevidedSnapshot(start_snap_id,end_snap_id,U1_Snapshot,devided_U1_snap);
