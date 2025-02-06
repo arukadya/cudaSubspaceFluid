@@ -126,7 +126,8 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
 }
 int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, float &nu,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
-    unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame ,float &threshold,
+    unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame ,
+    float &s_threshold,float &c_threshold,
     unsigned int &devide_num){
     std::ifstream Inputfile(InputFileName);
     if (!Inputfile.is_open()) {
@@ -201,10 +202,16 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, fl
                 snap_num = std::stoi(word);
             };
         }
-        else if(word == "threshold")
+        else if(word == "singularity_threshold")
         {
             while(getline(ss_nums,word,' ')){
-                threshold = std::stof(word);
+                s_threshold = std::stof(word);
+            };
+        }
+        else if(word == "cubature_threshold")
+        {
+            while(getline(ss_nums,word,' ')){
+                c_threshold = std::stof(word);
             };
         }
         else if(word == "discard_flame")

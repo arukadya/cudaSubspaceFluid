@@ -128,6 +128,7 @@ void Simulator::oneloop()
 {
     // init_density(TGT_DENSITY);
     // init_templature(TGT_TEMPLATURE);
+    // if(_timestamp < _flame_num / 2)addForce(_dt);
     addForce(_dt);
     init_all_velocity();
     //U0
@@ -149,7 +150,7 @@ void Simulator::oneloop()
     write_snapshot(P_Snapshot, px);
     write_exact_solution(U3_all_frame, all_velocity);
     // std::cout << "U3 norm = " << U3_all_frame.row(_timestamp).norm() << std::endl;
-    // write_exact_solution(P_all_frame, px);
+    write_exact_solution(P_all_frame, px);
     // std::cout << "P norm = " << P_all_frame.row(_timestamp).norm() << std::endl;
     //nonlinear
     //U3
@@ -160,7 +161,7 @@ void Simulator::oneloop()
     centerAdvect(density_tgt);
     centerAdvect(density_amb);
     // std::cout << "centerAdvectRho" << std::endl;
-    output_txt(origin_density_floder_name ,_timestamp);
+    // output_txt(origin_density_floder_name ,_timestamp);
     ++_timestamp;
 }
 
@@ -506,8 +507,8 @@ void Simulator::calPressure2VelocityMatrix(float dt)
 {
     std::vector<Triplet> triplets;
     float size = (_texwidth + 1) * _texheight * _texdepth;
-    // float scale = _dt/(_dx);
-    float scale = 1.0;
+    float scale = dt/(_dx);
+    // float scale = 1.0;
     for(unsigned int i=1;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
@@ -668,12 +669,14 @@ void Simulator::origin_project()
 void Simulator::project(){
     Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
     Eigen::ConjugateGradient<SparseMatrix> solver;
-    solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
-    // solver.setMaxIterations(100);//設定すると精度が足りないかも
+    if(_texwidth == 64)solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
+    if(_texwidth == 128)solver.setTolerance(1e-5);
+    if(_texwidth == 256)solver.setTolerance(1e-4);
+    // solver.setMaxIterations(20);//設定すると精度が足りないかも
     b = Vel2DivMatrix * all_velocity;
     solver.compute(PoissonMatrix);
     px = solver.solveWithGuess(b,px);
-    std::cout << "iteration = " << solver.iterations() << std::endl;
+    // std::cout << "iteration = " << solver.iterations() << std::endl;
     // px = solver.solve(b);
     all_velocity = all_velocity - Pressure2VelocityMatrix * px;
     all2xyz();
@@ -799,29 +802,30 @@ void Simulator::getBasisQRSVD(
     Timer timer;
     timer.startWithMessage("getBasisQRSVD");
     _reduce_dimention = devided_P_Snapshot.cols();
+    // _reduce_dimention = -1;
     std::cout << "U0" << std::endl;
-    devided_U0 = cal_Basis(devided_U0_Snapshot,_reduce_dimention,_threshold);
+    devided_U0 = cal_Basis(devided_U0_Snapshot,_reduce_dimention,_singularity_threshold);
     // std::cout << "norm, reduce_dimention = " << U0.norm() << ", " << _reduce_dimention << std::endl;
     // std::cout << "orthogonomality : " << 
     // (U0.transpose() * U0 - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
     std::cout << "U1" << std::endl;
-    devided_U1 = cal_Basis(devided_U1_Snapshot,_reduce_dimention,_threshold);
+    devided_U1 = cal_Basis(devided_U1_Snapshot,_reduce_dimention,_singularity_threshold);
     // std::cout << "orthogonomality : " << (U1.transpose() * U1 - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
     std::cout << "U2" << std::endl;
-    devided_U2 = cal_Basis(devided_U2_Snapshot,_reduce_dimention,_threshold);
+    devided_U2 = cal_Basis(devided_U2_Snapshot,_reduce_dimention,_singularity_threshold);
     // U2 = cal_PODBasis(U2_Snapshot);
     // std::cout << "norm, reduce_dimention = " << U2.norm() << ", " << _reduce_dimention << std::endl;
     // std::cout << "orthogonomality : " << (U2.transpose() * U2 - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
     // std::cout << U2.transpose() * U2 << std::endl;
 
     std::cout << "U3" << std::endl;
-    devided_U3 = cal_Basis(devided_U3_Snapshot,_reduce_dimention,_threshold);
+    devided_U3 = cal_Basis(devided_U3_Snapshot,_reduce_dimention,_singularity_threshold);
     // U3 = cal_PODBasis(U3_Snapshot);
     // std::cout << "norm, reduce_dimention = " << U3.norm() << ", " << _reduce_dimention << std::endl;
     // std::cout << "orthogonomality : " << (U3.transpose() * U3 - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
 
     std::cout << "P" << std::endl;
-    devided_P = cal_Basis(devided_P_Snapshot,_reduce_dimention,_threshold);
+    devided_P = cal_Basis(devided_P_Snapshot,_reduce_dimention,_singularity_threshold);
     // P = cal_PODBasis(P_Snapshot);
     // std::cout << "norm, reduce_dimention = " << P.norm() << ", " << _reduce_dimention << std::endl;
     // std::cout << "orthogonomality : " << (P.transpose() * P - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
@@ -991,22 +995,29 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &Snapshot, unsigned int &reduce_diment
     //特異値
     Eigen::VectorXf singular_values = svd.singularValues();
     Eigen::MatrixXf singular_value_matrix = singular_values.asDiagonal();
-    for(unsigned int i=0;i<singular_values.size();++i)
+    if(reduce_dimention == n)
     {
-        if(singular_values(i) < singularity_threshold)
+        for(unsigned int i=0;i<singular_values.size();++i)
         {
-            if(reduce_dimention < i)reduce_dimention = i;
-            break;
+            if(singular_values(i) / singular_values(0) < singularity_threshold)
+            {
+                // if(reduce_dimention < i)reduce_dimention = i;
+                reduce_dimention = i;
+                break;
+            }
         }
     }
-    float singularity = *singular_values.begin() / *(singular_values.end() - 1);
+    // std::cout << "update reduce dimention : " << reduce_dimention << std::endl;
+    float singularity = *singular_values.begin() / *(singular_values.begin() + reduce_dimention);
     // std::cout << "singular value" << std::endl << singular_values.transpose() << std::endl;
-    if(singularity < singularity_threshold)std::cout << "worning!! : singularity is too large : "<< singularity << std::endl;
+    // if(singularity > singularity_threshold)std::cout << "worning!! : singularity is too large : "<< singularity << std::endl;
+    // std::cout << "singularity : " << singularity << std::endl;
     // std::cout << "max,min : " << *singular_values.begin() << "," << *(singular_values.end() - 1) << std::endl;
     // Eigen::MatrixXf Basis = HhQR.matrixQ()*svd.matrixU();
-    Eigen::MatrixXf Basis(m,n);
-    // Eigen::MatrixXf Basis(m,reduce_dimention);
-    Basis = HhQR.householderQ()*svd.matrixU(); //m * n
+    // Eigen::MatrixXf Basis(m,n);
+    Eigen::MatrixXf Basis(m,reduce_dimention);
+    Eigen::MatrixXf matU(m,reduce_dimention);matU = svd.matrixU();
+    Basis = HhQR.householderQ()*matU.leftCols(reduce_dimention); //m * n
     // Basis = HhQR.householderQ()*svd.matrixU()*singular_value_matrix; //m * n
     std::cout << "Basis size : " << Basis.rows() << "," << Basis.cols() << std::endl;
     // std::cout << "m , n : " << m << "," << n << std::endl;
@@ -1089,13 +1100,14 @@ void Simulator::subspace_oneloop(
     //nonlinear
     std::cout << "sub_addForce" << std::endl;
     addForce(_sub_dt);
+    // if(_timestamp < _flame_num / 2)addForce(_dt);
     init_all_velocity();
     reduced_all_velocity = devided_U0.transpose() * all_velocity;
     //U1
     // if(_devide_num == 1)
     // {
-    //     subspace_advect(CubaturePointSet,weight_vector,devided_U0,devided_U1);
-    //     std::cout << "sub_advect" << std::endl;
+        // subspace_advect(CubaturePointSet,weight_vector,devided_U0,devided_U1);
+        // std::cout << "sub_advect" << std::endl;
     // }
     // else
     // {
@@ -1117,10 +1129,10 @@ void Simulator::subspace_oneloop(
     devided_Vel2DivMatrix,
     devided_PoissonMatrix,
     devided_Pressure2VelocityMatrix);
-    // std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
-    // std::cout << "exact, reduce : " << U3_all_frame.col(_timestamp).norm() << "," <<  (U3 * reduced_all_velocity).norm() << std::endl;
-    // std::cout << "P  : " << ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm() << std::endl;
-    // std::cout << "exact, reduce : " << P_all_frame.col(_timestamp).norm() << "," <<  (P * reduced_px).norm() << std::endl;
+    std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
+    std::cout << "exact, reduce : " << U3_all_frame.col(_timestamp).norm() << "," <<  (U3 * reduced_all_velocity).norm() << std::endl;
+    std::cout << "P  : " << ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm() << std::endl;
+    std::cout << "exact, reduce : " << P_all_frame.col(_timestamp).norm() << "," <<  (P * reduced_px).norm() << std::endl;
     //nonlinear
     //U3
     all_velocity = devided_U3 * reduced_all_velocity;
@@ -1138,7 +1150,9 @@ void Simulator::subspace_project(
 ){
     Eigen::VectorXf b;
     Eigen::ConjugateGradient<Eigen::MatrixXf> solver;
-    solver.setTolerance(1e-6);
+    if(_texwidth == 64)solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
+    if(_texwidth == 128)solver.setTolerance(1e-5);
+    if(_texwidth == 256)solver.setTolerance(1e-4);
     // solver.setMaxIterations(20);
     b = devided_Vel2DivMatrix * reduced_all_velocity;
     solver.compute(devided_PoissonMatrix);
@@ -1314,7 +1328,7 @@ void Simulator::largeSamplingCubature(
     std::cout << "b : " << b.size() << std::endl << b.transpose() << std::endl;
     Eigen::VectorXf w;
     Eigen::VectorXf residual = b;
-    float err_real_value = (residual.norm())*residual.norm() * error_threshold;
+    float err_real_value = (residual.norm())*residual.norm() * _cubature_threshold;
     // std::cout << "err_real_value : " << err_real_value << std::endl; 
     Eigen::NNLS<Eigen::MatrixXf> nnls_solver;
     int space_resolution = _texwidth * _texheight * _texdepth;

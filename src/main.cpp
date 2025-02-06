@@ -39,18 +39,21 @@ int main(int argc, char * argv[])
     bool is_viewer = (command0 == "viewer");
     float dx;float dt;float beta;float nu;
     unsigned int texwidth;unsigned int texheight;unsigned int texdepth;unsigned int slice_num;
-    unsigned int flame_num;unsigned int snap_num;unsigned int discard_flame;float threshold;
+    unsigned int flame_num;unsigned int snap_num;unsigned int discard_flame;
+    float singularity_threshold;float cubature_threshold;
     unsigned int devide_num;
     unsigned int id = 0;
     std::string paramatorsFileName = "../src/paramators.txt";
     inputParamator(paramatorsFileName,dx,dt,beta,nu,
     texwidth,texheight,texdepth,slice_num,
-    flame_num,snap_num,discard_flame,threshold,
+    flame_num,snap_num,discard_flame,
+    singularity_threshold,cubature_threshold,
     devide_num);
 
     Simulator simulator(dx,dt,beta,nu,
     texwidth,texheight,texdepth,
-    flame_num,snap_num,discard_flame,threshold,
+    flame_num,snap_num,discard_flame,
+    singularity_threshold,cubature_threshold,
     devide_num);
     std::cout << "success init simulator" << std::endl;
     if(argc == 2 && !is_simulate)
@@ -58,6 +61,7 @@ int main(int argc, char * argv[])
         unsigned int r = atoi(argv[1]);
         simulator._reduce_dimention = r;
     }
+    Eigen::Vector3f viewPoint(0.0f, 0.0f, 4.0f);
     if(is_viewer)
     {
         FixedObjectRenderer fixedObjectRenderer;
@@ -101,7 +105,6 @@ int main(int argc, char * argv[])
             simulator.inputTXT(inputFileName);
             ++simulator._timestamp;
             // simulator.output_txt(id);
-            Eigen::Vector3f viewPoint(4.0f, 0.0f, 4.0f);
     //        viewPoint /= 1.732;
             // 拡大縮小の変換行列を求める
             const GLfloat *const size(window.getSize());
@@ -183,7 +186,7 @@ int main(int argc, char * argv[])
         {
             simulator.oneloop();
             // simulator.output_txt(id);
-            Eigen::Vector3f viewPoint(4.0f, 0.0f, 4.0f);
+            // Eigen::Vector3f viewPoint(4.0f, 0.0f, 4.0f);
     //        viewPoint /= 1.732;
             // 拡大縮小の変換行列を求める
             const GLfloat *const size(window.getSize());
@@ -245,8 +248,8 @@ int main(int argc, char * argv[])
         simulator.calDevidedOperatorList();
         std::cout << "fin_operator_projection" << std::endl;
         // if(devide_num == 1){
-        //     simulator.calCubatureList();
-        //     std::cout << "fin_cubature" << std::endl;
+            // simulator.calCubatureList();
+            // std::cout << "fin_cubature" << std::endl;
         // }
         simulator.subspace_execute();//
         std::cout << "fin_subspace" << std::endl;

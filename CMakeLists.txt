@@ -39,6 +39,6 @@ target_link_libraries(main -lglfw -lGLEW ${OPENGL_LIBRARIES})
 
 target_compile_options(main PUBLIC
 #target_compile_options(viewer PUBLIC
-$<$<CONFIG:Release>: -O2 -Wall>          # Release
+$<$<CONFIG:Release>: -O3 -Wall>          # Release
   $<$<CONFIG:Debug>: -O0 -Wall>            # Debug
 )

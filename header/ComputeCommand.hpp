@@ -28,9 +28,38 @@ struct Timer{
     void startWithMessage(const char* s);
     double end();
 };
+// struct Outputer
+// {
+//     std::string _folder_name;
+//     std::string _file_name;
+//     Outputer(std::string &folder_name,std::string &file_name)
+//     {
+//         _folder_name = folder_name;
+//         _file_name = file_name;
+//         std::filesystem::create_directories(folder_name);
+//     }
+//     void output_err(unsigned int id, float value)
+//     {
+//         std::cout << OutputFileName << std::endl;
+//         FILE *ofp = fopen(OutputFileName.c_str(),"w");
+//         for(int row=0;row<mat.rows();row++)
+//         {
+//             for(int col=0;col<mat.cols();col++)
+//             {
+//                 if(fprintf(ofp, "%f\n", mat(row,col)));
+//             }
+//         }
+//         fclose(ofp);
+//     }
+//     void output_times(unsigned int id, float value)
+//     {
+
+//     }
+// };
 int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, float &nu,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
-    unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame,float &threshold,
+    unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame,
+    float &s_threshold,float &c_threshold,
     unsigned int &devide_num);
 
 void outputMatrix(std::string OutputFileName, Eigen::MatrixXf &mat);

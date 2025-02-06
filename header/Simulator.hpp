@@ -165,7 +165,8 @@ struct Simulator{
     //FluidVariables
     const float _dx; const float _dt;const float _beta;const float _nu;
     const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
-    const unsigned int _flame_num;const unsigned int _snap_num; const unsigned int _discard_flame; const float _threshold;
+    const unsigned int _flame_num;const unsigned int _snap_num; const unsigned int _discard_flame; 
+    const float _singularity_threshold;const float _cubature_threshold;
     const unsigned int _devide_num;
     unsigned int _timestamp;
     float err_threshold;
@@ -198,7 +199,7 @@ struct Simulator{
     // Eigen::MatrixXf U1_all_frame;
     // Eigen::MatrixXf U2_all_frame;
     Eigen::MatrixXf U3_all_frame;
-    // Eigen::MatrixXf P_all_frame;
+    Eigen::MatrixXf P_all_frame;
     // Eigen::MatrixXf b_all_frame;
     SparseMatrix DiffusionMatrix;//V
     SparseMatrix Vel2DivMatrix;//W
@@ -248,24 +249,27 @@ struct Simulator{
     std::string devided_density_floder_name;
     Simulator(float dx,float dt,float beta,float nu,
     unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
-    unsigned int flame_num, unsigned int snap_num, unsigned int discard_flame,float threshold,
+    unsigned int flame_num, unsigned int snap_num, unsigned int discard_flame,
+    float s_threshold,float c_threshold,
     unsigned int devide_num) 
     // : _dx(dx/texwidth),_dt(dt * texwidth),
     : _dx(dx),_dt(dt),
     _beta(beta),_nu(nu),
     _texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),
-    _flame_num(flame_num),_snap_num(snap_num),_discard_flame(discard_flame),_threshold(threshold),
+    _flame_num(flame_num),_snap_num(snap_num),_discard_flame(discard_flame),
+    _singularity_threshold(s_threshold),_cubature_threshold(c_threshold),
     _devide_num(devide_num)
     {
         _timestamp = 0;
         _delta_snap = _flame_num / _snap_num;
         // _snap_devide_num = _snap_num / 3;
-        err_threshold = threshold;
+        // err_threshold = threshold;
         _sub_dt = _dt;
         if(_flame_num % _snap_num != 0)std::cout << " Warning : _flame_num % _snap_num != 0" << std::endl;
         std::cout << "dx,dt,beta,nu = " << _dx << "," << _dt << "," << _beta << "," << _nu << std::endl;
         std::cout << "width,height,depth = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
-        std::cout << "flame_num,snap_num,threshold = " << _flame_num << "," << _snap_num << "," << threshold << std::endl;
+        std::cout << "flame_num,snap_num = " << _flame_num << "," << _snap_num << std::endl;
+        std::cout << "s_threshold, c_threshold = " << s_threshold << "," << c_threshold << std::endl;
         std::cout << "discard_flame, devide_num = " << _discard_flame << "," << devide_num << std::endl; 
         x_velocity = Slab(_texwidth+1,_texheight,_texdepth,0.0f);
         y_velocity = Slab(_texwidth,_texheight+1,_texdepth,0.0f);
@@ -306,7 +310,7 @@ struct Simulator{
         // U1_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         // U2_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
         U3_all_frame = Eigen::MatrixXf::Zero(3*(_texwidth + 1)*_texheight*_texdepth, _flame_num);
-        // P_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
+        P_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         // b_all_frame = Eigen::MatrixXf::Zero(_texwidth*_texheight*_texdepth, _flame_num);
         calPoissonMatrix(_dt);
         std::cout << "Poison" << std::endl;
