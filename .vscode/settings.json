@@ -96,7 +96,8 @@
         "ios": "cpp",
         "queue": "cpp",
         "variant": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "nnls": "cpp"
     }
     
 }

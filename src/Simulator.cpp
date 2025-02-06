@@ -682,19 +682,39 @@ void Simulator::project(){
     all2xyz();
 }
 
-void Simulator::addForce(float dt){
-
-    // setCenterRot();
+void Simulator::addForce(float dt)
+{
+    std::cout << "begin add force" << std::endl;
+    calConfinent();
+    std::cout << "calConf" << std::endl;
     for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
                 // f.value[i][j][k] = getBuoyanacy(i, j, k);
-                y_force.set_volume_value(i,j,k,getBuoyanacy(i, j, k).y());
+                Eigen::Vector3f buoy = getBuoyanacy(i, j, k);
+                Eigen::Vector3f conf = getConfinent(i, j, k);
+                Eigen::Vector3f force = buoy + conf;
+                // std::cout << i << "," << j << "," << k  << " : buoy" << std::endl << buoy.transpose() << std::endl; 
+                // if(conf.norm() > 1e-5)std::cout << i << "," << j << "," << k  << " : conf" << std::endl << conf.transpose() << std::endl;
+                // if(isnan(conf.norm()))std::cout << i << "," << j << "," << k  << " : nan" << std::endl;
+                // float fx = buoy.x();
+                // float fy = buoy.y();
+                // float fz = buoy.z();
+                // std::cout << force.transpose() << std::endl;
+                float fx = force.x();
+                float fy = force.y();
+                float fz = force.z();
+                x_force.set_volume_value(i,j,k,fx);
+                y_force.set_volume_value(i,j,k,fy);
+                z_force.set_volume_value(i,j,k,fz);
+                
                 // if(getBuoyanacy(i, j, k).y() > 1e-6)std::cout << i << "," << j << "," << k << ":" <<getBuoyanacy(i, j, k).y() << std::endl;
             }
         }
     }
+    x_force.swap_src_dst();
     y_force.swap_src_dst();
+    z_force.swap_src_dst();
     // y_force.print_src();
 
     // for(int i=1;i<_texwidth-1;i++){
@@ -762,8 +782,65 @@ void Simulator::write_exact_solution(Eigen::MatrixXf &mat, Eigen::VectorXf &snap
     mat.col(_timestamp) = snap;
 }
 
-Eigen::Vector3d Simulator::getBuoyanacy(int i,int j, int k){
-    Eigen::Vector3d dir_gravity = {0.0,1.0,0.0};
+void Simulator::calConfinent()
+{
+    //omega
+    for(unsigned int i=0;i<_texwidth;i++){
+        for(unsigned int j=0;j<_texheight;j++){
+            for(unsigned int k=0;k<_texdepth;k++){
+                float sub_x = (x_velocity.get_volume_value(i+1,j,k) - x_velocity.get_volume_value(i,j,k));//rotの分子
+                float sub_y = (y_velocity.get_volume_value(i,j+1,k) - y_velocity.get_volume_value(i,j,k));
+                float sub_z = (z_velocity.get_volume_value(i,j,k+1) - z_velocity.get_volume_value(i,j,k));
+                Eigen::Vector3f sub{(sub_y - sub_z)/_dx, (sub_z - sub_x)/_dx, (sub_x - sub_y)/_dx};//rot
+                x_omega.set_volume_value(i,j,k,sub.x());
+                y_omega.set_volume_value(i,j,k,sub.y());
+                z_omega.set_volume_value(i,j,k,sub.z());
+                eta.set_volume_value(i,j,k,sub.norm());
+            }
+        }
+    }
+    x_omega.swap_src_dst();
+    y_omega.swap_src_dst();
+    z_omega.swap_src_dst();
+    eta.swap_src_dst();
+
+    //Nの勾配
+    for(unsigned int i=1;i<_texwidth-1;i++){
+        for(unsigned int j=1;j<_texheight-1;j++){
+            for(unsigned int k=1;k<_texdepth-1;k++){
+                float sub_x = (eta.get_volume_value(i+1,j,k) - x_velocity.get_volume_value(i-1,j,k));//gradの分子
+                float sub_y = (eta.get_volume_value(i,j+1,k) - y_velocity.get_volume_value(i,j-1,k));
+                float sub_z = (eta.get_volume_value(i,j,k+1) - z_velocity.get_volume_value(i,j,k-1));
+                Eigen::Vector3f sub{(sub_y - sub_z)/(2*_dx), (sub_z - sub_x)/(2*_dx), (sub_x - sub_y)/(2*_dx)};//grad
+                N_x.set_volume_value(i,j,k,sub.x()/(1e-2 + sub.norm()));
+                N_y.set_volume_value(i,j,k,sub.y()/(1e-2 + sub.norm()));
+                N_z.set_volume_value(i,j,k,sub.z()/(1e-2 + sub.norm()));
+            }
+        }
+    }
+    N_x.swap_src_dst();
+    N_y.swap_src_dst();
+    N_z.swap_src_dst();
+}
+
+Eigen::Vector3f Simulator::getConfinent(int i,int j,int k)
+{
+    float _epsilon = 10.0;
+    Eigen::Vector3f ret;
+    float nx = N_x.get_volume_value(i,j,k);
+    float ny = N_y.get_volume_value(i,j,k);
+    float nz = N_z.get_volume_value(i,j,k);
+    float ox = x_omega.get_volume_value(i,j,k);
+    float oy = y_omega.get_volume_value(i,j,k);
+    float oz = z_omega.get_volume_value(i,j,k);
+    ret.x()  = ny * oz - nz * oy;
+    ret.y()  = nz * ox - nx * oz;
+    ret.z()  = nx * oy - ny * ox;
+    return _epsilon * ret;
+}
+
+Eigen::Vector3f Simulator::getBuoyanacy(int i,int j, int k){
+    Eigen::Vector3f dir_gravity = {0.0,1.0,0.0};
     float rho = density_tgt.get_volume_value(i,j,k);
     float rho_amb = density_amb.get_volume_value(i,j,k);
     float temp = templature.get_volume_value(i,j,k);

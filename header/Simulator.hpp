@@ -17,8 +17,8 @@
 #include <unistd.h>
 
 #define G0 9.8f
-#define AMB_TEMPLATURE 90.0f
-#define AMB_DENSITY 100.0f
+#define AMB_TEMPLATURE 0.0f
+#define AMB_DENSITY 0.0f
 #define TGT_TEMPLATURE 100.0f
 #define TGT_DENSITY 100.0f
 // #define err_threshold 0.005
@@ -180,6 +180,13 @@ struct Simulator{
     Slab x_force;
     Slab y_force;
     Slab z_force;
+    Slab x_omega;
+    Slab y_omega;
+    Slab z_omega;
+    Slab eta;
+    Slab N_x;
+    Slab N_y;
+    Slab N_z;
     Slab pressure;
     Slab density_tgt;
     Slab density_amb;
@@ -274,6 +281,13 @@ struct Simulator{
         x_velocity = Slab(_texwidth+1,_texheight,_texdepth,0.0f);
         y_velocity = Slab(_texwidth,_texheight+1,_texdepth,0.0f);
         z_velocity = Slab(_texwidth,_texheight,_texdepth+1,0.0f);
+        x_omega = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        y_omega = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        z_omega = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        eta = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        N_x = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        N_y = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        N_z = Slab(_texwidth,_texheight,_texdepth,0.0f);
         x_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
         y_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
         z_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
@@ -343,7 +357,9 @@ struct Simulator{
     void centerAdvect(Slab &val);
     void project();
     void addForce(float dt);
-    Eigen::Vector3d getBuoyanacy(int i,int j, int k);
+    Eigen::Vector3f getBuoyanacy(int i,int j, int k);
+    void calConfinent();
+    Eigen::Vector3f getConfinent(int i,int j,int k);
 
     //construct basis
     
