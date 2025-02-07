@@ -161,7 +161,7 @@ void Simulator::oneloop()
     centerAdvect(density_tgt);
     centerAdvect(density_amb);
     // std::cout << "centerAdvectRho" << std::endl;
-    output_txt(origin_density_floder_name ,_timestamp);
+    // output_txt(origin_density_floder_name ,_timestamp);
     ++_timestamp;
 }
 
@@ -895,7 +895,7 @@ void Simulator::getBasisQRSVD(
     // P = cal_PODBasis(P_Snapshot);
     // std::cout << "norm, reduce_dimention = " << P.norm() << ", " << _reduce_dimention << std::endl;
     // std::cout << "orthogonomality : " << (P.transpose() * P - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
-    basis_time = timer.end();
+    basis_time += timer.end();
 }
 
 void Simulator::getReducedLinearOperator
@@ -935,7 +935,7 @@ void Simulator::getReducedLinearOperator
     }
     if(!is_symmetric)std::cout << "non symmetric matrix" << std::endl;
     if(is_positive_definite && is_symmetric)std::cout << "reduced_X is symmetric positive definite matrix" << std::endl;
-    projection_time = timer.end();
+    projection_time += timer.end();
 }
 
 void Simulator::output_exact()
@@ -1166,9 +1166,9 @@ void Simulator::subspace_execute()
         else output_txt(subspace_density_floder_name ,_timestamp);
     }
     int n = _texdepth * _texheight * _texdepth;
-    std::string foldername = "result/" + std::to_string(n) + "T" + std::to_string(_snap_num) + "div" + std::to_string(_devide_num);
-    std::string U3errorFileName = "U3L2.txt";
-    std::string timeFileName = "time.txt";
+    std::string foldername = "result";
+    std::string U3errorFileName = std::to_string(n) + "T" + std::to_string(_snap_num) + "div" + std::to_string(_devide_num) + "U3L2.txt";
+    std::string timeFileName = std::to_string(n) + "T" + std::to_string(_snap_num) + "div" + std::to_string(_devide_num) + "time.txt";
     Outputer outputer(foldername,U3errorFileName,timeFileName);
     outputer.output_error(U3_error_vector);
     outputer.output_time(basis_time,projection_time);
@@ -1228,6 +1228,8 @@ void Simulator::subspace_oneloop(
     devided_Pressure2VelocityMatrix);
     float U3L2 = (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm();
     float PL2 = ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm();
+    // float U3L2 = (U3.transpose() * U3_all_frame.col(_timestamp) - reduced_all_velocity).norm() / ((U3.transpose() * U3_all_frame.col(_timestamp)).norm());
+    // float PL2 = ( P.transpose() * P_all_frame.col(_timestamp) - reduced_px).norm() / ((P.transpose() * P_all_frame.col(_timestamp)).norm());
     std::cout << "U3 : " << U3L2 << std::endl;
     std::cout << "P  : " << PL2 << std::endl;
     U3_error_vector.push_back(U3L2);

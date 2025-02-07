@@ -174,6 +174,12 @@ struct Simulator{
     unsigned int _reduce_dimention;
     unsigned int _snap_devide_num;
     float _sub_dt;
+
+    float basis_time;
+    float projection_time;
+    // std::vector<float> P_error_vector;
+    std::vector<float> U3_error_vector;
+
     Slab x_velocity;
     Slab y_velocity;
     Slab z_velocity;
@@ -336,6 +342,8 @@ struct Simulator{
         std::cout << "P2V" << std::endl;
         calDirichletBoundaryMatrix();
         std::cout << "DB" << std::endl;
+        projection_time = 0;
+        basis_time = 0;
     };
     //full simulator
     void oneloop();
@@ -448,10 +456,7 @@ struct Simulator{
     void all2xyz();
     void testCompute();
     void origin_project();
-    float basis_time;
-    float projection_time;
-    // std::vector<float> P_error_vector;
-    std::vector<float> U3_error_vector;
+
 private:
     void testSDF();
 };
