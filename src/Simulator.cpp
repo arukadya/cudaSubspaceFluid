@@ -161,7 +161,7 @@ void Simulator::oneloop()
     centerAdvect(density_tgt);
     centerAdvect(density_amb);
     // std::cout << "centerAdvectRho" << std::endl;
-    // output_txt(origin_density_floder_name ,_timestamp);
+    output_txt(origin_density_floder_name ,_timestamp);
     ++_timestamp;
 }
 
@@ -669,9 +669,10 @@ void Simulator::origin_project()
 void Simulator::project(){
     Eigen::VectorXf b = Eigen::VectorXf::Zero(_texwidth*_texheight*_texdepth);
     Eigen::ConjugateGradient<SparseMatrix> solver;
-    if(_texwidth == 64)solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
-    if(_texwidth == 128)solver.setTolerance(1e-5);
-    if(_texwidth == 256)solver.setTolerance(1e-4);
+    solver.setTolerance(1e-6);
+    // if(_texwidth == 64)solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
+    // if(_texwidth == 128)solver.setTolerance(1e-5);
+    // if(_texwidth == 256)solver.setTolerance(1e-4);
     // solver.setMaxIterations(20);//設定すると精度が足りないかも
     b = Vel2DivMatrix * all_velocity;
     solver.compute(PoissonMatrix);
@@ -684,9 +685,9 @@ void Simulator::project(){
 
 void Simulator::addForce(float dt)
 {
-    std::cout << "begin add force" << std::endl;
+    // std::cout << "begin add force" << std::endl;
     calConfinent();
-    std::cout << "calConf" << std::endl;
+    // std::cout << "calConf" << std::endl;
     for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
@@ -700,48 +701,36 @@ void Simulator::addForce(float dt)
                 // float fx = buoy.x();
                 // float fy = buoy.y();
                 // float fz = buoy.z();
-                // std::cout << force.transpose() << std::endl;
                 float fx = force.x();
                 float fy = force.y();
                 float fz = force.z();
                 x_force.set_volume_value(i,j,k,fx);
                 y_force.set_volume_value(i,j,k,fy);
                 z_force.set_volume_value(i,j,k,fz);
-                
-                // if(getBuoyanacy(i, j, k).y() > 1e-6)std::cout << i << "," << j << "," << k << ":" <<getBuoyanacy(i, j, k).y() << std::endl;
             }
         }
     }
     x_force.swap_src_dst();
     y_force.swap_src_dst();
     z_force.swap_src_dst();
-    // y_force.print_src();
-
-    // for(int i=1;i<_texwidth-1;i++){
-    //     for(int j=1;j<_texheight-1;j++){
-    //         for(int k=1;k<_texdepth-1;k++){
-    //             f.value[i][j][k] += getConfinement(i, j, k);
-    //         }
-    //     }
-    // }
     //x
-    for(unsigned int i=1;i<_texwidth;i++){
+    for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
                 // u.value[i][j][k] += dt*(f.value[i-1][j][k].x() + f.value[i][j][k].x())/2;
                 float value =  x_velocity.get_volume_value(i,j,k);
-                value += dt * ( x_force.get_volume_value(i-1,j,k) + x_force.get_volume_value(i,j,k) )/2;
+                value += dt * ( x_force.get_volume_value(i,j,k) + x_force.get_volume_value(i+1,j,k) )/2;
                 x_velocity.set_volume_value(i,j,k,value);
             }
         }
     }
     //y
     for(unsigned int i=0;i<_texwidth;i++){
-        for(unsigned int j=1;j<_texheight;j++){
+        for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
                 // v.value[i][j][k] += dt*(f.value[i][j-1][k].y() + f.value[i][j][k].y())/2;
                 float value =  y_velocity.get_volume_value(i,j,k);
-                value += dt * ( y_force.get_volume_value(i,j-1,k) + y_force.get_volume_value(i,j,k) )/2;
+                value += dt * ( y_force.get_volume_value(i,j,k) + y_force.get_volume_value(i,j+1,k) )/2;
                 y_velocity.set_volume_value(i,j,k,value);
             }
         }
@@ -749,10 +738,10 @@ void Simulator::addForce(float dt)
     //z
     for(unsigned int i=0;i<_texwidth;i++){
         for(unsigned int j=0;j<_texheight;j++){
-            for(unsigned int k=1;k<_texdepth;k++){
+            for(unsigned int k=0;k<_texdepth;k++){
                 // w.value[i][j][k] += dt*(f.value[i][j][k-1].z() + f.value[i][j][k].z())/2;
                 float value =  z_velocity.get_volume_value(i,j,k);
-                value += dt * ( z_force.get_volume_value(i,j,k-1) + z_force.get_volume_value(i,j,k) )/2;
+                value += dt * ( z_force.get_volume_value(i,j,k) + z_force.get_volume_value(i,j,k+1) )/2;
                 z_velocity.set_volume_value(i,j,k,value);
             }
         }
@@ -812,9 +801,9 @@ void Simulator::calConfinent()
                 float sub_y = (eta.get_volume_value(i,j+1,k) - y_velocity.get_volume_value(i,j-1,k));
                 float sub_z = (eta.get_volume_value(i,j,k+1) - z_velocity.get_volume_value(i,j,k-1));
                 Eigen::Vector3f sub{(sub_y - sub_z)/(2*_dx), (sub_z - sub_x)/(2*_dx), (sub_x - sub_y)/(2*_dx)};//grad
-                N_x.set_volume_value(i,j,k,sub.x()/(1e-2 + sub.norm()));
-                N_y.set_volume_value(i,j,k,sub.y()/(1e-2 + sub.norm()));
-                N_z.set_volume_value(i,j,k,sub.z()/(1e-2 + sub.norm()));
+                N_x.set_volume_value(i,j,k,sub.x()/(1e-5 + sub.norm()));
+                N_y.set_volume_value(i,j,k,sub.y()/(1e-5 + sub.norm()));
+                N_z.set_volume_value(i,j,k,sub.z()/(1e-5 + sub.norm()));
             }
         }
     }
@@ -825,7 +814,7 @@ void Simulator::calConfinent()
 
 Eigen::Vector3f Simulator::getConfinent(int i,int j,int k)
 {
-    float _epsilon = 10.0;
+    // float _epsilon = 50.0;
     Eigen::Vector3f ret;
     float nx = N_x.get_volume_value(i,j,k);
     float ny = N_y.get_volume_value(i,j,k);
@@ -836,7 +825,7 @@ Eigen::Vector3f Simulator::getConfinent(int i,int j,int k)
     ret.x()  = ny * oz - nz * oy;
     ret.y()  = nz * ox - nx * oz;
     ret.z()  = nx * oy - ny * ox;
-    return _epsilon * ret;
+    return _epsilon * _dx * ret;
 }
 
 Eigen::Vector3f Simulator::getBuoyanacy(int i,int j, int k){
@@ -906,7 +895,7 @@ void Simulator::getBasisQRSVD(
     // P = cal_PODBasis(P_Snapshot);
     // std::cout << "norm, reduce_dimention = " << P.norm() << ", " << _reduce_dimention << std::endl;
     // std::cout << "orthogonomality : " << (P.transpose() * P - Eigen::MatrixXf::Identity(_snap_num,_snap_num)).norm() << std::endl;
-    timer.end();
+    basis_time = timer.end();
 }
 
 void Simulator::getReducedLinearOperator
@@ -946,7 +935,31 @@ void Simulator::getReducedLinearOperator
     }
     if(!is_symmetric)std::cout << "non symmetric matrix" << std::endl;
     if(is_positive_definite && is_symmetric)std::cout << "reduced_X is symmetric positive definite matrix" << std::endl;
-    timer.end();
+    projection_time = timer.end();
+}
+
+void Simulator::output_exact()
+{
+    std::filesystem::create_directories("exact");
+    int n = _texdepth * _texheight * _texdepth;
+    std::string exact_foldername = 
+    "exact/n" + std::to_string(n) + "T" + std::to_string(_snap_num); 
+    std::filesystem::create_directories(exact_foldername);
+    std::string U3exactFileName = exact_foldername + "/U3exact.txt";
+    outputMatrix(U3exactFileName,U3_all_frame);
+    std::string PexactFileName = exact_foldername + "/Pexact.txt";
+    outputMatrix(PexactFileName,P_all_frame);
+}
+
+void Simulator::input_exact()
+{
+    int n = _texdepth * _texheight * _texdepth;
+    std::string exact_foldername = 
+    "exact/n" + std::to_string(n) + "T" + std::to_string(_snap_num); 
+    std::string U3exactFileName = exact_foldername + "/U3exact.txt";
+    inputMatrix(U3exactFileName,U3_all_frame);
+    std::string PexactFileName = exact_foldername + "/Pexact.txt";
+    inputMatrix(PexactFileName,P_all_frame);
 }
 
 void Simulator::output_Snapshot(unsigned int devided_id,Eigen::MatrixXf &devided_Snapshot)
@@ -996,7 +1009,8 @@ void Simulator::input_Snapshot(unsigned int devided_id)
     std::string U1snapFileName = snap_foldername + "/U1snap.txt";
     n = (_texdepth + 1)* _texheight * _texdepth;
     unsigned int r = _reduce_dimention / _devide_num;
-    Eigen::MatrixXf devided_U1_Snapshot = Eigen::MatrixXf(3*n,r);
+    // Eigen::MatrixXf devided_U1_Snapshot = Eigen::MatrixXf(3*n,r);
+    Eigen::MatrixXf devided_U1_Snapshot;
     inputMatrix(U1snapFileName,devided_U1_Snapshot);
     devided_U1_Snapshot_List.push_back(devided_U1_Snapshot);
     std::cout << "U1snap :" << devided_U1_Snapshot.rows() << "," << devided_U1_Snapshot.cols() << "," << devided_U1_Snapshot.norm() << std::endl;
@@ -1017,11 +1031,11 @@ void Simulator::input_Basis(unsigned int devided_id)
     std::string PFileName  = basis_foldername +  "/P.txt";
     n = (_texdepth + 1)* _texheight * _texdepth;
     r = _reduce_dimention / _devide_num;
-    U0 = Eigen::MatrixXf(3*n,r);
-    U1 = Eigen::MatrixXf(3*n,r);
-    U2 = Eigen::MatrixXf(3*n,r);
-    U3 = Eigen::MatrixXf(3*n,r);
-    P  = Eigen::MatrixXf(_texdepth * _texheight * _texdepth,r);
+    // U0 = Eigen::MatrixXf(3*n,r);
+    // U1 = Eigen::MatrixXf(3*n,r);
+    // U2 = Eigen::MatrixXf(3*n,r);
+    // U3 = Eigen::MatrixXf(3*n,r);
+    // P  = Eigen::MatrixXf(_texdepth * _texheight * _texdepth,r);
     inputMatrix(U0FileName,U0);
     inputMatrix(U1FileName,U1);
     inputMatrix(U2FileName,U2);
@@ -1151,7 +1165,13 @@ void Simulator::subspace_execute()
         if(_devide_num > 1)output_txt(devided_density_floder_name ,_timestamp);
         else output_txt(subspace_density_floder_name ,_timestamp);
     }
-    std::cout << std::endl;
+    int n = _texdepth * _texheight * _texdepth;
+    std::string foldername = "result/" + std::to_string(n) + "T" + std::to_string(_snap_num) + "div" + std::to_string(_devide_num);
+    std::string U3errorFileName = "U3L2.txt";
+    std::string timeFileName = "time.txt";
+    Outputer outputer(foldername,U3errorFileName,timeFileName);
+    outputer.output_error(U3_error_vector);
+    outputer.output_time(basis_time,projection_time);
 }
 
 void Simulator::subspace_oneloop(
@@ -1206,10 +1226,12 @@ void Simulator::subspace_oneloop(
     devided_Vel2DivMatrix,
     devided_PoissonMatrix,
     devided_Pressure2VelocityMatrix);
-    std::cout << "U3 : " << (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm() << std::endl;
-    std::cout << "exact, reduce : " << U3_all_frame.col(_timestamp).norm() << "," <<  (U3 * reduced_all_velocity).norm() << std::endl;
-    std::cout << "P  : " << ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm() << std::endl;
-    std::cout << "exact, reduce : " << P_all_frame.col(_timestamp).norm() << "," <<  (P * reduced_px).norm() << std::endl;
+    float U3L2 = (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm();
+    float PL2 = ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm();
+    std::cout << "U3 : " << U3L2 << std::endl;
+    std::cout << "P  : " << PL2 << std::endl;
+    U3_error_vector.push_back(U3L2);
+    // P_error_vector.push_back(PL2);
     //nonlinear
     //U3
     all_velocity = devided_U3 * reduced_all_velocity;
@@ -1227,9 +1249,10 @@ void Simulator::subspace_project(
 ){
     Eigen::VectorXf b;
     Eigen::ConjugateGradient<Eigen::MatrixXf> solver;
-    if(_texwidth == 64)solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
-    if(_texwidth == 128)solver.setTolerance(1e-5);
-    if(_texwidth == 256)solver.setTolerance(1e-4);
+    solver.setTolerance(1e-6);
+    // if(_texwidth == 64)solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
+    // if(_texwidth == 128)solver.setTolerance(1e-5);
+    // if(_texwidth == 256)solver.setTolerance(1e-4);
     // solver.setMaxIterations(20);
     b = devided_Vel2DivMatrix * reduced_all_velocity;
     solver.compute(devided_PoissonMatrix);

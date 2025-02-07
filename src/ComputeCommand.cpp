@@ -124,7 +124,7 @@ std::vector<unsigned int>get_init_index_list(unsigned int Ni,unsigned int Nj,uns
     }
     return ret;
 }
-int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, float &nu,
+int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, float &epsilon, float &nu,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
     unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame ,
     float &s_threshold,float &c_threshold,
@@ -158,6 +158,12 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, fl
         {
             while(getline(ss_nums,word,' ')){
                 beta = std::stof(word);
+            };
+        }
+        else if(word == "epsilon")
+        {
+            while(getline(ss_nums,word,' ')){
+                epsilon = std::stof(word);
             };
         }
         else if(word == "nu")
@@ -238,6 +244,8 @@ void outputMatrix(std::string OutputFileName, Eigen::MatrixXf &mat)
 {
     std::cout << OutputFileName << std::endl;
     FILE *ofp = fopen(OutputFileName.c_str(),"w");
+    if(!ofp)std::cout << "failed open file" << std::endl;
+    if(fprintf(ofp, "%d\n%d\n", mat.rows(),mat.cols()));
     for(int row=0;row<mat.rows();row++)
     {
         for(int col=0;col<mat.cols();col++)
@@ -251,7 +259,15 @@ void outputMatrix(std::string OutputFileName, Eigen::MatrixXf &mat)
 void inputMatrix(std::string InputFileName, Eigen::MatrixXf &mat)
 {
     FILE *ifp = fopen(InputFileName.c_str(),"r");
+    if(!ifp)std::cout << "failed open file" << std::endl;
     std::cout << InputFileName << std::endl;
+    int rows;int cols;
+    if(fscanf(ifp, "%d", &rows));
+    std::cout << rows << std::endl;
+    if(fscanf(ifp, "%d", &cols));
+    // std::cout << cols << std::endl;
+    std::cout << rows << "," << cols << std::endl;
+    mat = Eigen::MatrixXf(rows,cols);
     for(int row=0;row<mat.rows();row++)
     {
         for(int col=0;col<mat.cols();col++)

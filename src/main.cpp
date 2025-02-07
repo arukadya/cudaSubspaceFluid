@@ -37,20 +37,20 @@ int main(int argc, char * argv[])
     std::string command0(argv[1]);
     bool is_simulate = (command0 == "pre_compute");
     bool is_viewer = (command0 == "viewer");
-    float dx;float dt;float beta;float nu;
+    float dx;float dt;float beta;float epsilon;float nu;
     unsigned int texwidth;unsigned int texheight;unsigned int texdepth;unsigned int slice_num;
     unsigned int flame_num;unsigned int snap_num;unsigned int discard_flame;
     float singularity_threshold;float cubature_threshold;
     unsigned int devide_num;
     unsigned int id = 0;
     std::string paramatorsFileName = "../src/paramators.txt";
-    inputParamator(paramatorsFileName,dx,dt,beta,nu,
+    inputParamator(paramatorsFileName,dx,dt,beta,epsilon,nu,
     texwidth,texheight,texdepth,slice_num,
     flame_num,snap_num,discard_flame,
     singularity_threshold,cubature_threshold,
     devide_num);
 
-    Simulator simulator(dx,dt,beta,nu,
+    Simulator simulator(dx,dt,beta,epsilon,nu,
     texwidth,texheight,texdepth,
     flame_num,snap_num,discard_flame,
     singularity_threshold,cubature_threshold,
@@ -228,11 +228,13 @@ int main(int argc, char * argv[])
             window.swapBuffers();
         }
         std::cout << "fin_window" << std::endl;
+        simulator.output_exact();
     }
     else 
     {
         for(int i=0;i<simulator._devide_num;++i)simulator.input_Basis(i);
         for(int i=0;i<simulator._devide_num;++i)simulator.input_Snapshot(i);
+        simulator.input_exact();
     }
     // if(is_simulate)
     // {

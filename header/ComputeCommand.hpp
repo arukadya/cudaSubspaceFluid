@@ -28,35 +28,40 @@ struct Timer{
     void startWithMessage(const char* s);
     double end();
 };
-// struct Outputer
-// {
-//     std::string _folder_name;
-//     std::string _file_name;
-//     Outputer(std::string &folder_name,std::string &file_name)
-//     {
-//         _folder_name = folder_name;
-//         _file_name = file_name;
-//         std::filesystem::create_directories(folder_name);
-//     }
-//     void output_err(unsigned int id, float value)
-//     {
-//         std::cout << OutputFileName << std::endl;
-//         FILE *ofp = fopen(OutputFileName.c_str(),"w");
-//         for(int row=0;row<mat.rows();row++)
-//         {
-//             for(int col=0;col<mat.cols();col++)
-//             {
-//                 if(fprintf(ofp, "%f\n", mat(row,col)));
-//             }
-//         }
-//         fclose(ofp);
-//     }
-//     void output_times(unsigned int id, float value)
-//     {
-
-//     }
-// };
-int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, float &nu,
+struct Outputer
+{
+    std::string _folder_name;
+    std::string _error_file_name;
+    std::string _time_file_name;
+    Outputer(std::string &folder_name,std::string &error_file_name,std::string &time_file_name)
+    {
+        _folder_name = folder_name;
+        _error_file_name = _folder_name +"/"+ error_file_name;
+        _time_file_name = _folder_name + "/" +time_file_name;
+        std::filesystem::create_directories(folder_name);
+    }
+    
+    void output_error(std::vector<float> &data)
+    {
+        std::cout << _error_file_name << std::endl;
+        FILE *ofp = fopen(_error_file_name.c_str(),"w");
+        for(int i=0;i<data.size();++i)
+        {
+            if(fprintf(ofp, "%d %f\n",i, data[i]));
+        }
+        fclose(ofp);
+    }
+    void output_time(float basis_time,float projection_time)
+    {
+        std::cout << _time_file_name << std::endl;
+        FILE *ofp = fopen(_time_file_name.c_str(),"w");
+        // if(fprintf(ofp, "%c : %f\n",time_name.c_str(),value));
+        if(fprintf(ofp, "basis : %f\n",basis_time));
+        if(fprintf(ofp, "projection : %f\n",projection_time));
+        fclose(ofp);
+    }
+};
+int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, float &epsilon, float &nu,
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
     unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame,
     float &s_threshold,float &c_threshold,

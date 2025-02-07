@@ -163,7 +163,7 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &Snapshot, unsigned int &reduce_diment
 
 struct Simulator{
     //FluidVariables
-    const float _dx; const float _dt;const float _beta;const float _nu;
+    const float _dx; const float _dt;const float _beta;const float _epsilon;const float _nu;
     const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
     const unsigned int _flame_num;const unsigned int _snap_num; const unsigned int _discard_flame; 
     const float _singularity_threshold;const float _cubature_threshold;
@@ -254,14 +254,14 @@ struct Simulator{
     std::string origin_density_floder_name;
     std::string subspace_density_floder_name;
     std::string devided_density_floder_name;
-    Simulator(float dx,float dt,float beta,float nu,
+    Simulator(float dx,float dt,float beta,float epsilon,float nu,
     unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
     unsigned int flame_num, unsigned int snap_num, unsigned int discard_flame,
     float s_threshold,float c_threshold,
     unsigned int devide_num) 
     // : _dx(dx/texwidth),_dt(dt * texwidth),
     : _dx(dx),_dt(dt),
-    _beta(beta),_nu(nu),
+    _beta(beta),_epsilon(epsilon),_nu(nu),
     _texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),
     _flame_num(flame_num),_snap_num(snap_num),_discard_flame(discard_flame),
     _singularity_threshold(s_threshold),_cubature_threshold(c_threshold),
@@ -273,7 +273,7 @@ struct Simulator{
         // err_threshold = threshold;
         _sub_dt = _dt;
         if(_flame_num % _snap_num != 0)std::cout << " Warning : _flame_num % _snap_num != 0" << std::endl;
-        std::cout << "dx,dt,beta,nu = " << _dx << "," << _dt << "," << _beta << "," << _nu << std::endl;
+        std::cout << "dx,dt,beta,epsilon,nu = " << _dx << "," << _dt << "," << _beta << "," << _epsilon << "," << _nu << std::endl;
         std::cout << "width,height,depth = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
         std::cout << "flame_num,snap_num = " << _flame_num << "," << _snap_num << std::endl;
         std::cout << "s_threshold, c_threshold = " << s_threshold << "," << c_threshold << std::endl;
@@ -441,11 +441,17 @@ struct Simulator{
     void output_txt(std::string &density_floder_name,unsigned int id);
     void output_Basis(unsigned int devided_id);
     void output_Snapshot(unsigned int devided_id,Eigen::MatrixXf &devided_Snapshot);
+    void output_exact();
+    void input_exact();
     void input_Basis(unsigned int devided_id);
     void input_Snapshot(unsigned int devided_id);
     void all2xyz();
     void testCompute();
     void origin_project();
+    float basis_time;
+    float projection_time;
+    // std::vector<float> P_error_vector;
+    std::vector<float> U3_error_vector;
 private:
     void testSDF();
 };
