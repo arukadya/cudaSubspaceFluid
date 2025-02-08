@@ -61,7 +61,7 @@ int main(int argc, char * argv[])
         unsigned int r = atoi(argv[1]);
         simulator._reduce_dimention = r;
     }
-    Eigen::Vector3f viewPoint(0.0f, 0.0f, 4.0f);
+    Eigen::Vector3f viewPoint(0.0f, 0.0f, 6.0f);
     if(is_viewer)
     {
         FixedObjectRenderer fixedObjectRenderer;
@@ -100,10 +100,12 @@ int main(int argc, char * argv[])
         while(window && simulator._timestamp < flame_num)
         {
             std::string inputFileName(argv[2]);
-            inputFileName += std::to_string(simulator._timestamp % flame_num)+".txt";
+            // inputFileName += std::to_string(simulator._timestamp % flame_num)+".txt";
+            // ++simulator._timestamp;
+            inputFileName += std::to_string(180 % flame_num)+".txt";
+            ++simulator._timestamp;
             std::cout << inputFileName << std::endl;
             simulator.inputTXT(inputFileName);
-            ++simulator._timestamp;
             // simulator.output_txt(id);
     //        viewPoint /= 1.732;
             // 拡大縮小の変換行列を求める

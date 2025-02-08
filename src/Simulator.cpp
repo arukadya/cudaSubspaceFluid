@@ -161,7 +161,7 @@ void Simulator::oneloop()
     centerAdvect(density_tgt);
     centerAdvect(density_amb);
     // std::cout << "centerAdvectRho" << std::endl;
-    // output_txt(origin_density_floder_name ,_timestamp);
+    output_txt(origin_density_floder_name ,_timestamp);
     ++_timestamp;
 }
 
@@ -673,7 +673,7 @@ void Simulator::project(){
     // if(_texwidth == 64)solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
     // if(_texwidth == 128)solver.setTolerance(1e-5);
     // if(_texwidth == 256)solver.setTolerance(1e-4);
-    // solver.setMaxIterations(20);//設定すると精度が足りないかも
+    solver.setMaxIterations(20);//設定すると精度が足りないかも
     b = Vel2DivMatrix * all_velocity;
     solver.compute(PoissonMatrix);
     px = solver.solveWithGuess(b,px);
@@ -1165,10 +1165,13 @@ void Simulator::subspace_execute()
         if(_devide_num > 1)output_txt(devided_density_floder_name ,_timestamp);
         else output_txt(subspace_density_floder_name ,_timestamp);
     }
-    int n = _texdepth * _texheight * _texdepth;
+    int n = _texdepth;
     std::string foldername = "result";
-    std::string U3errorFileName = std::to_string(n) + "T" + std::to_string(_snap_num) + "div" + std::to_string(_devide_num) + "U3L2.txt";
-    std::string timeFileName = std::to_string(n) + "T" + std::to_string(_snap_num) + "div" + std::to_string(_devide_num) + "time.txt";
+    std::string U3errorFileName = std::to_string(n) + "div" + std::to_string(_devide_num) + "U3L2.txt";
+    std::string timeFileName = std::to_string(n) + "div" + std::to_string(_devide_num) + "time.txt";
+    // FILE *ofp = fopen("fileist.txt","a");
+    // if(fprintf(ofp, "%c\n",U3errorFileName.c_str()));
+    // fclose(ofp);
     Outputer outputer(foldername,U3errorFileName,timeFileName);
     outputer.output_error(U3_error_vector);
     outputer.output_time(basis_time,projection_time);
