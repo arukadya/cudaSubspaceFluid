@@ -99,18 +99,30 @@ int main(int argc, char * argv[])
         int sumcnt = 0;
         float startTime;
         float sum = 0;
-        simulator.input_exact();
+        // if(argc == 4)simulator.input_exact();
         while(window && simulator._timestamp < flame_num)
         {
             std::string inputFileName(argv[2]);
-            // inputFileName += std::to_string(simulator._timestamp % flame_num)+".txt";
-            // ++simulator._timestamp;
-            inputFileName += std::to_string(id % flame_num)+".txt";
-            std::cout << inputFileName << std::endl;
-            simulator.inputTXT(inputFileName);
-            simulator.load_vel(id);
-            std::string plot_filename = "velocity_plot_" + std::to_string(id) + ".png";
-            simulator.plot(plot_filename,id);
+            std::string originFileName = "origin_density_txt/output";
+            if(argc == 4)
+            {
+                inputFileName += std::to_string(id % flame_num)+".txt";
+                originFileName += std::to_string(id % flame_num)+".txt";
+                simulator.load_vel(id);
+                simulator.inputTXT(inputFileName,simulator.density_tgt);
+                simulator.inputTXT(originFileName,simulator.origin_density);
+                // std::string plot_filename = "velocity_plot_" + std::to_string(id) + ".png";
+                // simulator.plot(plot_filename,id);
+            }
+            else 
+            {
+                inputFileName +=  std::to_string(simulator._timestamp % flame_num)+".txt";
+                originFileName += std::to_string(simulator._timestamp % flame_num)+".txt";
+                std::cout << inputFileName << std::endl;
+                simulator.inputTXT(inputFileName,simulator.density_tgt);
+                simulator.inputTXT(originFileName,simulator.origin_density);
+                ++simulator._timestamp;
+            }
     //        viewPoint /= 1.732;
             // 拡大縮小の変換行列を求める
             const GLfloat *const size(window.getSize());
@@ -148,7 +160,8 @@ int main(int argc, char * argv[])
                             );
             sliceRenderer.setSliceDirection(tgt);
             fixedObjectRenderer.rendering(projection, modelview);
-            sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture);
+            // sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.origin_density.src_texture);
+            sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.density_tgt.src_texture);
             window.swapBuffers();
         }
         std::cout << "fin_window" << std::endl;
@@ -230,7 +243,7 @@ int main(int argc, char * argv[])
                             );
             sliceRenderer.setSliceDirection(tgt);
             fixedObjectRenderer.rendering(projection, modelview);
-            sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture);
+            sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.density_tgt.src_texture);
             window.swapBuffers();
         }
         std::cout << "fin_window" << std::endl;

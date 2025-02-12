@@ -107,21 +107,31 @@ GLuint SliceRenderer::makeSlice()
     return vao;
 }
 
-GLuint SliceRenderer::makeVolume(float* densityTexture, GLfloat *smokeColor,Eigen::Vector3f &tgt)
+GLuint SliceRenderer::makeVolume(float* densityTexture,float* originTexture, GLfloat *smokeColor,Eigen::Vector3f &tgt)
 {
-    std::vector<GLfloat>volume;
+    // std::vector<GLfloat>volume;
+    std::vector<GLubyte>volume(_texwidth * _texheight * _texdepth * 4);
     raySliceAngleCos = getRaySliceAngleCos(tgt);
     float marchingLength = sliceThickness / raySliceAngleCos;
     for(unsigned int k=0;k<_texdepth;++k){
         for(unsigned int j=0;j<_texheight;++j){
             for(unsigned int i=0;i<_texwidth;++i){
-                float transparency = exp( -1.0 * densityTexture[resequence3to1(i, j, k, _texwidth, _texheight, _texdepth)] * marchingLength);
+                int index = resequence3to1(i, j, k, _texwidth, _texheight, _texdepth);
+                float transparency = exp( -1.0 * densityTexture[index] * marchingLength);
                 // float transparency10 = exp( -1.0 * 10 * marchingLength);
                 // float transparency255 = exp( -1.0 * 255 * marchingLength);
             //    std::cout << densityTexture[resequence3to1(i, j, k, texwidth, _texheight, _texdepth)] << std::endl;
                 float opacity = 1 - transparency;
             //    else volume.push_back(opacity);
-                volume.push_back(opacity);
+                // float err = 0;
+                float err;
+                if(originTexture[index] < 1e-10 && std::fabs(densityTexture[index] - originTexture[index]) < 1e-6)err = 0;
+                else err = std::fabs(densityTexture[index] - originTexture[index]) / originTexture[index];
+                volume[index * 4 + 0] = static_cast<GLubyte>(255 * (err));
+                volume[index * 4 + 1] = 0;
+                volume[index * 4 + 2] = static_cast<GLubyte>(255 * (1 - err));
+                volume[index * 4 + 3] = opacity * 255;
+                // volume.push_back(opacity);
             //    std::cout << (float)volume[volume.size()-1] << "," << opacity10 << "," << opacity255 << std::endl;
             }
         }
@@ -133,17 +143,21 @@ GLuint SliceRenderer::makeVolume(float* densityTexture, GLfloat *smokeColor,Eige
     
     //GL_RGBA8,GL_RGBA:Each element contains all four components. Each component is clamped to the range [0,1].
     //テクスチャを割り当てる
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, _texwidth, _texheight, _texdepth, 0,
-                 GL_RED, GL_FLOAT, &volume[0]);
+    // glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, _texwidth, _texheight, _texdepth, 0,GL_RED, GL_FLOAT, &volume[0]);
+    // glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, _texwidth, _texheight, _texdepth, 0,GL_RGBA, GL_UNSIGNED_BYTE, &volume[0]);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, _texwidth, _texheight, _texdepth, 0,GL_RGBA, GL_UNSIGNED_BYTE, volume.data());
     //拡大・補間方法の設定
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     
     //クランプ方法の設定
     //テクスチャ座標s,t,r軸について，テクスチャを繰り返すかどうか
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    // glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    // glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
     
     static const GLfloat black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 //    static const GLfloat black[] = { 1.0f, 1.0f, 1.0f, 0.0f };
@@ -208,7 +222,7 @@ GLuint makeSlice()
     
     return vao;
 }
-void SliceRenderer::rendering(Matrix4x4 &projection,Matrix4x4 &modelview,Matrix4x4 &sliceRot,float* densityTexture)
+void SliceRenderer::rendering(Matrix4x4 &projection,Matrix4x4 &modelview,Matrix4x4 &sliceRot,float* densityTexture,float* originTexture)
 {
     GLfloat smokeColor[3] = {0.0f,0.0f,1.0f};
 
@@ -240,7 +254,7 @@ void SliceRenderer::rendering(Matrix4x4 &projection,Matrix4x4 &modelview,Matrix4
     glEnable(GL_BLEND);
     glUniform1f(volumeLoc, 0);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, makeVolume(densityTexture, smokeColor,tgt));
+    glBindTexture(GL_TEXTURE_3D, makeVolume(densityTexture,originTexture, smokeColor,tgt));
     glBindVertexArray(slice);
     //複製する描画方法．第四引数がインスタンスの数
     

@@ -28,9 +28,9 @@ struct SliceRenderer{
     void setSliceDirection(Eigen::Vector3f &tgt);
     void setSmokecolor(GLfloat color);
     float getRaySliceAngleCos(Eigen::Vector3f &tgt);
-    GLuint makeVolume(float* densityTexture, GLfloat *smokeColor, Eigen::Vector3f &tgt);
+    GLuint makeVolume(float* densityTexture,float* originTexture, GLfloat *smokeColor, Eigen::Vector3f &tgt);
     GLuint makeSlice();
-    void rendering(Matrix4x4 &projection,Matrix4x4 &modelview,Matrix4x4 &sliceRot,float* densityTexture);
+    void rendering(Matrix4x4 &projection,Matrix4x4 &modelview,Matrix4x4 &sliceRot,float* densityTexture,float* originTexture);
     void makeCosTexture();
 };
 

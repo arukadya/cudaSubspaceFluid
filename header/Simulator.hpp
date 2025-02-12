@@ -196,6 +196,7 @@ struct Simulator{
     Slab N_z;
     Slab pressure;
     Slab density_tgt;
+    Slab origin_density;
     Slab density_amb;
     Slab templature;
     Slab test;
@@ -301,6 +302,7 @@ struct Simulator{
         z_force = Slab(_texwidth,_texheight,_texdepth,0.0f);
         pressure = Slab(_texwidth,_texheight,_texdepth,0.0f);
         density_tgt = Slab(_texwidth,_texheight,_texdepth,0.0f);
+        origin_density = Slab(_texwidth,_texheight,_texdepth,0.0f);
         density_amb = Slab(_texwidth,_texheight,_texdepth,AMB_DENSITY);
         templature = Slab(_texwidth,_texheight,_texdepth,AMB_TEMPLATURE);
         test = Slab(_texwidth,_texheight,1,0.0f);
@@ -447,7 +449,7 @@ struct Simulator{
         Eigen::MatrixXf &devided_U3,
         Eigen::MatrixXf &devided_P);
     //test
-    void inputTXT(std::string &InputFileName);
+    void inputTXT(std::string &InputFileName,Slab &density);
     void output_txt(std::string &density_floder_name,unsigned int id);
     void output_Basis(unsigned int devided_id);
     void output_Snapshot(unsigned int devided_id,Eigen::MatrixXf &devided_Snapshot);

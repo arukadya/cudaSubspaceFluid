@@ -16,7 +16,7 @@ float* Simulator::get_currentTexture()
     return density_tgt.src_texture;
 }
 //Simulator
-void Simulator::inputTXT(std::string &InputFileName)
+void Simulator::inputTXT(std::string &InputFileName,Slab &density)
 {
     FILE *ifp = fopen(InputFileName.c_str(),"r");
     for(unsigned int k=0;k<_texdepth;++k){
@@ -24,7 +24,7 @@ void Simulator::inputTXT(std::string &InputFileName)
             for(unsigned int i=0;i<_texwidth;++i){
                 float value;
                 if(fscanf(ifp, "%f", &value));
-                density_tgt.src_texture[resequence3to1(i, _texheight - j, k, _texwidth, _texheight, _texdepth)] = value;
+                density.src_texture[resequence3to1(i, _texheight - j, k, _texwidth, _texheight, _texdepth)] = value;
             }
         }
     }

@@ -350,7 +350,8 @@ void outputSliceData(const vector<vector<vector<Velocity>>> &data, int nx, int n
     
     for (int i = 0; i < nx; i += nx / 32) {
         for (int j = 0; j < ny; j += ny / 32) {
-            file << i << " " << j << " " << data[i][j][slice].x << " " << -data[i][j][slice].y << " " << data[i][j][slice].color<< endl;
+            if(i == 0 && j == 0)file << i << " " << j << " " << data[i][j][slice].x << " " << -data[i][j][slice].y << " " << 60.0<< endl;
+            else file << i << " " << j << " " << data[i][j][slice].x << " " << -data[i][j][slice].y << " " << data[i][j][slice].color<< endl;
         }
         file << endl;  // gnuplotの"splot"用の空行
     }
@@ -366,11 +367,50 @@ void plotWithGnuplot(const string &filename,std::string &plot_fileName) {
     gnuplotScript << "set xlabel 'X'\n";
     gnuplotScript << "set ylabel 'Y'\n";
     gnuplotScript << "set title 'Velocity Field Slice'\n";
+    // カラーマップを定義
     gnuplotScript << "set palette defined (0 'blue', 1 'green', 2 'yellow', 3 'red')\n";
+    // gnuplotScript << "set palette defined (0 'red', 1 'yellow', 2 'green', 3 'blue')\n";
+    // スタイルを統一
+    gnuplotScript << "set style line 1 lt 1 lw 2 lc rgb 'blue'\n";
+    gnuplotScript << "set style line 2 lt 1 lw 2 lc rgb 'green'\n";
+    gnuplotScript << "set style line 3 lt 1 lw 2 lc rgb 'yellow'\n";
+    gnuplotScript << "set style line 4 lt 1 lw 2 lc rgb 'red'\n";
+
     gnuplotScript << "plot '" << filename << "' using 1:2:3:4:5 with vectors lc palette title 'Velocity'\n";
+    // gnuplotScript << "plot '" << filename << "' using 1:2:3:4:5 with vectors linestyle 1 title 'Velocity'\n";
     gnuplotScript.close();
     system("gnuplot plot_script.gp");
 }
+// void plotWithGnuplot(const string &filename, std::string &plot_fileName) {
+//     ofstream gnuplotScript("plot_script.gp");
+//     gnuplotScript << "set terminal pngcairo enhanced\n";
+//     gnuplotScript << "set output '" << plot_fileName << "'\n";
+//     gnuplotScript << "set xlabel 'X'\n";
+//     gnuplotScript << "set ylabel 'Y'\n";
+//     gnuplotScript << "set title 'Velocity Field Slice'\n";
+
+//     // カラーマップの定義
+//     gnuplotScript << "set palette defined (0 'blue', 1 'green', 2 'yellow', 3 'red')\n";
+
+//     // 凡例を統一するためのダミーデータ（矢印としてプロット）
+//     gnuplotScript << "set key outside\n";
+//     gnuplotScript << "plot '-' using 1:2:3:4 with vectors lc rgb 'blue' title 'Low Velocity', \\\n";
+//     gnuplotScript << "     '-' using 1:2:3:4 with vectors lc rgb 'green' title 'Medium Velocity', \\\n";
+//     gnuplotScript << "     '-' using 1:2:3:4 with vectors lc rgb 'yellow' title 'High Velocity', \\\n";
+//     gnuplotScript << "     '-' using 1:2:3:4 with vectors lc rgb 'red' title 'Max Velocity'\n";
+
+//     // ダミーデータ（凡例のみ表示するための矢印）
+//     gnuplotScript << "0 0 0.1 0.1\ne\n"; // Low Velocity
+//     gnuplotScript << "0 0 0.1 0.1\ne\n"; // Medium Velocity
+//     gnuplotScript << "0 0 0.1 0.1\ne\n"; // High Velocity
+//     gnuplotScript << "0 0 0.1 0.1\ne\n"; // Max Velocity
+
+//     // 実際のデータをプロット（lc variable で色をデータから指定）
+//     gnuplotScript << "replot '" << filename << "' using 1:2:3:4:5 with vectors lc variable title ''\n";
+
+//     gnuplotScript.close();
+//     system("gnuplot plot_script.gp");
+// }
 
 void plotVelocity(unsigned int nx,unsigned int ny,unsigned int nz,Eigen::VectorXf &velocity,Eigen::VectorXf &origin,std::string &plot_fileName)
 {
