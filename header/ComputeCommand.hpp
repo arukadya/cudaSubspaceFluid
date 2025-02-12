@@ -65,8 +65,9 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, fl
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
     unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame,
     float &s_threshold,float &c_threshold,
-    unsigned int &devide_num);
+    unsigned int &devide_num,unsigned int &situation);
 
 void outputMatrix(std::string OutputFileName, Eigen::MatrixXf &mat);
 void inputMatrix(std::string InputFileName, Eigen::MatrixXf &mat);
+void plotVelocity(unsigned int nx,unsigned int ny,unsigned int nz,Eigen::VectorXf &velocity,Eigen::VectorXf &origin,std::string &plot_fileName);
 #endif /* ComputeCommand_hpp */

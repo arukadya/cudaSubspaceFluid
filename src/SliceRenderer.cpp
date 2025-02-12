@@ -210,11 +210,14 @@ GLuint makeSlice()
 }
 void SliceRenderer::rendering(Matrix4x4 &projection,Matrix4x4 &modelview,Matrix4x4 &sliceRot,float* densityTexture)
 {
+    GLfloat smokeColor[3] = {0.0f,0.0f,1.0f};
+
     const GLuint volumeProgram(loadVertFragProgram("../shader/volume.vert", "../shader/volume.frag"));
     const GLint mwLoc(glGetUniformLocation(volumeProgram, "mw"));
     const GLint mpLoc(glGetUniformLocation(volumeProgram, "mp"));
     const GLint spacingLoc(glGetUniformLocation(volumeProgram, "spacing"));
     const GLint volume_light_vecLoc(glGetUniformLocation(volumeProgram, "light_vec"));
+    const GLint volume_smoke_color_loc(glGetUniformLocation(volumeProgram, "somke_color"));
     const GLint sliceRot_Loc(glGetUniformLocation(volumeProgram, "sliceRot"));
     const GLint volumeLoc(glGetUniformLocation(volumeProgram, "volume"));
 
@@ -224,13 +227,14 @@ void SliceRenderer::rendering(Matrix4x4 &projection,Matrix4x4 &modelview,Matrix4
     glUniformMatrix4fv(mwLoc, 1, GL_FALSE, modelview.data());
     glUniformMatrix4fv(sliceRot_Loc, 1, GL_FALSE, sliceRot.data());
     glUniform4f(volume_light_vecLoc, 3.0f, 4.0f, 5.0f, 0.0f);
+    glUniform3f(volume_smoke_color_loc, smokeColor[0], smokeColor[1], smokeColor[2]);
     Timer timer;
 //    timer.startWithMessage("rendering");
     //スライスの図形データを作成
     const GLuint slice(makeSlice());
     //ボリュームテクスチャを設定
     Eigen::Vector3f tgt = {0.0f,0.0f,0.0f};
-    GLfloat smokeColor[3] = {0.0f,0.0f,1.0f};
+
     glDisable(GL_CULL_FACE);
     glEnable(GL_TEXTURE_3D);
     glEnable(GL_BLEND);

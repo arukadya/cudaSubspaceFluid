@@ -4,6 +4,8 @@
 // ボリュームテクスチャのサンプラ
 uniform sampler3D volume;
 
+uniform vec3 smoke_color;
+
 // テクスチャ座標
 in vec3 t;
 // フレームバッファに出力するデータ
@@ -13,7 +15,9 @@ void main()
 {
     vec3 fixt = vec3(t.x,t.y,t.z);
     float opacity = texture(volume, fixt).r;
-    vec3 smoke_color = vec3(1.0, 0.0, 0.0);
+    float error = texture(volume, fixt).b;
+//    vec3 smoke_color = texture(volume, fixt);
+    vec3 smoke_color = vec3(0.0, 0.0, error*10);
     fc = vec4(smoke_color, opacity*10);
 }
 

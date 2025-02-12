@@ -128,7 +128,7 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, fl
     unsigned int &texwidth,unsigned int &texheight,unsigned int &texdepth,unsigned int &slice_num,
     unsigned int &flame_num,unsigned int &snap_num,unsigned int &discard_flame ,
     float &s_threshold,float &c_threshold,
-    unsigned int &devide_num){
+    unsigned int &devide_num,unsigned int &situation){
     std::ifstream Inputfile(InputFileName);
     if (!Inputfile.is_open()) {
         std::cerr << "Could not open the file - '"
@@ -232,6 +232,12 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, fl
                 devide_num = std::stof(word);
             };
         }
+        else if(word == "situation")
+        {
+            while(getline(ss_nums,word,' ')){
+                situation = std::stof(word);
+            };
+        }
     };
     // std::cout << "dx,dt,beta = " << dx << "," << dt << "," << beta << std::endl;
     // std::cout << "width,height,depth,slice = " << texwidth << "," << texheight << "," << texdepth << "," << slice_num << std::endl;
@@ -278,4 +284,105 @@ void inputMatrix(std::string InputFileName, Eigen::MatrixXf &mat)
         }
     }
     fclose(ifp);
+}
+
+// 3次元流速データの構造体
+struct Velocity {
+    float x, y, z;
+    float color;
+};
+using namespace std;
+
+void generateVelocityData(vector<vector<vector<Velocity>>> &data,Eigen::VectorXf &velocity,int nx, int ny, int nz) {
+    int size = nx * ny * nz;
+    for (int i = 0; i < nx; ++i) {
+        for (int j = 0; j < ny; ++j) {
+            for (int k = 0; k < nz; ++k) {
+                int x_pre_id  = resequence3to1(i,j,k,nx,ny,nz);
+                int x_post_id = resequence3to1(i+1,j,k,nx,ny,nz);
+                int y_pre_id  = size + resequence3to1(i,j,k,nx,ny,nz);    
+                int y_post_id = size + resequence3to1(i,j+1,k,nx,ny,nz);
+                int z_pre_id  = 2*size + resequence3to1(i,j,k,nx,ny,nz);
+                int z_post_id = 2*size + resequence3to1(i,j,k+1,nx,ny,nz);
+                Eigen::Vector3f vel = {
+                    ( velocity(x_pre_id) + velocity(x_post_id) )/2,
+                    ( velocity(y_pre_id) + velocity(y_post_id) )/2,
+                    ( velocity(z_pre_id) + velocity(z_post_id) )/2};
+                    // vel.normalize();
+                    // vel = vel * 5;
+                data[i][j][k] = {vel.x(), vel.y(),vel.z(),0};
+            }
+        }
+    }
+}
+
+void cal_color_and_normalize(vector<vector<vector<Velocity>>> &simulate,vector<vector<vector<Velocity>>> &origin,int nx, int ny, int nz)
+{
+    for (int i = 0; i < nx; ++i) {
+        for (int j = 0; j < ny; ++j) {
+            for (int k = 0; k < nz; ++k)
+            {
+                Eigen::Vector3f error = 
+                {
+                simulate[i][j][k].x - origin[i][j][k].x,
+                simulate[i][j][k].y - origin[i][j][k].y,
+                simulate[i][j][k].z - origin[i][j][k].z
+                };
+                Eigen::Vector3f vel = {
+                simulate[i][j][k].x,
+                simulate[i][j][k].y,
+                simulate[i][j][k].z
+                };
+                vel.normalize();
+                vel = vel * 5;
+                simulate[i][j][k] = {vel.x(), vel.y(),vel.z(),error.norm()};
+            }
+        }
+    }
+}
+// 断面データを適度にサンプリングして出力
+void outputSliceData(const vector<vector<vector<Velocity>>> &data, int nx, int ny, int nz, int slice, const string &filename) {
+    ofstream file(filename);
+    if (!file) {
+        cerr << "Error: Cannot open file!" << endl;
+        exit(1);
+    }
+    
+    for (int i = 0; i < nx; i += nx / 32) {
+        for (int j = 0; j < ny; j += ny / 32) {
+            file << i << " " << j << " " << data[i][j][slice].x << " " << -data[i][j][slice].y << " " << data[i][j][slice].color<< endl;
+        }
+        file << endl;  // gnuplotの"splot"用の空行
+    }
+    file.close();
+}
+
+// gnuplotで描画
+void plotWithGnuplot(const string &filename,std::string &plot_fileName) {
+    ofstream gnuplotScript("plot_script.gp");
+    gnuplotScript << "set terminal pngcairo enhanced\n";
+    // gnuplotScript << "set terminal pdfcairo size 8in,6in\n";
+    gnuplotScript << "set output '" << plot_fileName <<"'\n";
+    gnuplotScript << "set xlabel 'X'\n";
+    gnuplotScript << "set ylabel 'Y'\n";
+    gnuplotScript << "set title 'Velocity Field Slice'\n";
+    gnuplotScript << "set palette defined (0 'blue', 1 'green', 2 'yellow', 3 'red')\n";
+    gnuplotScript << "plot '" << filename << "' using 1:2:3:4:5 with vectors lc palette title 'Velocity'\n";
+    gnuplotScript.close();
+    system("gnuplot plot_script.gp");
+}
+
+void plotVelocity(unsigned int nx,unsigned int ny,unsigned int nz,Eigen::VectorXf &velocity,Eigen::VectorXf &origin,std::string &plot_fileName)
+{
+    // int nx = 20, ny = 20, nz = 10;  // グリッドサイズ
+    int slice = nz / 2;  // z = 中央の断面を取得
+    vector<vector<vector<Velocity>>> velocityData(nx, vector<vector<Velocity>>(ny, vector<Velocity>(nz)));
+    vector<vector<vector<Velocity>>> originData(nx, vector<vector<Velocity>>(ny, vector<Velocity>(nz)));
+    generateVelocityData(velocityData,velocity, nx, ny, nz);
+    generateVelocityData(originData,origin, nx, ny, nz);
+    cal_color_and_normalize(velocityData, originData, nx, ny, nz);
+    string dataFile = "velocity_slice.dat";
+    outputSliceData(velocityData,nx, ny, nz, slice, dataFile);
+    plotWithGnuplot(dataFile,plot_fileName);
+    cout << "Plot generated: " << plot_fileName << endl;
 }

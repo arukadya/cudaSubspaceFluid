@@ -1,5 +1,15 @@
 #include "Simulator.hpp"
 // #include "Simulator.cuh"
+void Simulator::plot(std::string &plot_fileName,unsigned int id)
+{
+    origin_velocity = U3_all_frame.col(id);
+    plotVelocity(_texwidth,_texheight,_texdepth,all_velocity,origin_velocity,plot_fileName);
+}
+
+void Simulator::load_vel(unsigned int id)
+{
+    all_velocity = U3_all_frame.col(id);
+}
 
 float* Simulator::get_currentTexture()
 {
@@ -958,8 +968,8 @@ void Simulator::input_exact()
     "exact/n" + std::to_string(n) + "T" + std::to_string(_snap_num); 
     std::string U3exactFileName = exact_foldername + "/U3exact.txt";
     inputMatrix(U3exactFileName,U3_all_frame);
-    std::string PexactFileName = exact_foldername + "/Pexact.txt";
-    inputMatrix(PexactFileName,P_all_frame);
+    // std::string PexactFileName = exact_foldername + "/Pexact.txt";
+    // inputMatrix(PexactFileName,P_all_frame);
 }
 
 void Simulator::output_Snapshot(unsigned int devided_id,Eigen::MatrixXf &devided_Snapshot)
@@ -1086,6 +1096,8 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &Snapshot, unsigned int &reduce_diment
     //特異値
     Eigen::VectorXf singular_values = svd.singularValues();
     Eigen::MatrixXf singular_value_matrix = singular_values.asDiagonal();
+    float cumulative_contribution_ratio;
+    float sum_used_singular_values = 0.0;
     if(reduce_dimention == n)
     {
         for(unsigned int i=0;i<singular_values.size();++i)
@@ -1098,19 +1110,16 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &Snapshot, unsigned int &reduce_diment
             }
         }
     }
-    // std::cout << "update reduce dimention : " << reduce_dimention << std::endl;
+    for(unsigned int i=0;i<reduce_dimention;++i)sum_used_singular_values += singular_values(i) * singular_values(i);
+    cumulative_contribution_ratio = sum_used_singular_values / (singular_values.norm() * singular_values.norm());
     float singularity = *singular_values.begin() / *(singular_values.begin() + reduce_dimention);
-    // std::cout << "singular value" << std::endl << singular_values.transpose() << std::endl;
-    // if(singularity > singularity_threshold)std::cout << "worning!! : singularity is too large : "<< singularity << std::endl;
-    // std::cout << "singularity : " << singularity << std::endl;
-    // std::cout << "max,min : " << *singular_values.begin() << "," << *(singular_values.end() - 1) << std::endl;
-    // Eigen::MatrixXf Basis = HhQR.matrixQ()*svd.matrixU();
-    // Eigen::MatrixXf Basis(m,n);
     Eigen::MatrixXf Basis(m,reduce_dimention);
     Eigen::MatrixXf matU(m,reduce_dimention);matU = svd.matrixU();
     Basis = HhQR.householderQ()*matU.leftCols(reduce_dimention); //m * n
     // Basis = HhQR.householderQ()*svd.matrixU()*singular_value_matrix; //m * n
     std::cout << "Basis size : " << Basis.rows() << "," << Basis.cols() << std::endl;
+    std::cout << "cumulative_contribution_ratio : " << cumulative_contribution_ratio << std::endl;
+    // std::cout << "used, all : " << sum_used_singular_values << "," << singular_values.sum() << std::endl;
     // std::cout << "m , n : " << m << "," << n << std::endl;
     // std::cout << "Basis is orthonomality check : " << (Basis.transpose() * Basis - Eigen::MatrixXf::Identity(n,n)).norm() << std::endl;
     return Basis;
@@ -1140,7 +1149,11 @@ void Simulator::subspace_execute()
     unsigned int subspace_flame_num = (_dt/_sub_dt) * _flame_num;
     for(_timestamp = 0; _timestamp < subspace_flame_num; ++_timestamp)
     {
-        
+        if(_timestamp == 99 || _timestamp == 100 || _timestamp == 101 || _timestamp == 102)
+        {
+            std::string plot_filename = "velocity_plot_" + std::to_string(_timestamp) + ".png";
+            plot(plot_filename,_timestamp);
+        }
         unsigned int devided_id = _timestamp / (subspace_flame_num / _devide_num);
         if(_timestamp * (_dt/_sub_dt) < _discard_flame )
         {

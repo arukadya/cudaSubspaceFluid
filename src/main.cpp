@@ -22,6 +22,7 @@
 #include "SliceRenderer.hpp"
 #include "Eigen/Dense"
 #include "ShaderDebugger.hpp"
+
 /*
 FixedObjectRenderer,SliceRendererのconst工事
 */
@@ -41,20 +42,20 @@ int main(int argc, char * argv[])
     unsigned int texwidth;unsigned int texheight;unsigned int texdepth;unsigned int slice_num;
     unsigned int flame_num;unsigned int snap_num;unsigned int discard_flame;
     float singularity_threshold;float cubature_threshold;
-    unsigned int devide_num;
-    unsigned int id = 0;
+    unsigned int devide_num;unsigned int situation;
+    unsigned int id;
     std::string paramatorsFileName = "../src/paramators.txt";
     inputParamator(paramatorsFileName,dx,dt,beta,epsilon,nu,
     texwidth,texheight,texdepth,slice_num,
     flame_num,snap_num,discard_flame,
     singularity_threshold,cubature_threshold,
-    devide_num);
+    devide_num,situation);
 
     Simulator simulator(dx,dt,beta,epsilon,nu,
     texwidth,texheight,texdepth,
     flame_num,snap_num,discard_flame,
     singularity_threshold,cubature_threshold,
-    devide_num);
+    devide_num,situation);
     std::cout << "success init simulator" << std::endl;
     if(argc == 2 && !is_simulate)
     {
@@ -64,6 +65,7 @@ int main(int argc, char * argv[])
     Eigen::Vector3f viewPoint(0.0f, 0.0f, 6.0f);
     if(is_viewer)
     {
+        if(argc == 4)id = atoi(argv[3]);
         FixedObjectRenderer fixedObjectRenderer;
         SliceRenderer sliceRenderer(texwidth,texheight,texdepth,slice_num);
         std::cout << "Sucssess initialize Simulator" << std::endl;
@@ -97,16 +99,18 @@ int main(int argc, char * argv[])
         int sumcnt = 0;
         float startTime;
         float sum = 0;
+        simulator.input_exact();
         while(window && simulator._timestamp < flame_num)
         {
             std::string inputFileName(argv[2]);
             // inputFileName += std::to_string(simulator._timestamp % flame_num)+".txt";
             // ++simulator._timestamp;
-            inputFileName += std::to_string(180 % flame_num)+".txt";
-            ++simulator._timestamp;
+            inputFileName += std::to_string(id % flame_num)+".txt";
             std::cout << inputFileName << std::endl;
             simulator.inputTXT(inputFileName);
-            // simulator.output_txt(id);
+            simulator.load_vel(id);
+            std::string plot_filename = "velocity_plot_" + std::to_string(id) + ".png";
+            simulator.plot(plot_filename,id);
     //        viewPoint /= 1.732;
             // 拡大縮小の変換行列を求める
             const GLfloat *const size(window.getSize());

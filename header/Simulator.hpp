@@ -167,7 +167,7 @@ struct Simulator{
     const unsigned int _texwidth; const unsigned int _texheight; const unsigned int _texdepth;
     const unsigned int _flame_num;const unsigned int _snap_num; const unsigned int _discard_flame; 
     const float _singularity_threshold;const float _cubature_threshold;
-    const unsigned int _devide_num;
+    const unsigned int _devide_num;const unsigned int _situation;
     unsigned int _timestamp;
     float err_threshold;
     unsigned int _delta_snap;
@@ -180,6 +180,7 @@ struct Simulator{
     // std::vector<float> P_error_vector;
     std::vector<float> U3_error_vector;
 
+    std::vector<std::vector<std::vector<bool>>>is_fluid;
     Slab x_velocity;
     Slab y_velocity;
     Slab z_velocity;
@@ -200,6 +201,7 @@ struct Simulator{
     Slab test;
 
     Eigen::VectorXf all_velocity;
+    Eigen::VectorXf origin_velocity;
     Eigen::VectorXf px;
     Eigen::VectorXf b;
     Eigen::VectorXf origin_b;
@@ -264,14 +266,14 @@ struct Simulator{
     unsigned int texwidth, unsigned int texheight, unsigned int texdepth, 
     unsigned int flame_num, unsigned int snap_num, unsigned int discard_flame,
     float s_threshold,float c_threshold,
-    unsigned int devide_num) 
+    unsigned int devide_num, unsigned int situation) 
     // : _dx(dx/texwidth),_dt(dt * texwidth),
     : _dx(dx),_dt(dt),
     _beta(beta),_epsilon(epsilon),_nu(nu),
     _texwidth(texwidth),_texheight(texheight),_texdepth(texdepth),
     _flame_num(flame_num),_snap_num(snap_num),_discard_flame(discard_flame),
     _singularity_threshold(s_threshold),_cubature_threshold(c_threshold),
-    _devide_num(devide_num)
+    _devide_num(devide_num),_situation(situation)
     {
         _timestamp = 0;
         _delta_snap = _flame_num / _snap_num;
@@ -283,7 +285,7 @@ struct Simulator{
         std::cout << "width,height,depth = " << _texwidth << "," << _texheight << "," << _texdepth << std::endl;
         std::cout << "flame_num,snap_num = " << _flame_num << "," << _snap_num << std::endl;
         std::cout << "s_threshold, c_threshold = " << s_threshold << "," << c_threshold << std::endl;
-        std::cout << "discard_flame, devide_num = " << _discard_flame << "," << devide_num << std::endl; 
+        std::cout << "discard_flame, devide_num, situation = " << _discard_flame << "," << devide_num << "," << situation << std::endl; 
         x_velocity = Slab(_texwidth+1,_texheight,_texdepth,0.0f);
         y_velocity = Slab(_texwidth,_texheight+1,_texdepth,0.0f);
         z_velocity = Slab(_texwidth,_texheight,_texdepth+1,0.0f);
@@ -456,6 +458,8 @@ struct Simulator{
     void all2xyz();
     void testCompute();
     void origin_project();
+    void plot(std::string &plot_fileName,unsigned int id);
+    void load_vel(unsigned int id);
 
 private:
     void testSDF();
