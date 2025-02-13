@@ -350,7 +350,7 @@ void outputSliceData(const vector<vector<vector<Velocity>>> &data, int nx, int n
     
     for (int i = 0; i < nx; i += nx / 32) {
         for (int j = 0; j < ny; j += ny / 32) {
-            if(i == 0 && j == 0)file << i << " " << j << " " << data[i][j][slice].x << " " << -data[i][j][slice].y << " " << 60.0<< endl;
+            if(i == 0 && j == 0)file << i << " " << j << " " << data[i][j][slice].x << " " << -data[i][j][slice].y << " " << 200.0<< endl;
             else file << i << " " << j << " " << data[i][j][slice].x << " " << -data[i][j][slice].y << " " << data[i][j][slice].color<< endl;
         }
         file << endl;  // gnuplotの"splot"用の空行

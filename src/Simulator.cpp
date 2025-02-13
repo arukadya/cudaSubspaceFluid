@@ -136,8 +136,8 @@ void Simulator::all2xyz()
 
 void Simulator::oneloop()
 {
-    // init_density(TGT_DENSITY);
-    // init_templature(TGT_TEMPLATURE);
+    init_density(TGT_DENSITY);
+    init_templature(TGT_TEMPLATURE);
     // if(_timestamp < _flame_num / 2)addForce(_dt);
     addForce(_dt);
     init_all_velocity();
@@ -245,9 +245,12 @@ float Simulator::TriLinearInterporation(float x,float y,float z,Slab &val)
 // }
 
 void Simulator::faceAdvect(){
+    float size = (_texwidth + 1) * _texheight * _texdepth;
     for(unsigned int i=1;i<x_velocity._width-1;++i){
         for(unsigned int j=0;j<x_velocity._height;++j){
             for(unsigned int k=0;k<x_velocity._depth;++k){
+                unsigned int x_vel_id = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
+                if(DirichletBoundaryMatrix.coeff(x_vel_id,x_vel_id) == 0)continue;
                 float x = i*_dx;float y = (j+0.5)*_dx;float z = (k+0.5)*_dx;
                 float adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
                 float adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
@@ -260,6 +263,8 @@ void Simulator::faceAdvect(){
     for(unsigned int i=0;i<y_velocity._width;++i){
         for(unsigned int j=1;j<y_velocity._height-1;++j){
             for(unsigned int k=0;k<y_velocity._depth;++k){
+                unsigned int y_vel_id = size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth);
+                if(DirichletBoundaryMatrix.coeff(y_vel_id,y_vel_id) == 0)continue;
                 float x = (i+0.5)*_dx;float y = j*_dx;float z = (k+0.5)*_dx;
                 float adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
                 float adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
@@ -272,6 +277,8 @@ void Simulator::faceAdvect(){
     for(unsigned int i=0;i<z_velocity._width;++i){
         for(unsigned int j=0;j<z_velocity._height;++j){
             for(unsigned int k=1;k<z_velocity._depth-1;++k){
+                unsigned int z_vel_id = 2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1);
+                if(DirichletBoundaryMatrix.coeff(z_vel_id,z_vel_id) == 0)continue;
                 float x = (i+0.5)*_dx;float y = (j+0.5)*_dx;float z = k*_dx;
                 float adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
                 float adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
@@ -291,6 +298,14 @@ void Simulator::centerAdvect(Slab &val){
     for(unsigned int i=0;i<val._width;++i){
         for(unsigned int j=0;j<val._height;++j){
             for(unsigned int k=0;k<val._depth;++k){
+                // if(_situation == 1)
+                // {
+                //     unsigned int range_x = _texwidth/8;
+                //     unsigned int range_y = _texheight/8;
+                //     bool is_inrange_x = (_texwidth / 2 - range_x < i && i < _texwidth / 2 + range_x);
+                //     bool is_inrange_y = (_texheight / 2 - range_y < j && j < _texheight / 2 + range_y);
+                //     if(is_inrange_x && is_inrange_y)continue;
+                // }
                 float x = (i+0.5)*_dx;float y = (j+0.5)*_dx;float z = (k+0.5)*_dx;
                 float adv_x = x - _dt*TriLinearInterporation(x, y-0.5*_dx, z-0.5*_dx, x_velocity);
                 float adv_y = y - _dt*TriLinearInterporation(x-0.5*_dx, y, z-0.5*_dx, y_velocity);
@@ -351,33 +366,75 @@ void Simulator::calDirichletBoundaryMatrix()
 {
     std::vector<Triplet> triplets;
     float size = (_texwidth + 1) * _texheight * _texdepth;
-    for(unsigned int i=0;i<_texwidth+1;i++){
-        for(unsigned int j=0;j<_texheight;j++){
-            for(unsigned int k=0;k<_texdepth;k++){
-                // unsigned int x_vel_id = i+j*_texwidth+k*_texwidth*_texheight;
-                unsigned int x_vel_id = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
-                if(i ==0 || i == _texwidth)triplets.emplace_back(x_vel_id,x_vel_id, 0);
-                else triplets.emplace_back(x_vel_id,x_vel_id, 1);
+    if(_situation == 0)
+    {
+        for(unsigned int i=0;i<_texwidth+1;i++){
+            for(unsigned int j=0;j<_texheight;j++){
+                for(unsigned int k=0;k<_texdepth;k++){
+                    // unsigned int x_vel_id = i+j*_texwidth+k*_texwidth*_texheight;
+                    unsigned int x_vel_id = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
+                    if(i ==0 || i == _texwidth)triplets.emplace_back(x_vel_id,x_vel_id, 0);
+                    else triplets.emplace_back(x_vel_id,x_vel_id, 1);
+                }
+            }
+        }
+        for(unsigned int i=0;i<_texwidth;i++){
+            for(unsigned int j=0;j<_texheight+1;j++){
+                for(unsigned int k=0;k<_texdepth;k++){
+                    // unsigned int y_vel_id = size + i+j*_texwidth+k*_texwidth*_texheight;
+                    unsigned int y_vel_id = size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth);
+                    if(j ==0 || j == _texheight)triplets.emplace_back(y_vel_id,y_vel_id, 0);
+                    else triplets.emplace_back(y_vel_id,y_vel_id, 1);
+                }
+            }
+        }
+        for(unsigned int i=0;i<_texwidth;i++){
+            for(unsigned int j=0;j<_texheight;j++){
+                for(unsigned int k=0;k<_texdepth+1;k++){
+                    // unsigned int z_vel_id = 2*size + i+j*_texwidth+k*_texwidth*_texheight;
+                    unsigned int z_vel_id = 2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1);
+                    if(k ==0 || k == _texdepth)triplets.emplace_back(z_vel_id,z_vel_id, 0);
+                    else triplets.emplace_back(z_vel_id,z_vel_id, 1);
+                }
             }
         }
     }
-    for(unsigned int i=0;i<_texwidth;i++){
-        for(unsigned int j=0;j<_texheight+1;j++){
-            for(unsigned int k=0;k<_texdepth;k++){
-                // unsigned int y_vel_id = size + i+j*_texwidth+k*_texwidth*_texheight;
-                unsigned int y_vel_id = size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth);
-                if(j ==0 || j == _texheight)triplets.emplace_back(y_vel_id,y_vel_id, 0);
-                else triplets.emplace_back(y_vel_id,y_vel_id, 1);
+    if(_situation == 1)
+    {
+        unsigned int range_x = _texwidth/8;
+        unsigned int range_y = _texheight/8;
+        for(unsigned int i=0;i<_texwidth+1;i++){
+            for(unsigned int j=0;j<_texheight;j++){
+                for(unsigned int k=0;k<_texdepth;k++){
+                    bool is_inrange_x = (_texwidth / 2 - range_x < i && i < _texwidth / 2 + range_x);
+                    bool is_inrange_y = (_texheight / 2 - range_y < j && j < _texheight / 2 + range_y);
+                    unsigned int x_vel_id = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
+                    if((is_inrange_x && is_inrange_y) || i ==0 || i == _texwidth )triplets.emplace_back(x_vel_id,x_vel_id, 0);
+                    else triplets.emplace_back(x_vel_id,x_vel_id, 1);
+                }
             }
         }
-    }
-    for(unsigned int i=0;i<_texwidth;i++){
-        for(unsigned int j=0;j<_texheight;j++){
-            for(unsigned int k=0;k<_texdepth+1;k++){
-                // unsigned int z_vel_id = 2*size + i+j*_texwidth+k*_texwidth*_texheight;
-                unsigned int z_vel_id = 2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1);
-                if(k ==0 || k == _texdepth)triplets.emplace_back(z_vel_id,z_vel_id, 0);
-                else triplets.emplace_back(z_vel_id,z_vel_id, 1);
+        for(unsigned int i=0;i<_texwidth;i++){
+            for(unsigned int j=0;j<_texheight+1;j++){
+                for(unsigned int k=0;k<_texdepth;k++){
+                    bool is_inrange_x = (_texwidth / 2 - range_x < i && i < _texwidth / 2 + range_x);
+                    bool is_inrange_y = (_texheight / 2 - range_y < j && j < _texheight / 2 + range_y);
+                    unsigned int y_vel_id = size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth);
+                    if((is_inrange_x && is_inrange_y)  || j ==0 || j == _texheight)triplets.emplace_back(y_vel_id,y_vel_id, 0);
+                    else triplets.emplace_back(y_vel_id,y_vel_id, 1);
+                }
+            }
+        }
+        for(unsigned int i=0;i<_texwidth;i++){
+            for(unsigned int j=0;j<_texheight;j++){
+                for(unsigned int k=0;k<_texdepth+1;k++){
+                    bool is_inrange_x = (_texwidth / 2 - range_x < i && i < _texwidth / 2 + range_x);
+                    bool is_inrange_y = (_texheight / 2 - range_y < j && j < _texheight / 2 + range_y);
+                    unsigned int z_vel_id = 2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1);
+                    // if((_texdepth / 2 - range_z < k && k < _texdepth / 2 + range_z ) || k ==0 || k == _texdepth)triplets.emplace_back(z_vel_id,z_vel_id, 0);
+                    if((is_inrange_x && is_inrange_y) || k ==0 || k == _texdepth)triplets.emplace_back(z_vel_id,z_vel_id, 0);
+                    else triplets.emplace_back(z_vel_id,z_vel_id, 1);
+                }
             }
         }
     }
@@ -689,13 +746,14 @@ void Simulator::project(){
     px = solver.solveWithGuess(b,px);
     // std::cout << "iteration = " << solver.iterations() << std::endl;
     // px = solver.solve(b);
-    all_velocity = all_velocity - Pressure2VelocityMatrix * px;
+    all_velocity = DirichletBoundaryMatrix*(all_velocity - Pressure2VelocityMatrix * px);
     all2xyz();
 }
 
 void Simulator::addForce(float dt)
 {
     // std::cout << "begin add force" << std::endl;
+    float size = (_texwidth + 1) * _texheight * _texdepth;
     calConfinent();
     // std::cout << "calConf" << std::endl;
     for(unsigned int i=0;i<_texwidth;i++){
@@ -728,6 +786,8 @@ void Simulator::addForce(float dt)
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
                 // u.value[i][j][k] += dt*(f.value[i-1][j][k].x() + f.value[i][j][k].x())/2;
+                unsigned int x_vel_id = resequence3to1(i,j,k,_texwidth+1,_texheight,_texdepth);
+                if(DirichletBoundaryMatrix.coeff(x_vel_id,x_vel_id) == 0)continue;
                 float value =  x_velocity.get_volume_value(i,j,k);
                 value += dt * ( x_force.get_volume_value(i,j,k) + x_force.get_volume_value(i+1,j,k) )/2;
                 x_velocity.set_volume_value(i,j,k,value);
@@ -739,6 +799,8 @@ void Simulator::addForce(float dt)
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
                 // v.value[i][j][k] += dt*(f.value[i][j-1][k].y() + f.value[i][j][k].y())/2;
+                unsigned int y_vel_id = size + resequence3to1(i,j,k,_texwidth,_texheight+1,_texdepth);
+                if(DirichletBoundaryMatrix.coeff(y_vel_id,y_vel_id) == 0)continue;
                 float value =  y_velocity.get_volume_value(i,j,k);
                 value += dt * ( y_force.get_volume_value(i,j,k) + y_force.get_volume_value(i,j+1,k) )/2;
                 y_velocity.set_volume_value(i,j,k,value);
@@ -750,6 +812,8 @@ void Simulator::addForce(float dt)
         for(unsigned int j=0;j<_texheight;j++){
             for(unsigned int k=0;k<_texdepth;k++){
                 // w.value[i][j][k] += dt*(f.value[i][j][k-1].z() + f.value[i][j][k].z())/2;
+                unsigned int z_vel_id = 2*size + resequence3to1(i,j,k,_texwidth,_texheight,_texdepth+1);
+                if(DirichletBoundaryMatrix.coeff(z_vel_id,z_vel_id) == 0)continue;
                 float value =  z_velocity.get_volume_value(i,j,k);
                 value += dt * ( z_force.get_volume_value(i,j,k) + z_force.get_volume_value(i,j,k+1) )/2;
                 z_velocity.set_volume_value(i,j,k,value);
@@ -1205,6 +1269,8 @@ void Simulator::subspace_oneloop(
     Eigen::VectorXf &weight_vector
     )
 {
+    init_density(TGT_DENSITY);
+    init_templature(TGT_TEMPLATURE);
     // std::cout << "devided_U0.size() = " << devided_U0.rows() << "," << devided_U0.cols() << std::endl;
     // std::cout << "devided_U1.size() = " << devided_U1.rows() << "," << devided_U1.cols() << std::endl;
     // std::cout << "devided_U2.size() = " << devided_U2.rows() << "," << devided_U2.cols() << std::endl;

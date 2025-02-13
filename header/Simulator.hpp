@@ -20,7 +20,7 @@
 #define AMB_TEMPLATURE 0.0f
 #define AMB_DENSITY 0.0f
 #define TGT_TEMPLATURE 100.0f
-#define TGT_DENSITY 100.0f
+#define TGT_DENSITY 30.0f
 // #define err_threshold 0.005
 #define w_threshold 0.01
 
