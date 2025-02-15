@@ -70,4 +70,5 @@ int inputParamator(std::string InputFileName,float &dx,float &dt,float &beta, fl
 void outputMatrix(std::string OutputFileName, Eigen::MatrixXf &mat);
 void inputMatrix(std::string InputFileName, Eigen::MatrixXf &mat);
 void plotVelocity(unsigned int nx,unsigned int ny,unsigned int nz,Eigen::VectorXf &velocity,Eigen::VectorXf &origin,std::string &plot_fileName);
+void outputVTK(std::string OutputFileName,float* val,int nx,int ny,int nz,double dx);
 #endif /* ComputeCommand_hpp */

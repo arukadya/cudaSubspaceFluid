@@ -15,7 +15,7 @@ void FixedObjectRenderer::rendering(Matrix4x4 &projection,Matrix4x4 &modelview)
     const GLuint surfaceProgram(loadVertFragProgram("../shader/point.vert", "../shader/point.frag"));
     
     std::unique_ptr<const Shape>shape_wire(new ShapeIndex(3,8,cubeVertex,24,wireCubeIndex));
-    std::unique_ptr<const Shape>shape(new SolidShapeIndex(3,36,solidCubeVertex,36,solidCubeIndex));
+    std::unique_ptr<const Shape>shape_obstacle(new SolidShapeIndex(3,36,solidObstacleVertex,36,solidCubeIndex));
     //uniform変数の場所を取得する
     const GLint surface_modelviewLoc(glGetUniformLocation(surfaceProgram, "modelview"));
     const GLint surface_projectionLoc(glGetUniformLocation(surfaceProgram, "projection"));
@@ -38,4 +38,5 @@ void FixedObjectRenderer::rendering(Matrix4x4 &projection,Matrix4x4 &modelview)
     glUniformMatrix4fv(surface_modelviewLoc, 1, GL_FALSE, modelview.data());
     glUniform4f(surface_light_vecLoc, viewPoint.x(), viewPoint.y(), viewPoint.z(), 0.0f);
     shape_wire->draw();
+    shape_obstacle->draw();
 }

@@ -12,5 +12,5 @@ snap_num 100
 discard_flame 0
 singularity_threshold 0.1
 cubature_threshold 0.001
-devide_num 10
+devide_num 2
 situation 1

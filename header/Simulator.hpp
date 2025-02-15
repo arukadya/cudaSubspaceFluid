@@ -200,6 +200,7 @@ struct Simulator{
     Slab density_amb;
     Slab templature;
     Slab test;
+    Slab density_err;
 
     Eigen::VectorXf all_velocity;
     Eigen::VectorXf origin_velocity;
@@ -306,6 +307,7 @@ struct Simulator{
         density_amb = Slab(_texwidth,_texheight,_texdepth,AMB_DENSITY);
         templature = Slab(_texwidth,_texheight,_texdepth,AMB_TEMPLATURE);
         test = Slab(_texwidth,_texheight,1,0.0f);
+        density_err = Slab(_texwidth,_texheight,_texdepth,0.0f);
         init_density(TGT_DENSITY);
         init_templature(TGT_TEMPLATURE);
         // calForceEncoder = CalForceEncoder("../shader/calForce.comp");
@@ -462,6 +464,7 @@ struct Simulator{
     void origin_project();
     void plot(std::string &plot_fileName,unsigned int id);
     void load_vel(unsigned int id);
+    void cal_density_err();
 
 private:
     void testSDF();

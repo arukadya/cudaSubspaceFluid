@@ -100,7 +100,8 @@ int main(int argc, char * argv[])
         float startTime;
         float sum = 0;
         // if(argc == 4)simulator.input_exact();
-        while(window && simulator._timestamp < flame_num)
+        // while(window && simulator._timestamp < flame_num)
+        while(window)
         {
             std::string inputFileName(argv[2]);
             std::string originFileName = "origin_density_txt/output";
@@ -116,8 +117,8 @@ int main(int argc, char * argv[])
             }
             else 
             {
-                inputFileName +=  std::to_string(simulator._timestamp % flame_num)+".txt";
-                originFileName += std::to_string(simulator._timestamp % flame_num)+".txt";
+                inputFileName +=  std::to_string((simulator._timestamp + 170)% flame_num)+".txt";
+                originFileName += std::to_string((simulator._timestamp + 170)% flame_num)+".txt";
                 std::cout << inputFileName << std::endl;
                 simulator.inputTXT(inputFileName,simulator.density_tgt);
                 simulator.inputTXT(originFileName,simulator.origin_density);
@@ -160,8 +161,8 @@ int main(int argc, char * argv[])
                             );
             sliceRenderer.setSliceDirection(tgt);
             fixedObjectRenderer.rendering(projection, modelview);
-            // sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.origin_density.src_texture);
-            sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.density_tgt.src_texture);
+            sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.origin_density.src_texture);
+            // sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.density_tgt.src_texture);
             window.swapBuffers();
         }
         std::cout << "fin_window" << std::endl;

@@ -426,3 +426,28 @@ void plotVelocity(unsigned int nx,unsigned int ny,unsigned int nz,Eigen::VectorX
     plotWithGnuplot(dataFile,plot_fileName);
     cout << "Plot generated: " << plot_fileName << endl;
 }
+
+void outputVTK(std::string OutputFileName,float* val,int nx,int ny,int nz,double dx)
+{
+    std::vector<float> origin = {0,0,0};
+    std::ofstream writing_file;
+    std::cout << OutputFileName << std::endl;
+    writing_file.open(OutputFileName, std::ios::out);
+    std::string writing_text ="# vtk DataFile Version 2.0\nIsosurface\nASCII\nDATASET STRUCTURED_POINTS\n";
+    writing_file << writing_text << std::endl;
+    writing_file << "DIMENSIONS " << nx <<" "<< ny <<" "<< nz << std::endl;
+    writing_file << "ORIGIN " << origin[0] <<" "<< origin[1] <<" "<< origin[2] << std::endl;
+    writing_file << "SPACING " << dx <<" "<< dx <<" "<< dx << std::endl;
+    writing_file << "POINT_DATA " << nx*ny*nz << std::endl;
+    writing_file << "SCALARS value float 1" << std::endl;
+    writing_file << "LOOKUP_TABLE default" << std::endl;
+    for(int k=0;k<nz;k++){
+        for(int j=0;j<ny;j++){
+            for(int i=0;i<nx;i++){
+                if(abs(val[resequence3to1(i,j,k,nx,ny,nz)]) < 1e-10)writing_file << 0 << std::endl;
+                else writing_file << val[resequence3to1(i,j,k,nx,ny,nz)] << std::endl;
+            }
+        }
+    }
+    writing_file.close();
+}

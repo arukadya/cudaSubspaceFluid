@@ -1192,6 +1192,11 @@ Eigen::MatrixXf cal_Basis(Eigen::MatrixXf &Snapshot, unsigned int &reduce_diment
 //subspace
 void Simulator::subspace_execute()
 {
+    std::string rootFolderName = "Result";
+    std::string densityFolderName = rootFolderName + "/density";
+    std::filesystem::create_directories(rootFolderName);
+    std::filesystem::create_directories(densityFolderName);
+
     x_velocity = Slab(_texwidth+1,_texheight,_texdepth,0.0f);
     y_velocity = Slab(_texwidth,_texheight+1,_texdepth,0.0f);
     z_velocity = Slab(_texwidth,_texheight,_texdepth+1,0.0f);
@@ -1239,6 +1244,9 @@ void Simulator::subspace_execute()
             devided_cubaturePointSetList[devided_id],
             devided_cubatureWeightVectorList[devided_id]);
         }
+        std::string OutputVTK_den = densityFolderName+  "/output"+std::to_string(_timestamp)+".vtk";
+        cal_density_err();
+        outputVTK(OutputVTK_den,density_err.src_texture,_texwidth,_texheight,_texdepth,_dx);
         if(_devide_num > 1)output_txt(devided_density_floder_name ,_timestamp);
         else output_txt(subspace_density_floder_name ,_timestamp);
     }
@@ -1770,6 +1778,22 @@ void Simulator::calCubatureList()
         devided_cubaturePointSetList.push_back(cubaturePointSet);
         devided_cubatureWeightVectorList.push_back(cubatureWeightVector);
     }
+}
+
+void Simulator::cal_density_err()
+{
+    for(unsigned int k=0;k<_texdepth;++k){
+        for(unsigned int j=0;j<_texheight;++j){
+            for(unsigned int i=0;i<_texwidth;++i){
+                int index = resequence3to1(i, j, k, _texwidth, _texheight, _texdepth);
+                float err;
+                if(origin_density.get_volume_value(i,j,k) < 1e-10 && std::fabs(density_tgt.get_volume_value(i,j,k) - origin_density.get_volume_value(i,j,k)) < 1e-6)err = 0;
+                else err = (density_tgt.get_volume_value(i,j,k) - origin_density.get_volume_value(i,j,k));
+                density_err.set_volume_value(i,j,k,err);
+            }
+        }
+    }
+    density_err.swap_src_dst();
 }
 
 //元データ計算時は成功し，読み込むと失敗する．かつ線形項は成功→Snapshotミス
