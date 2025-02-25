@@ -50,7 +50,9 @@ int main(int argc, char * argv[])
     flame_num,snap_num,discard_flame,
     singularity_threshold,cubature_threshold,
     devide_num,situation);
-
+    Timer timer_rendering;
+    timer_rendering.startWithMessage("over head");
+    timer_rendering.end();
     Simulator simulator(dx,dt,beta,epsilon,nu,
     texwidth,texheight,texdepth,
     flame_num,snap_num,discard_flame,
@@ -117,11 +119,11 @@ int main(int argc, char * argv[])
             }
             else 
             {
-                inputFileName +=  std::to_string((simulator._timestamp + 170)% flame_num)+".txt";
-                originFileName += std::to_string((simulator._timestamp + 170)% flame_num)+".txt";
+                inputFileName +=  std::to_string((simulator._timestamp +380)% (2*flame_num))+".txt";
+                originFileName += std::to_string((simulator._timestamp +380)% (2*flame_num))+".txt";
                 std::cout << inputFileName << std::endl;
                 simulator.inputTXT(inputFileName,simulator.density_tgt);
-                simulator.inputTXT(originFileName,simulator.origin_density);
+                // simulator.inputTXT(originFileName,simulator.origin_density);
                 ++simulator._timestamp;
             }
     //        viewPoint /= 1.732;
@@ -160,9 +162,11 @@ int main(int argc, char * argv[])
                                                 )
                             );
             sliceRenderer.setSliceDirection(tgt);
+            timer_rendering.startWithMessage("rendering");
             fixedObjectRenderer.rendering(projection, modelview);
-            sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.origin_density.src_texture);
-            // sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.density_tgt.src_texture);
+            // sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.origin_density.src_texture);
+            sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.density_tgt.src_texture);
+            timer_rendering.end();
             window.swapBuffers();
         }
         std::cout << "fin_window" << std::endl;
@@ -243,8 +247,10 @@ int main(int argc, char * argv[])
                                                 )
                             );
             sliceRenderer.setSliceDirection(tgt);
+            timer_rendering.startWithMessage("rendering");
             fixedObjectRenderer.rendering(projection, modelview);
             sliceRenderer.rendering(projection, modelview, sliceRot, simulator.density_tgt.src_texture,simulator.density_tgt.src_texture);
+            timer_rendering.end();
             window.swapBuffers();
         }
         std::cout << "fin_window" << std::endl;

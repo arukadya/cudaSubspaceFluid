@@ -81,7 +81,8 @@ void Timer::startWithMessage(const char* s)
 double Timer::end()
 {
     endTime = std::chrono::system_clock::now();
-    double time = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count());
+    // double time = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count());
+    double time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count());
     std::cout << str << ":" << time << "ms" << std::endl;
     return time;
     //std::cout << std::endl;

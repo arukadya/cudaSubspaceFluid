@@ -136,40 +136,58 @@ void Simulator::all2xyz()
 
 void Simulator::oneloop()
 {
+    Timer timer_oneloop;
+    Timer timer;
+    timer_oneloop.startWithMessage("oneloop");
     init_density(TGT_DENSITY);
     init_templature(TGT_TEMPLATURE);
     // if(_timestamp < _flame_num / 2)addForce(_dt);
+    timer.startWithMessage("add force");
     addForce(_dt);
+    timer.end();
+    timer.startWithMessage("update all vel");
     init_all_velocity();
+    timer.end();
     //U0
-    write_snapshot(U0_Snapshot, all_velocity);
+    // write_snapshot(U0_Snapshot, all_velocity);
     // write_exact_solution(U0_all_frame, all_velocity);
+    timer.startWithMessage("advect velocity");
     faceAdvect();
+    timer.end();
     //linear
+    timer.startWithMessage("update all vel");
     init_all_velocity();
-    write_snapshot(U1_Snapshot, all_velocity);
+    timer.end();
+    // write_snapshot(U1_Snapshot, all_velocity);
     // write_exact_solution(U1_all_frame, all_velocity);
     //U1
     //Diffusion
+    timer.startWithMessage("diffusion");
     all_velocity = DiffusionMatrix * DirichletBoundaryMatrix * all_velocity;
+    timer.end();
     //U2
-    write_snapshot(U2_Snapshot, all_velocity);
+    // write_snapshot(U2_Snapshot, all_velocity);
     // write_exact_solution(U2_all_frame, all_velocity);
+    timer.startWithMessage("project");
     project();
-    write_snapshot(U3_Snapshot, all_velocity);
-    write_snapshot(P_Snapshot, px);
-    write_exact_solution(U3_all_frame, all_velocity);
+    timer.end();
+    // write_snapshot(U3_Snapshot, all_velocity);
+    // write_snapshot(P_Snapshot, px);
+    // write_exact_solution(U3_all_frame, all_velocity);
     // std::cout << "U3 norm = " << U3_all_frame.row(_timestamp).norm() << std::endl;
-    write_exact_solution(P_all_frame, px);
+    // write_exact_solution(P_all_frame, px);
     // std::cout << "P norm = " << P_all_frame.row(_timestamp).norm() << std::endl;
     //nonlinear
     //U3
     // times.push_back(TD.endTimer());
     // std::cout << "project" << std::endl;
+    timer.startWithMessage("advect scalar");
     centerAdvect(templature);
     // std::cout << "centerAdvectTemp" << std::endl;
     centerAdvect(density_tgt);
     centerAdvect(density_amb);
+    timer.end();
+    timer_oneloop.end();
     // std::cout << "centerAdvectRho" << std::endl;
     output_txt(origin_density_floder_name ,_timestamp);
     ++_timestamp;
@@ -1224,6 +1242,7 @@ void Simulator::subspace_execute()
             plot(plot_filename,_timestamp);
         }
         unsigned int devided_id = _timestamp / (subspace_flame_num / _devide_num);
+        std::cout << "devided_id = " << devided_id << std::endl;
         if(_timestamp * (_dt/_sub_dt) < _discard_flame )
         {
             oneloop();
@@ -1279,6 +1298,8 @@ void Simulator::subspace_oneloop(
 {
     init_density(TGT_DENSITY);
     init_templature(TGT_TEMPLATURE);
+    // Timer timer_oneloop;
+    Timer timer;
     // std::cout << "devided_U0.size() = " << devided_U0.rows() << "," << devided_U0.cols() << std::endl;
     // std::cout << "devided_U1.size() = " << devided_U1.rows() << "," << devided_U1.cols() << std::endl;
     // std::cout << "devided_U2.size() = " << devided_U2.rows() << "," << devided_U2.cols() << std::endl;
@@ -1304,28 +1325,35 @@ void Simulator::subspace_oneloop(
     // }
     //U2
     //Diffusion
-    std::cout << "sub_diffusion" << std::endl;
+    timer.startWithMessage("sub diffusion");
+    // std::cout << "sub_diffusion" << std::endl;
     reduced_all_velocity = devided_DiffusionMatrix * devided_DirichletBoundaryMatrix * reduced_all_velocity;
+    timer.end();
     // std::cout << "exact, reduce : " << U2_all_frame.col(_timestamp).norm() << "," <<  (U2 * reduced_all_velocity).norm() << std::endl;
     // if(_timestamp < _discard_flame)
     // std::cout << "U2 restore error = " << (all_velocity - U2 * (U2.transpose() * all_velocity)).norm() / all_velocity.norm() << std::endl;
     // reduced_all_velocity = U2.transpose() * all_velocity;
     std::cout << "sub_project" << std::endl;
+    timer.startWithMessage("sub project");
     subspace_project(
     devided_DirichletBoundaryMatrix,
     devided_Vel2DivMatrix,
     devided_PoissonMatrix,
     devided_Pressure2VelocityMatrix);
-    float U3L2 = (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm();
-    float PL2 = ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm();
+    timer.end();
+    // float U3L2 = (U3_all_frame.col(_timestamp) - U3 * reduced_all_velocity).norm() / U3_all_frame.col(_timestamp).norm();
+    // float PL2 = ( P_all_frame.col(_timestamp) - P * reduced_px).norm() / P_all_frame.col(_timestamp).norm();
     // float U3L2 = (U3.transpose() * U3_all_frame.col(_timestamp) - reduced_all_velocity).norm() / ((U3.transpose() * U3_all_frame.col(_timestamp)).norm());
     // float PL2 = ( P.transpose() * P_all_frame.col(_timestamp) - reduced_px).norm() / ((P.transpose() * P_all_frame.col(_timestamp)).norm());
-    std::cout << "U3 : " << U3L2 << std::endl;
-    std::cout << "P  : " << PL2 << std::endl;
-    U3_error_vector.push_back(U3L2);
+    // std::cout << "U3 : " << U3L2 << std::endl;
+    // std::cout << "P  : " << PL2 << std::endl;
+    // U3_error_vector.push_back(U3L2);
     // P_error_vector.push_back(PL2);
     //nonlinear
     //U3
+    timer.startWithMessage("restore vector");
+    Eigen::VectorXf dummy = P * reduced_px;
+    timer.end();
     all_velocity = devided_U3 * reduced_all_velocity;
     all2xyz();
     centerAdvect(templature);
@@ -1345,7 +1373,7 @@ void Simulator::subspace_project(
     // if(_texwidth == 64)solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
     // if(_texwidth == 128)solver.setTolerance(1e-5);
     // if(_texwidth == 256)solver.setTolerance(1e-4);
-    // solver.setMaxIterations(20);
+    solver.setMaxIterations(20);
     b = devided_Vel2DivMatrix * reduced_all_velocity;
     solver.compute(devided_PoissonMatrix);
     reduced_px = solver.solveWithGuess(b, reduced_px);
