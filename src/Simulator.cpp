@@ -24,7 +24,7 @@ void Simulator::inputTXT(std::string &InputFileName,Slab &density)
             for(unsigned int i=0;i<_texwidth;++i){
                 float value;
                 if(fscanf(ifp, "%f", &value));
-                density.src_texture[resequence3to1(i, _texheight - j, k, _texwidth, _texheight, _texdepth)] = value;
+                density.src_texture[resequence3to1(i, j, k, _texwidth, _texheight, _texdepth)] = value;
             }
         }
     }
@@ -149,7 +149,7 @@ void Simulator::oneloop()
     init_all_velocity();
     timer.end();
     //U0
-    // write_snapshot(U0_Snapshot, all_velocity);
+    write_snapshot(U0_Snapshot, all_velocity);
     // write_exact_solution(U0_all_frame, all_velocity);
     timer.startWithMessage("advect velocity");
     faceAdvect();
@@ -158,7 +158,7 @@ void Simulator::oneloop()
     timer.startWithMessage("update all vel");
     init_all_velocity();
     timer.end();
-    // write_snapshot(U1_Snapshot, all_velocity);
+    write_snapshot(U1_Snapshot, all_velocity);
     // write_exact_solution(U1_all_frame, all_velocity);
     //U1
     //Diffusion
@@ -166,16 +166,16 @@ void Simulator::oneloop()
     all_velocity = DiffusionMatrix * DirichletBoundaryMatrix * all_velocity;
     timer.end();
     //U2
-    // write_snapshot(U2_Snapshot, all_velocity);
+    write_snapshot(U2_Snapshot, all_velocity);
     // write_exact_solution(U2_all_frame, all_velocity);
     timer.startWithMessage("project");
     project();
     timer.end();
-    // write_snapshot(U3_Snapshot, all_velocity);
-    // write_snapshot(P_Snapshot, px);
-    // write_exact_solution(U3_all_frame, all_velocity);
+    write_snapshot(U3_Snapshot, all_velocity);
+    write_snapshot(P_Snapshot, px);
+    write_exact_solution(U3_all_frame, all_velocity);
     // std::cout << "U3 norm = " << U3_all_frame.row(_timestamp).norm() << std::endl;
-    // write_exact_solution(P_all_frame, px);
+    write_exact_solution(P_all_frame, px);
     // std::cout << "P norm = " << P_all_frame.row(_timestamp).norm() << std::endl;
     //nonlinear
     //U3
@@ -1264,6 +1264,11 @@ void Simulator::subspace_execute()
             devided_cubatureWeightVectorList[devided_id]);
         }
         std::string OutputVTK_den = densityFolderName+  "/output"+std::to_string(_timestamp)+".vtk";
+        std::string originFileName = "origin_density_txt/output";
+        originFileName += std::to_string((_timestamp )% (_flame_num))+".txt";
+        std::cout << originFileName << std::endl;
+        // simulator.inputTXT(originFileName,simulator.density_tgt);
+        inputTXT(originFileName,origin_density);
         cal_density_err();
         outputVTK(OutputVTK_den,density_err.src_texture,_texwidth,_texheight,_texdepth,_dx);
         if(_devide_num > 1)output_txt(devided_density_floder_name ,_timestamp);
@@ -1300,11 +1305,6 @@ void Simulator::subspace_oneloop(
     init_templature(TGT_TEMPLATURE);
     // Timer timer_oneloop;
     Timer timer;
-    // std::cout << "devided_U0.size() = " << devided_U0.rows() << "," << devided_U0.cols() << std::endl;
-    // std::cout << "devided_U1.size() = " << devided_U1.rows() << "," << devided_U1.cols() << std::endl;
-    // std::cout << "devided_U2.size() = " << devided_U2.rows() << "," << devided_U2.cols() << std::endl;
-    // std::cout << "devided_U3.size() = " << devided_U3.rows() << "," << devided_U3.cols() << std::endl;
-    // std::cout << "devided_P.size() = " << devided_P.rows() << "," << devided_P.cols() << std::endl;
     //nonlinear
     std::cout << "sub_addForce" << std::endl;
     addForce(_sub_dt);
@@ -1329,10 +1329,6 @@ void Simulator::subspace_oneloop(
     // std::cout << "sub_diffusion" << std::endl;
     reduced_all_velocity = devided_DiffusionMatrix * devided_DirichletBoundaryMatrix * reduced_all_velocity;
     timer.end();
-    // std::cout << "exact, reduce : " << U2_all_frame.col(_timestamp).norm() << "," <<  (U2 * reduced_all_velocity).norm() << std::endl;
-    // if(_timestamp < _discard_flame)
-    // std::cout << "U2 restore error = " << (all_velocity - U2 * (U2.transpose() * all_velocity)).norm() / all_velocity.norm() << std::endl;
-    // reduced_all_velocity = U2.transpose() * all_velocity;
     std::cout << "sub_project" << std::endl;
     timer.startWithMessage("sub project");
     subspace_project(
@@ -1373,7 +1369,7 @@ void Simulator::subspace_project(
     // if(_texwidth == 64)solver.setTolerance(1e-6);//64下限は1e-6 128下限は1e-4
     // if(_texwidth == 128)solver.setTolerance(1e-5);
     // if(_texwidth == 256)solver.setTolerance(1e-4);
-    solver.setMaxIterations(20);
+    // solver.setMaxIterations(20);
     b = devided_Vel2DivMatrix * reduced_all_velocity;
     solver.compute(devided_PoissonMatrix);
     reduced_px = solver.solveWithGuess(b, reduced_px);
@@ -1816,7 +1812,7 @@ void Simulator::cal_density_err()
                 int index = resequence3to1(i, j, k, _texwidth, _texheight, _texdepth);
                 float err;
                 if(origin_density.get_volume_value(i,j,k) < 1e-10 && std::fabs(density_tgt.get_volume_value(i,j,k) - origin_density.get_volume_value(i,j,k)) < 1e-6)err = 0;
-                else err = (density_tgt.get_volume_value(i,j,k) - origin_density.get_volume_value(i,j,k));
+                else err = std::fabs(density_tgt.get_volume_value(i,j,k) - origin_density.get_volume_value(i,j,k));
                 density_err.set_volume_value(i,j,k,err);
             }
         }

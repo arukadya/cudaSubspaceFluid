@@ -119,11 +119,11 @@ int main(int argc, char * argv[])
             }
             else 
             {
-                inputFileName +=  std::to_string((simulator._timestamp +380)% (2*flame_num))+".txt";
-                originFileName += std::to_string((simulator._timestamp +380)% (2*flame_num))+".txt";
+                inputFileName +=  std::to_string((simulator._timestamp )% (flame_num))+".txt";
+                originFileName += std::to_string((simulator._timestamp )% (flame_num))+".txt";
                 std::cout << inputFileName << std::endl;
                 simulator.inputTXT(inputFileName,simulator.density_tgt);
-                // simulator.inputTXT(originFileName,simulator.origin_density);
+                simulator.inputTXT(originFileName,simulator.origin_density);
                 ++simulator._timestamp;
             }
     //        viewPoint /= 1.732;
